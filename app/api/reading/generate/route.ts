@@ -4,27 +4,20 @@ import { createClient } from '@/lib/supabase/client';
 // Tipos básicos para la lectura de tarot
 export type ReadingType = 'single' | 'three_card' | 'love' | 'career' | 'celtic_cross';
 
-interface GenerateReadingRequest {
-  type: ReadingType;
-  question?: string;
-  cards?: number[];
-}
-
-// Simulación de lógica de cartas (debería ir en lib/tarot-logic.ts)
-const tarotCards = [
-  { id: 1, name: 'El Loco', suit: 'major_arcana', keywords: ['aventura'], position: 'general' },
-  { id: 2, name: 'El Mago', suit: 'major_arcana', keywords: ['manifestación'], position: 'general' },
-  // ... más cartas
-];
-
-function drawCards(count: number, cardIds?: number[]) {
-  if (cardIds && cardIds.length > 0) {
-    return tarotCards.filter(card => cardIds.includes(card.id)).slice(0, count);
-  }
-  // Barajado simple
-  const shuffled = [...tarotCards].sort(() => Math.random() - 0.5);
-  return shuffled.slice(0, count);
-}
+const cardsInfo = (selectedCards: {id: number, orientation: 'upright' | 'reversed'}[], count: number, tarotData: any[]) => 
+  selectedCards.slice(0, count).map(sel => {
+  const card = tarotData.find((c: { id: number }) => c.id === sel.id);
+  if (!card) return null;
+  const orientation = sel.orientation === 'reversed' ? 'Invertida' : 'Al derecho';
+  const keywords = sel.orientation === 'reversed' ? card.keywords_reversed : card.keywords_upright;
+  const interpretation = sel.orientation === 'reversed' ? card.interpretation_reversed : card.interpretation_upright;
+  return {
+    name: card.name,
+    orientation,
+    keywords,
+    interpretation
+  };
+}).filter((c): c is { name: string; orientation: string; keywords: string; interpretation: string } => c !== null);
 
 // Llamada real a Gemini Flash 1.5 Lite
 async function getGeminiInterpretation(cards: any[], prompt: string) {
@@ -59,7 +52,7 @@ export async function POST(req: NextRequest) {
     celtic_cross: 10,
   };
   const count = typeToCount[type] || 1;
-  const selectedIds = (cards || []).slice(0, count).map(c => c.id);
+  const selectedIds = (cards || []).slice(0, count).map((c: {id: number}) => c.id);
   console.log('Selected card IDs:', selectedIds);
 
   // Buscar cartas en Supabase
@@ -74,8 +67,8 @@ export async function POST(req: NextRequest) {
   console.log('Tarot cards data from Supabase:', tarotData);
 
   // Armar info de cada carta según orientación
-  const cardsInfo = (cards || []).slice(0, count).map(sel => {
-    const card = tarotData.find((c: any) => c.id === sel.id);
+  const cardsInfo = (cards || []).slice(0, count).map((sel: {id: number, orientation: 'upright' | 'reversed'}) => {
+    const card = tarotData.find((c: { id: number }) => c.id === sel.id);
     if (!card) return null;
     const orientation = sel.orientation === 'reversed' ? 'Invertida' : 'Al derecho';
     const keywords = sel.orientation === 'reversed' ? card.keywords_reversed : card.keywords_upright;
@@ -86,12 +79,12 @@ export async function POST(req: NextRequest) {
       keywords,
       interpretation
     };
-  }).filter(Boolean);
+  }).filter((c): c is { name: string; orientation: string; keywords: string; interpretation: string } => c !== null);
   console.log('cardsInfo for prompt:', cardsInfo);
 
   // Armar el prompt para Gemini
   const prompt = `Cartas seleccionadas para la pregunta: "${question || ''}"
-${cardsInfo.map(c => `- ${c.name} (${c.orientation}): keywords: ${c.keywords}. Interpretación: ${c.interpretation}`).join('\n')}
+${cardsInfo.map((c: { name: string; orientation: string; keywords: string; interpretation: string }) => `- ${c.name} (${c.orientation}): keywords: ${c.keywords}. Interpretación: ${c.interpretation}`).join('\n')}
 Redacta una conclusión general para esta tirada, integrando los significados de las cartas y la pregunta.`;
   console.log('Prompt enviado a Gemini:', prompt);
 

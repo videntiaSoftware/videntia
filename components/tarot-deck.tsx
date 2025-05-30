@@ -8,7 +8,9 @@ export interface Card {
   id: string;
   name: string;
   description?: string;
-  image?: string;
+  image_url: string;
+  interpretation_reversed?: string;
+  interpretation_upright?: string;
 }
 
 interface TarotDeckProps {
@@ -33,18 +35,6 @@ export default function TarotDeck({ deck, isShuffling, selectedCards, onSelectCa
       setFlippedCards([])
     }
   }, [isShuffling])
-
-  const handleCardClick = (card: Card) => {
-    if (isShuffling || selectedCards.length >= 3 || selectedCards.find((c) => c.card.id === card.id)) return
-
-    // Flip the card first
-    setFlippedCards((prev) => [...prev, card.id])
-
-    // After a short delay, select the card
-    setTimeout(() => {
-      onSelectCard(card)
-    }, 600)
-  }
 
   // Mostrar solo el mazo apilado si no se ha revelado
   if (!deckRevealed && !isShuffling) {
@@ -157,7 +147,7 @@ export default function TarotDeck({ deck, isShuffling, selectedCards, onSelectCa
                       <div
                         className="w-full h-full bg-cover bg-center rounded-sm flex flex-col items-center justify-end p-1"
                         style={{
-                          backgroundImage: `url('${card.image}')`,
+                          backgroundImage: `url('${card.image_url}')`,
                           backgroundColor: "#1e293b",
                           transform: orientation === 'reversed' ? 'rotate(180deg)' : undefined,
                         }}

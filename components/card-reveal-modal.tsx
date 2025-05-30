@@ -1,23 +1,41 @@
 import React, { useState, useEffect } from 'react';
 import Modal from 'react-modal';
-import { motion, AnimatePresence } from 'framer-motion';
+import { motion } from 'framer-motion';
 import { Button } from '@/components/ui/button';
-import { X, ChevronLeft, ChevronRight } from 'lucide-react';
+import { ChevronLeft, ChevronRight } from 'lucide-react';
 
 import './CardRevealModal.css';
 
 // Cambia el elemento raíz para accesibilidad y compatibilidad Next.js
 Modal.setAppElement('body');
 
-interface Card {
+export interface Card {
   id: string;
   name: string;
   type: string;
   orientation?: string;
   image_url?: string;
+  interpretation_reversed?: string;
+  interpretation_upright?: string;
 }
 
-export default function CardRevealModal({ card, reading, cardIndex, totalCards, onNext, onPrev, onClose, selectedCards }: { card: Card; reading: string; cardIndex: number; totalCards: number; onNext: () => void; onPrev: () => void; onClose: () => void; selectedCards: Card[] }) {
+export interface SelectedCard {
+  card: Card;
+  orientation: 'upright' | 'reversed';
+}
+
+interface CardRevealModalProps {
+  card: Card;
+  reading: string;
+  cardIndex: number;
+  totalCards: number;
+  onNext: () => void;
+  onPrev: () => void;
+  onClose: () => void;
+  selectedCards: SelectedCard[];
+}
+
+export default function CardRevealModal({ card, reading, cardIndex, totalCards, onNext, onPrev, onClose, selectedCards }: CardRevealModalProps) {
   const orientation = card.orientation || 'upright';
   const [isFlipped, setIsFlipped] = useState(false);
   const [flippedTop, setFlippedTop] = useState(Array(totalCards).fill(false));
@@ -62,7 +80,7 @@ export default function CardRevealModal({ card, reading, cardIndex, totalCards, 
               if (flippedTop[idx]) showFront = true;
               const url = showFront
                 ? (selectedCards && selectedCards[idx] && selectedCards[idx].card.image_url
-                    ? selectedCards[idx].image_url
+                    ? selectedCards[idx].card.image_url
                     : undefined)
                 : "https://jhtjdapbeiybxpqvyqqs.supabase.co/storage/v1/object/public/deck//740937b3-dc03-49e3-acbf-1d2da17eddaf.png";
               return (
@@ -113,7 +131,7 @@ export default function CardRevealModal({ card, reading, cardIndex, totalCards, 
               {card.type === 'major' ? 'Arcano Mayor' : 'Arcano Menor'} · {orientation === 'reversed' ? 'Invertida' : 'Al derecho'}
             </p>
             <div className="prose prose-invert max-w-none">
-              <p className="text-white/90 whitespace-pre-line text-center">{reading}</p>
+              <p className="text-white/90 whitespace-pre-line text-center">{reading || 'Sin interpretación.'}</p>
             </div>
           </div>
         </div>

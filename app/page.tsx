@@ -4,7 +4,7 @@ import { useState, useRef, useEffect } from "react";
 import { Sparkles, Shuffle } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
-import TarotDeck from "../components/tarot-deck";
+import TarotDeck, { Card as TarotDeckCard } from "../components/tarot-deck";
 import TarotReading from "../components/tarot-reading";
 import CardRevealModal from "@/components/card-reveal-modal";
 import { createClient } from "@/lib/supabase/client";
@@ -14,12 +14,13 @@ interface Card {
   name: string;
   description: string;
   image_url: string; // URL absoluta de Supabase
+  type?: string; // Optional property for card type
   interpretation_reversed?: string; // Optional property for reversed interpretation
   interpretation_upright?: string; // Optional property for upright interpretation
 }
 
 interface SelectedCard {
-  card: Card;
+  card: TarotDeckCard;
   orientation: "upright" | "reversed";
 }
 
@@ -28,7 +29,7 @@ export default function Home() {
   const [isShuffling, setIsShuffling] = useState(false);
   const [selectedCards, setSelectedCards] = useState<SelectedCard[]>([]);
   const [showReading, setShowReading] = useState(false);
-  const [deck, setDeck] = useState<any[]>([]);
+  const [deck, setDeck] = useState<TarotDeckCard[]>([]);
   const [readingData, setReadingData] = useState<ReadingResponse | null>(null);
   const [loadingReading, setLoadingReading] = useState(false);
   const [readingType, setReadingType] = useState("three_card");
@@ -76,20 +77,13 @@ export default function Home() {
     }, 1500);
   };
 
-  interface Card {
-    id: string;
-    name: string;
-    description: string;
-    image_url: string; // URL absoluta de Supabase
-  }
-
-  const selectCard = (card: Card): void => {
+  const selectCard = (card: TarotDeckCard): void => {
     console.log('selectCard called', card);
     if (isShuffling || selectedCards.length >= 3 || showReading) return;
     if (selectedCards.find((c) => c.card.id === card.id)) return;
     // Aleatoriamente al derecho o invertida
     const orientation: "upright" | "reversed" = Math.random() < 0.5 ? "upright" : "reversed";
-    const newSelectedCards = [...selectedCards, { card, orientation }];
+    const newSelectedCards: SelectedCard[] = [...selectedCards, { card, orientation }];
     setSelectedCards(newSelectedCards);
     console.log('newSelectedCards', newSelectedCards);
     if (newSelectedCards.length === 3) {
@@ -214,7 +208,7 @@ export default function Home() {
               deck={deck}
               isShuffling={isShuffling}
               selectedCards={selectedCards}
-              onSelectCard={(card: Card) => selectCard(card)}
+              onSelectCard={selectCard}
               tarotBackUrl={tarotBackUrl}
               deckRevealed={deckRevealed}
             />
@@ -242,13 +236,14 @@ export default function Home() {
             card={{
               ...selectedCards[revealIndex].card,
               orientation: selectedCards[revealIndex].orientation,
+              type: 'major', // fallback value since 'type' does not exist on 'Card'
             }}
             reading={selectedCards[revealIndex].orientation === 'reversed'
-              ? selectedCards[revealIndex].card.interpretation_reversed
-              : selectedCards[revealIndex].card.interpretation_upright}
+              ? selectedCards[revealIndex].card.interpretation_reversed || 'Sin interpretación.'
+              : selectedCards[revealIndex].card.interpretation_upright || 'Sin interpretación.'}
             cardIndex={revealIndex}
             totalCards={selectedCards.length}
-            selectedCards={selectedCards} // <-- PASAR selectedCards por props
+            selectedCards={selectedCards as any} // type cast for compatibility
             onNext={() => {
               if (revealIndex < selectedCards.length - 1) {
                 setRevealIndex(revealIndex + 1);
@@ -269,13 +264,13 @@ export default function Home() {
               <p className="mb-4">{question}</p>
               <p className="text-purple-200 mb-2 font-semibold">Cartas seleccionadas:</p>
               <ul className="mb-4">
-                {selectedCards.map((c, i) => (
+                {selectedCards.map((c) => (
                   <li key={c.card.id} className="mb-2">
                     <span className="font-bold text-amber-200">{c.card.name}</span>
                     {" · "}
                     <span className="italic text-purple-300">{c.orientation === 'reversed' ? 'Invertida' : 'Al derecho'}</span>
                     <div className="text-sm text-white/90 mt-1">
-                      {c.orientation === 'reversed' ? c.card.interpretation_reversed : c.card.interpretation_upright}
+                      {c.orientation === 'reversed' ? c.card.interpretation_reversed || 'Sin interpretación.' : c.card.interpretation_upright || 'Sin interpretación.'}
                     </div>
                   </li>
                 ))}
