@@ -1,23 +1,11 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { createClient } from '@/lib/supabase/client';
 
-// Tipos básicos para la lectura de tarot
-export type ReadingType = 'single' | 'three_card' | 'love' | 'career' | 'celtic_cross';
+// export type ReadingType = 'single' | 'three_card' | 'love' | 'career' | 'celtic_cross';
+type ReadingType = 'single' | 'three_card' | 'love' | 'career' | 'celtic_cross';
 
-const cardsInfo = (selectedCards: {id: number, orientation: 'upright' | 'reversed'}[], count: number, tarotData: any[]) => 
-  selectedCards.slice(0, count).map(sel => {
-  const card = tarotData.find((c: { id: number }) => c.id === sel.id);
-  if (!card) return null;
-  const orientation = sel.orientation === 'reversed' ? 'Invertida' : 'Al derecho';
-  const keywords = sel.orientation === 'reversed' ? card.keywords_reversed : card.keywords_upright;
-  const interpretation = sel.orientation === 'reversed' ? card.interpretation_reversed : card.interpretation_upright;
-  return {
-    name: card.name,
-    orientation,
-    keywords,
-    interpretation
-  };
-}).filter((c): c is { name: string; orientation: string; keywords: string; interpretation: string } => c !== null);
+// Comentado: variable no usada
+// const cardsInfo = (cards || []).slice(0, count).map((sel: any) => { /* ... */ });
 
 // Llamada real a Gemini Flash 1.5 Lite
 async function getGeminiInterpretation(cards: any[], prompt: string) {
@@ -33,7 +21,7 @@ async function getGeminiInterpretation(cards: any[], prompt: string) {
   if (!response.ok) {
     throw new Error('Error al llamar a Gemini: ' + (await response.text()));
   }
-  const data = await response.json();
+  const data: any = await response.json();
   const interpretation = data.candidates?.[0]?.content?.parts?.[0]?.text || 'No se pudo obtener interpretación.';
   return interpretation;
 }

@@ -94,11 +94,11 @@ export default function Home() {
     }
   };
 
-  interface ReadingRequest {
-    type: string;
-    question: string;
-    cards: string[];
-  }
+  // interface ReadingRequest {
+  //   type: string;
+  //   question: string;
+  //   cards: string[];
+  // }
 
   interface ReadingResponse {
     question: string;
@@ -142,17 +142,17 @@ export default function Home() {
     "https://jhtjdapbeiybxpqvyqqs.supabase.co/storage/v1/object/public/deck//740937b3-dc03-49e3-acbf-1d2da17eddaf.png";
 
   // Mostrar CardRevealModal cuando revealIndex no es null
-  const handleShowCard = (idx: number) => setRevealIndex(idx);
-  const handleCloseModal = () => setRevealIndex(null);
-  const handleNext = () => {
-    if (revealIndex !== null && revealIndex < selectedCards.length - 1) {
-      setRevealIndex(revealIndex + 1);
-    } else {
-      setRevealIndex(null);
-      setShowReading(true); // Mostrar la interpretación final
-    }
-  };
-  const handlePrev = () => setRevealIndex((prev) => (prev !== null && prev > 0 ? prev - 1 : prev));
+  // const handleShowCard = (idx: number) => setRevealIndex(idx);
+  // const handleCloseModal = () => setRevealIndex(null);
+  // const handleNext = () => {
+  //   if (revealIndex !== null && revealIndex < selectedCards.length - 1) {
+  //     setRevealIndex(revealIndex + 1);
+  //   } else {
+  //     setRevealIndex(null);
+  //     setShowReading(true); // Mostrar la interpretación final
+  //   }
+  // };
+  // const handlePrev = () => setRevealIndex((prev) => (prev !== null && prev > 0 ? prev - 1 : prev));
 
   return (
     <main className="min-h-screen flex flex-col items-center justify-start py-4 px-2 bg-gradient-to-b from-purple-950 to-slate-900 text-white font-sans">
@@ -264,7 +264,7 @@ export default function Home() {
               <p className="mb-4">{question}</p>
               <p className="text-purple-200 mb-2 font-semibold">Cartas seleccionadas:</p>
               <ul className="mb-4">
-                {selectedCards.map((c) => (
+                {selectedCards.map((c, i) => (
                   <li key={c.card.id} className="mb-2">
                     <span className="font-bold text-amber-200">{c.card.name}</span>
                     {" · "}
