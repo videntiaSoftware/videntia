@@ -43,13 +43,13 @@ export default function Home() {
       const { data, error } = await supabase.from("tarot_cards").select("*", { head: false });
       if (!error && data) {
         // Asegurarse de que la URL de la imagen sea absoluta
-        const deckWithImages = data.map((card: any) => ({
+        const deckWithImages = data.map((card: Record<string, unknown>) => ({
           ...card,
-          image_url: card.image_url && !card.image_url.startsWith('http')
+          image_url: typeof card.image_url === 'string' && !card.image_url.startsWith('http')
             ? `https://jhtjdapbeiybxpqvyqqs.supabase.co/storage/v1/object/public/deck/${card.image_url}`
             : card.image_url
         }));
-        setDeck(deckWithImages);
+        setDeck(deckWithImages as TarotDeckCard[]);
       }
     };
     fetchDeck();
@@ -264,7 +264,7 @@ export default function Home() {
               <p className="mb-4">{question}</p>
               <p className="text-purple-200 mb-2 font-semibold">Cartas seleccionadas:</p>
               <ul className="mb-4">
-                {selectedCards.map((c, i) => (
+                {selectedCards.map((c /*, i*/) => (
                   <li key={c.card.id} className="mb-2">
                     <span className="font-bold text-amber-200">{c.card.name}</span>
                     {" · "}

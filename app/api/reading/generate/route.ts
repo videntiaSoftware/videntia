@@ -8,7 +8,7 @@ type ReadingType = 'single' | 'three_card' | 'love' | 'career' | 'celtic_cross';
 // const cardsInfo = (cards || []).slice(0, count).map((sel: any) => { /* ... */ });
 
 // Llamada real a Gemini Flash 1.5 Lite
-async function getGeminiInterpretation(cards: any[], prompt: string) {
+async function getGeminiInterpretation(cards: { name: string; orientation: string; keywords: string; interpretation: string }[], prompt: string) {
   const apiKey = process.env.GEMINI_API_KEY;
   if (!apiKey) throw new Error('Gemini API key not set');
   const response = await fetch('https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-flash-latest:generateContent?key=' + apiKey, {
@@ -21,7 +21,7 @@ async function getGeminiInterpretation(cards: any[], prompt: string) {
   if (!response.ok) {
     throw new Error('Error al llamar a Gemini: ' + (await response.text()));
   }
-  const data: any = await response.json();
+  const data: { candidates?: { content?: { parts?: { text?: string }[] } }[] } = await response.json();
   const interpretation = data.candidates?.[0]?.content?.parts?.[0]?.text || 'No se pudo obtener interpretación.';
   return interpretation;
 }
@@ -47,7 +47,7 @@ export async function POST(req: NextRequest) {
   const { data: tarotData, error } = await supabase
     .from('tarot_cards')
     .select('id, name, keywords_upright, keywords_reversed, interpretation_upright, interpretation_reversed')
-    .in('id', selectedIds);
+    .in('id', selectedIds) as unknown as { data: { id: number; name: string; keywords_upright: string; keywords_reversed: string; interpretation_upright: string; interpretation_reversed: string }[], error: any };
   if (error || !tarotData) {
     console.error('Error fetching tarot cards from Supabase:', error);
     return NextResponse.json({ error: 'No se pudieron obtener los datos de las cartas.' }, { status: 500 });

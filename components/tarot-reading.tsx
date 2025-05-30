@@ -63,7 +63,7 @@ const READING_TYPES = [
 const TarotReading = ({
 	readingType = 'three_card',
 	onChangeType,
-	...props
+	// ...props
 }: {
 	readingType?: string;
 	onChangeType?: (type: string) => void;
