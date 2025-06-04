@@ -28,16 +28,6 @@ export default function Home() {
             <div className="w-32 h-16 bg-amber-200/60 dark:bg-slate-700/60 rounded-lg flex items-center justify-center text-amber-700 dark:text-amber-100 text-xs">[Anuncio aquí]</div>
           </div>
         </section>
-        {/* Placeholder para historial de chats (solo si autenticado) */}
-        {/* TODO: Mostrar historial real si el usuario está autenticado */}
-        <section className="mb-8">
-          <div className="bg-white/70 dark:bg-slate-900/70 border border-slate-200 dark:border-slate-700 rounded-lg p-4 shadow text-slate-800 dark:text-slate-100">
-            <h3 className="font-semibold text-lg mb-2 text-amber-700 dark:text-amber-200">Historial de lecturas</h3>
-            <div className="text-slate-500 dark:text-slate-400 text-sm">Inicia sesión para ver tu historial de lecturas y chats aquí.</div>
-            {/* Placeholder para historial de chats */}
-            <div className="mt-2 w-full h-16 bg-slate-100/60 dark:bg-slate-800/60 rounded flex items-center justify-center text-slate-400 dark:text-slate-500 text-xs">[Historial de chats aquí]</div>
-          </div>
-        </section>
         {/* Experiencia interactiva de tarot */}
         <TarotExperience />
       </div>
