@@ -12,6 +12,7 @@ export default async function ProfilePage() {
     <div className="flex min-h-svh w-full items-center justify-center p-6 md:p-10">
       <div className="w-full max-w-sm bg-slate-900/90 rounded-lg p-6 border border-purple-500/30 shadow-xl text-white flex flex-col items-center gap-4">
         <h1 className="text-2xl font-bold text-amber-300 mb-2">Perfil de usuario</h1>
+        {/* Considera reemplazar <img> por <Image> de next/image para optimización automática de imágenes. */}
         {user.user_metadata?.avatar_url && (
           <img
             src={user.user_metadata.avatar_url}

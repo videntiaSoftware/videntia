@@ -4,6 +4,7 @@ import { ThemeProvider } from "next-themes";
 import "./globals.css";
 import { AuthButton } from "@/components/auth-button";
 import Footer from "@/components/ui/footer";
+import Link from "next/link";
 
 const defaultUrl = process.env.VERCEL_URL
   ? `https://${process.env.VERCEL_URL}`
@@ -38,10 +39,10 @@ export default function RootLayout({
           <header className="sticky top-0 z-50 w-full bg-white/80 dark:bg-black/80 backdrop-blur border-b border-slate-200 dark:border-slate-800 shadow-sm flex items-center justify-between px-4 py-2">
             <div className="flex items-center gap-2">
               {/* Logo o nombre */}
-              <a href="/" className="font-bold text-lg tracking-tight text-amber-600">Videntia</a>
+              <Link href="/" className="font-bold text-lg tracking-tight text-amber-600">Videntia</Link>
               {/* Navegación principal */}
               <nav className="ml-4 text-sm text-slate-500 flex gap-4">
-                <a href="/profile/historia-personal" className="hover:underline hover:text-amber-700 transition-colors">Historial de lecturas</a>
+                <Link href="/profile/historia-personal" className="hover:underline hover:text-amber-700 transition-colors">Historial de lecturas</Link>
               </nav>
             </div>
             <div className="flex items-center gap-2">

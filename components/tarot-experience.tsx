@@ -167,7 +167,7 @@ export default function TarotExperience() {
       // Guardar la lectura en la base de datos
       const supabase = createClient();
       const { data: userData } = await supabase.auth.getUser();
-      let insertObj: any = {
+      const insertObj: any = {
         question: data.question,
         reading_type: readingType,
         cards_drawn: data.cards,

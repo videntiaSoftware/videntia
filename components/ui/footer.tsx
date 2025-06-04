@@ -10,6 +10,7 @@ export default function Footer() {
         <span className="hidden sm:inline">|</span>
         <Link href="/contacto" className="hover:underline">Contacto</Link>
       </div>
+
       <div className="mt-2">&copy; {new Date().getFullYear()} Videntia</div>
     </footer>
   );

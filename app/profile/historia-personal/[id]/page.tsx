@@ -1,5 +1,6 @@
 import { createClient } from "@/lib/supabase/server";
 import { redirect } from "next/navigation";
+import Link from "next/link";
 
 interface ReadingDetailPageProps {
   params: { id: string };
@@ -51,7 +52,9 @@ export default async function ReadingDetailPage({ params }: ReadingDetailPagePro
           </div>
         </div>
       )}
-      <a href="/profile/historia-personal" className="inline-block mt-4 text-amber-300 hover:underline">← Volver al historial</a>
+      <Link href="/profile/historia-personal" className="inline-block mt-4 text-amber-300 hover:underline">
+        ← Volver al historial
+      </Link>
     </div>
   );
 }
