@@ -1,5 +1,6 @@
 import { createClient } from "@/lib/supabase/server";
 import { redirect } from "next/navigation";
+import Image from "next/image";
 
 export default async function ProfilePage() {
   const supabase = await createClient();
@@ -14,10 +15,13 @@ export default async function ProfilePage() {
         <h1 className="text-2xl font-bold text-amber-300 mb-2">Perfil de usuario</h1>
         {/* Considera reemplazar <img> por <Image> de next/image para optimización automática de imágenes. */}
         {user.user_metadata?.avatar_url && (
-          <img
+          <Image
             src={user.user_metadata.avatar_url}
             alt="Avatar"
+            width={80}
+            height={80}
             className="w-20 h-20 rounded-full border-2 border-amber-300 mb-2"
+            priority
           />
         )}
         <div className="text-lg font-semibold">{user.user_metadata?.name || user.email}</div>

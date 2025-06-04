@@ -2,7 +2,8 @@ import { createClient } from "@/lib/supabase/server";
 import { redirect } from "next/navigation";
 import Link from "next/link";
 
-export default async function ReadingDetailPage({ params }: { params: { id: string } }) {
+export default async function Page(props: any) {
+  const params = props.params || {};
   const supabase = await createClient();
   const { data, error } = await supabase.auth.getUser();
   if (error || !data?.user) {
