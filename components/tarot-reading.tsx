@@ -1,6 +1,7 @@
 import React, { useState } from 'react';
 import { Drawer, DrawerTrigger, DrawerContent, DrawerClose } from './ui/drawer';
 import { ChevronDown } from 'lucide-react';
+import * as DialogPrimitive from '@radix-ui/react-dialog';
 
 const READING_TYPES = [
 	{
@@ -98,9 +99,9 @@ const TarotReading = ({
 				</button>
 			</DrawerTrigger>
 			<DrawerContent>
-				<div className="mb-2 text-center text-lg font-bold text-amber-300">
+				<DialogPrimitive.Title className="mb-2 text-center text-lg font-bold text-amber-300">
 					Tipo de lectura
-				</div>
+				</DialogPrimitive.Title>
 				<div className="flex flex-col gap-2">
 					{READING_TYPES.map((group) => (
 						<div key={group.group} className="mb-2">

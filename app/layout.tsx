@@ -2,6 +2,8 @@ import type { Metadata } from "next";
 import { Geist } from "next/font/google";
 import { ThemeProvider } from "next-themes";
 import "./globals.css";
+import { AuthButton } from "@/components/auth-button";
+import Footer from "@/components/ui/footer";
 
 const defaultUrl = process.env.VERCEL_URL
   ? `https://${process.env.VERCEL_URL}`
@@ -33,8 +35,28 @@ export default function RootLayout({
           enableSystem
           disableTransitionOnChange
         >
+          <header className="sticky top-0 z-50 w-full bg-white/80 dark:bg-black/80 backdrop-blur border-b border-slate-200 dark:border-slate-800 shadow-sm flex items-center justify-between px-4 py-2">
+            <div className="flex items-center gap-2">
+              {/* Logo o nombre */}
+              <a href="/" className="font-bold text-lg tracking-tight text-amber-600">Videntia</a>
+              {/* Navegación principal */}
+              <nav className="ml-4 text-sm text-slate-500 flex gap-4">
+                <a href="/profile/historia-personal" className="hover:underline hover:text-amber-700 transition-colors">Historial de lecturas</a>
+              </nav>
+            </div>
+            <div className="flex items-center gap-2">
+              {/* Placeholder para anuncio/banner premium */}
+              <div className="hidden md:block mr-4">
+                {/* Banner premium o anuncio aquí */}
+                <span className="rounded bg-amber-100 text-amber-800 px-3 py-1 text-xs font-semibold">Suscripción Premium $1.99 USD / $2000 ARS</span>
+              </div>
+              {/* Botón de login/registro o usuario */}
+              <AuthButton />
+            </div>
+          </header>
           {children}
         </ThemeProvider>
+        <Footer />
       </body>
     </html>
   );

@@ -33,9 +33,10 @@ interface CardRevealModalProps {
   onPrev: () => void;
   onClose: () => void;
   selectedCards: SelectedCard[];
+  layoutLabels?: string[]; // NUEVO: etiquetas de posición para cada carta
 }
 
-export default function CardRevealModal({ card, reading, cardIndex, totalCards, onNext, onPrev, onClose, selectedCards }: CardRevealModalProps) {
+export default function CardRevealModal({ card, reading, cardIndex, totalCards, onNext, onPrev, onClose, selectedCards, layoutLabels }: CardRevealModalProps) {
   const orientation = card.orientation || 'upright';
   const [isFlipped, setIsFlipped] = useState(false);
   const [flippedTop, setFlippedTop] = useState(Array(totalCards).fill(false));
@@ -119,6 +120,10 @@ export default function CardRevealModal({ card, reading, cardIndex, totalCards, 
               >
                 <div className="bg-black/70 text-amber-300 text-sm w-full text-center rounded py-1 font-medium flex flex-col items-center">
                   <span>{card.name}</span>
+                  {/* NUEVO: Mostrar etiqueta de posición si existe */}
+                  {layoutLabels && layoutLabels[cardIndex] && (
+                    <span className="text-xs text-purple-300 mt-1">{layoutLabels[cardIndex]}</span>
+                  )}
                   <span className="text-xs text-purple-300 mt-1">{orientation === 'reversed' ? 'Invertida' : 'Al derecho'}</span>
                 </div>
               </div>
@@ -127,6 +132,10 @@ export default function CardRevealModal({ card, reading, cardIndex, totalCards, 
           {/* Interpretación */}
           <div className="w-full max-w-xl mx-auto mt-4">
             <h2 className="text-2xl font-bold text-amber-300 mb-3 text-center">{card.name}</h2>
+            {/* NUEVO: Mostrar etiqueta de posición si existe */}
+            {layoutLabels && layoutLabels[cardIndex] && (
+              <div className="text-center text-purple-300 text-base mb-2 font-semibold">{layoutLabels[cardIndex]}</div>
+            )}
             <p className="text-purple-200 mb-4 text-sm text-center">
               {card.type === 'major' ? 'Arcano Mayor' : 'Arcano Menor'} · {orientation === 'reversed' ? 'Invertida' : 'Al derecho'}
             </p>

@@ -26,6 +26,88 @@ async function getGeminiInterpretation(cards: { name: string; orientation: strin
   return interpretation;
 }
 
+// --- PROMPT CONFIGURATIONS SEGÚN TIPO DE LECTURA ---
+const PROMPT_CONFIG: Record<string, { instructions: string; layout?: string[] }> = {
+  three_card: {
+    instructions: "Interpreta cada carta como pasado, presente y futuro. Relaciona cada posición con la pregunta y ofrece una síntesis final.",
+    layout: ["Pasado", "Presente", "Futuro"],
+  },
+  celtic_cross: {
+    instructions: "Sigue el significado tradicional de la Cruz Celta para cada posición. Relaciona cada carta con su posición y la pregunta. Ofrece una visión profunda y una síntesis final.",
+    layout: [
+      "Situación actual", "Desafío", "Pasado", "Futuro", "Meta", "Inconsciente", "Influencia externa", "Esperanzas", "Resultado", "Síntesis"
+    ],
+  },
+  yes_no: {
+    instructions: "Da una respuesta clara de sí o no, justificando con la carta y su orientación. Explica brevemente el porqué.",
+    layout: ["Respuesta"],
+  },
+  love_relationship: {
+    instructions: "Interpreta cada carta según su posición: tú, la otra persona, obstáculos, potencial. Relaciona todo con la pregunta y concluye con un consejo.",
+    layout: ["Tú", "La otra persona", "Obstáculos", "Potencial"],
+  },
+  soulmate: {
+    instructions: "Explora la conexión espiritual, bloqueos y caminos para sanar. Relaciona cada carta con su posición y la pregunta.",
+    layout: ["Conexión", "Bloqueos", "Camino a sanar"],
+  },
+  life_purpose: {
+    instructions: "Interpreta cada carta como dones, misión, bloqueos y próximos pasos. Relaciona con la pregunta y concluye con una orientación práctica.",
+    layout: ["Dones", "Misión", "Bloqueos", "Próximos pasos"],
+  },
+  shadow_work: {
+    instructions: "Revela aspectos inconscientes, miedos y sanación. Relaciona cada carta con su posición y la pregunta.",
+    layout: ["Inconsciente", "Miedo", "Sanación"],
+  },
+  single: {
+    instructions: "Da una interpretación profunda de la carta seleccionada en relación a la pregunta. Ofrece un mensaje claro y directo.",
+    layout: ["Mensaje principal"],
+  },
+  career: {
+    instructions: "Interpreta cada carta como pasado, presente y futuro en el ámbito laboral o profesional. Relaciona cada posición con la pregunta y concluye con un consejo práctico.",
+    layout: ["Pasado laboral", "Presente laboral", "Futuro laboral"],
+  },
+  general: {
+    instructions: "Da una visión general sobre la situación consultada, integrando el significado de cada carta y su posición. Concluye con una síntesis y consejo.",
+    layout: ["Primera carta", "Segunda carta", "Tercera carta"],
+  },
+  health: {
+    instructions: "Interpreta cada carta en relación a la salud física, emocional y mental. Relaciona cada posición con la pregunta y concluye con una recomendación de bienestar.",
+    layout: ["Salud física", "Salud emocional", "Salud mental"],
+  },
+  spiritual_path: {
+    instructions: "Interpreta cada carta como etapas o aprendizajes en el camino espiritual del consultante. Relaciona cada posición con la pregunta y concluye con una guía espiritual.",
+    layout: ["Inicio del camino", "Desafío espiritual", "Lección principal"],
+  },
+  blockage: {
+    instructions: "Identifica bloqueos, su origen y cómo superarlos. Relaciona cada carta con su posición y la pregunta.",
+    layout: ["Bloqueo actual", "Origen del bloqueo", "Cómo superarlo"],
+  },
+  decision: {
+    instructions: "Interpreta cada carta como una opción o camino posible. Relaciona cada posición con la pregunta y concluye con una recomendación sobre la mejor decisión.",
+    layout: ["Opción 1", "Opción 2", "Opción 3"],
+  },
+  family: {
+    instructions: "Interpreta cada carta en relación a la dinámica familiar, roles y evolución. Relaciona cada posición con la pregunta y concluye con un consejo para la armonía familiar.",
+    layout: ["Situación familiar", "Conflicto o reto", "Evolución o consejo"],
+  },
+  finances: {
+    instructions: "Interpreta cada carta en relación a la situación financiera, oportunidades y advertencias. Relaciona cada posición con la pregunta y concluye con una recomendación económica.",
+    layout: ["Situación actual", "Oportunidad", "Advertencia"],
+  },
+  project: {
+    instructions: "Interpreta cada carta como fases de un proyecto: inicio, desarrollo y resultado. Relaciona cada posición con la pregunta y concluye con una síntesis sobre el éxito del proyecto.",
+    layout: ["Inicio", "Desarrollo", "Resultado"],
+  },
+  friendship: {
+    instructions: "Interpreta cada carta en relación a la amistad consultada: situación, desafío y potencial. Relaciona cada posición con la pregunta y concluye con un consejo para fortalecer la amistad.",
+    layout: ["Situación actual", "Desafío", "Potencial"],
+  },
+  self_knowledge: {
+    instructions: "Interpreta cada carta como un aspecto del autoconocimiento: fortaleza, debilidad y potencial oculto. Relaciona cada posición con la pregunta y concluye con una guía para el crecimiento personal.",
+    layout: ["Fortaleza", "Debilidad", "Potencial oculto"],
+  },
+};
+
 export async function POST(req: NextRequest) {
   const supabase = createClient();
   const { type, question, cards }: { type: ReadingType, question?: string, cards: {id: number, orientation: 'upright' | 'reversed'}[] } = await req.json();
@@ -54,8 +136,9 @@ export async function POST(req: NextRequest) {
   }
   console.log('Tarot cards data from Supabase:', tarotData);
 
-  // Armar info de cada carta según orientación
-  const cardsInfo = (cards || []).slice(0, count).map((sel: {id: number, orientation: 'upright' | 'reversed'}) => {
+  // --- Siempre enviar todas las cartas seleccionadas, en el orden correcto y con su posición ---
+  // Usar la cantidad de cartas recibidas, no cortar con 'count'
+  const cardsInfo = (cards || []).map((sel: {id: number, orientation: 'upright' | 'reversed'}, idx: number) => {
     const card = tarotData.find((c: { id: number }) => c.id === sel.id);
     if (!card) return null;
     const orientation = sel.orientation === 'reversed' ? 'Invertida' : 'Al derecho';
@@ -71,9 +154,15 @@ export async function POST(req: NextRequest) {
   console.log('cardsInfo for prompt:', cardsInfo);
 
   // Armar el prompt para Gemini
-  const prompt = `Cartas seleccionadas para la pregunta: "${question || ''}"
-${cardsInfo.map((c: { name: string; orientation: string; keywords: string; interpretation: string }) => `- ${c.name} (${c.orientation}): keywords: ${c.keywords}. Interpretación: ${c.interpretation}`).join('\n')}
-Redacta una conclusión general para esta tirada, integrando los significados de las cartas y la pregunta.`;
+  const config = PROMPT_CONFIG[type] || { instructions: '', layout: [] };
+  const cardsList = cardsInfo.map((c, i) => {
+    const pos = config.layout?.[i] ? `(${config.layout[i]})` : '';
+    return `- ${c.name} ${pos} [${c.orientation}]: keywords: ${c.keywords}. Interpretación: ${c.interpretation}`;
+  }).join('\n');
+
+  const prompt = `Pregunta: "${question || ''}"
+${cardsList}
+${config.instructions}\nRedacta una conclusión general para esta tirada, integrando los significados de las cartas y la pregunta.`;
   console.log('Prompt enviado a Gemini:', prompt);
 
   // Llamada a Gemini para interpretación final
