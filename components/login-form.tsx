@@ -117,10 +117,13 @@ export function LoginForm({
               setIsLoading(true);
               setError(null);
               try {
+                const redirectTo =
+                  (process.env.NEXT_PUBLIC_SITE_URL ||
+                    window.location.origin) + "/protected";
                 const { error } = await supabase.auth.signInWithOAuth({
                   provider: "google",
                   options: {
-                    redirectTo: window.location.origin + "/protected",
+                    redirectTo,
                   },
                 });
                 if (error) throw error;
