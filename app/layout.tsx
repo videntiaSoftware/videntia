@@ -1,5 +1,5 @@
 import type { Metadata } from "next";
-import { Geist } from "next/font/google";
+import { Geist, Cinzel_Decorative, Cormorant_Garamond } from "next/font/google";
 import "./globals.css";
 import { AuthButton } from "@/components/auth-button";
 import Footer from "@/components/ui/footer";
@@ -22,6 +22,20 @@ const geistSans = Geist({
   subsets: ["latin"],
 });
 
+const cinzelDecorative = Cinzel_Decorative({
+  variable: "--font-cinzel-decorative",
+  display: "swap",
+  subsets: ["latin"],
+  weight: ["400", "700", "900"],
+});
+
+const cormorantGaramond = Cormorant_Garamond({
+  variable: "--font-cormorant-garamond",
+  display: "swap",
+  subsets: ["latin"],
+  weight: ["400", "700", "300", "500", "600"],
+});
+
 export default function RootLayout({
   children,
 }: Readonly<{
@@ -29,7 +43,7 @@ export default function RootLayout({
 }>) {
   return (
     <html lang="en" className="dark" suppressHydrationWarning>
-      <body className={`${geistSans.className} antialiased`}>
+      <body className={`${geistSans.className} ${cinzelDecorative.variable} ${cormorantGaramond.variable} antialiased`}>
         {/* Google reCAPTCHA v3 */}
         <Script
           src={`https://www.google.com/recaptcha/api.js?render=${process.env.NEXT_PUBLIC_RECAPTCHA_SITE_KEY}`}
