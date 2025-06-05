@@ -11,7 +11,7 @@ export default function PoliticaPrivacidad() {
       <ul className="list-disc ml-6 mb-4">
         <li>Datos de contacto proporcionados voluntariamente (por ejemplo, correo electrónico en formularios de contacto).</li>
         <li>Información de uso del sitio recopilada automáticamente (cookies, dirección IP, etc.).</li>
-        <li>Podemos utilizar tecnologías de identificación del navegador ("fingerprinting") exclusivamente para prevenir abuso, fraude y proteger el servicio. No se utiliza para fines publicitarios ni de seguimiento.</li>
+        <li>Podemos utilizar tecnologías de identificación del navegador (&quot;fingerprinting&quot;) exclusivamente para prevenir abuso, fraude y proteger el servicio. No se utiliza para fines publicitarios ni de seguimiento.</li>
       </ul>
       <h2 className="text-xl font-semibold mt-6 mb-2">2. Uso de la información</h2>
       <ul className="list-disc ml-6 mb-4">

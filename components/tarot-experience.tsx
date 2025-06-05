@@ -163,10 +163,14 @@ export default function TarotExperience() {
   const fetchReading = async (cards: SelectedCard[]): Promise<void> => {
     setLoadingReading(true);
     try {
+      // Obtener si el usuario está autenticado
+      const supabase = createClient();
+      const { data: userData } = await supabase.auth.getUser();
+      const isUserAuthenticated = !!userData?.user;
       // Obtener token de reCAPTCHA v3
       let recaptchaToken = '';
-      if (!isUserAuthenticated && typeof window !== 'undefined' && window.grecaptcha && process.env.NEXT_PUBLIC_RECAPTCHA_SITE_KEY) {
-        recaptchaToken = await window.grecaptcha.execute(process.env.NEXT_PUBLIC_RECAPTCHA_SITE_KEY, { action: 'reading' });
+      if (!isUserAuthenticated && typeof window !== 'undefined' && (window as any).grecaptcha && process.env.NEXT_PUBLIC_RECAPTCHA_SITE_KEY) {
+        recaptchaToken = await (window as any).grecaptcha.execute(process.env.NEXT_PUBLIC_RECAPTCHA_SITE_KEY, { action: 'reading' });
       }
       // Obtener guest_id (fingerprint) si no autenticado
       let guestId = null;
@@ -189,8 +193,6 @@ export default function TarotExperience() {
       setShowReading(true);
 
       // Guardar la lectura en la base de datos
-      const supabase = createClient();
-      const { data: userData } = await supabase.auth.getUser();
       const insertObj: any = {
         question: data.question,
         reading_type: readingType,
@@ -227,6 +229,70 @@ export default function TarotExperience() {
   const tarotBackUrl =
     "https://jhtjdapbeiybxpqvyqqs.supabase.co/storage/v1/object/public/deck//740937b3-dc03-49e3-acbf-1d2da17eddaf.png";
 
+  // Estado para Speech to Text
+  const [isRecording, setIsRecording] = useState(false);
+  const [recognitionInstance, setRecognitionInstance] = useState<any>(null);
+  const recognitionTimeout = useRef<NodeJS.Timeout | null>(null);
+
+  // Función para iniciar Speech to Text
+  const startSpeechToText = () => {
+    if (!('webkitSpeechRecognition' in window) && !('SpeechRecognition' in window)) {
+      alert('Tu navegador no soporta reconocimiento de voz.');
+      return;
+    }
+    const SpeechRecognition = (window as any).SpeechRecognition || (window as any).webkitSpeechRecognition;
+    const recognition = new SpeechRecognition();
+    recognition.lang = 'es-ES';
+    recognition.interimResults = true;
+    recognition.maxAlternatives = 1;
+    recognition.continuous = false;
+    let finalTranscript = '';
+    setIsRecording(true);
+    setRecognitionInstance(recognition);
+
+    // Timeout de 15 segundos
+    if (recognitionTimeout.current) clearTimeout(recognitionTimeout.current);
+    recognitionTimeout.current = setTimeout(() => {
+      recognition.stop();
+    }, 15000);
+
+    recognition.onresult = (event: any) => {
+      let interimTranscript = '';
+      for (let i = event.resultIndex; i < event.results.length; ++i) {
+        if (event.results[i].isFinal) {
+          finalTranscript += event.results[i][0].transcript;
+        } else {
+          interimTranscript += event.results[i][0].transcript;
+        }
+      }
+      setQuestion(finalTranscript + interimTranscript);
+    };
+    recognition.onend = () => {
+      setIsRecording(false);
+      setRecognitionInstance(null);
+      if (recognitionTimeout.current) clearTimeout(recognitionTimeout.current);
+    };
+    recognition.onerror = (event: any) => {
+      setIsRecording(false);
+      setRecognitionInstance(null);
+      if (recognitionTimeout.current) clearTimeout(recognitionTimeout.current);
+      if (event.error !== 'no-speech') {
+        alert('Error en el reconocimiento de voz: ' + event.error);
+      }
+    };
+    recognition.start();
+  };
+
+  // Función para cancelar Speech to Text
+  const cancelSpeechToText = () => {
+    if (recognitionInstance) {
+      recognitionInstance.abort();
+      setIsRecording(false);
+      setRecognitionInstance(null);
+      if (recognitionTimeout.current) clearTimeout(recognitionTimeout.current);
+    }
+  };
+
   return (
     <div>
       <header className="text-center mb-4">
@@ -255,34 +321,32 @@ export default function TarotExperience() {
                       placeholder="¿Qué deseas saber?"
                       value={question}
                       onChange={(e) => setQuestion(e.target.value)}
-                      className="w-full bg-slate-700 border-purple-400/30 text-white placeholder:text-slate-400 pr-10"
+                      className={`w-full bg-slate-700 border-purple-400/30 text-white placeholder:text-slate-400 pr-10 ${isRecording ? 'ring-2 ring-amber-400 border-amber-400 animate-pulse' : ''}`}
+                      disabled={isRecording}
                     />
                     <button
                       type="button"
-                      aria-label="Hablar"
-                      className="absolute right-2 top-1/2 -translate-y-1/2 text-purple-300 hover:text-amber-300 transition-colors"
+                      aria-label={isRecording ? "Cancelar grabación" : "Hablar"}
+                      className={`absolute right-2 top-1/2 -translate-y-1/2 transition-colors ${isRecording ? 'text-amber-400 animate-pulse' : 'text-purple-300 hover:text-amber-300'}`}
                       onClick={() => {
-                        if (!('webkitSpeechRecognition' in window) && !('SpeechRecognition' in window)) {
-                          alert('Tu navegador no soporta reconocimiento de voz.');
-                          return;
+                        if (isRecording) {
+                          cancelSpeechToText();
+                        } else {
+                          startSpeechToText();
                         }
-                        const SpeechRecognition = (window as any).SpeechRecognition || (window as any).webkitSpeechRecognition;
-                        const recognition = new SpeechRecognition();
-                        recognition.lang = 'es-ES';
-                        recognition.interimResults = false;
-                        recognition.maxAlternatives = 1;
-                        recognition.onresult = (event: any) => {
-                          const transcript = event.results[0][0].transcript;
-                          setQuestion(transcript);
-                        };
-                        recognition.onerror = (event: any) => {
-                          alert('Error en el reconocimiento de voz: ' + event.error);
-                        };
-                        recognition.start();
                       }}
                     >
                       <Mic className="w-5 h-5" />
                     </button>
+                    {isRecording && (
+                      <button
+                        type="button"
+                        className="absolute right-10 top-1/2 -translate-y-1/2 text-red-400 font-bold text-xs bg-black/60 px-2 py-1 rounded"
+                        onClick={cancelSpeechToText}
+                      >
+                        Cancelar
+                      </button>
+                    )}
                   </div>
                   <Button
                     onClick={shuffleDeck}

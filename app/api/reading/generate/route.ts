@@ -133,7 +133,7 @@ export async function POST(req: NextRequest) {
     const recaptchaToken = body.recaptchaToken;
     if (!recaptchaToken) {
       // Logging intento sospechoso: petición sin reCAPTCHA
-      console.warn(`[SUSPECT] Intento sin reCAPTCHA | IP: ${req.headers.get('x-forwarded-for') || req.ip || 'unknown'} | guest_id: ${guestId}`);
+      console.warn(`[SUSPECT] Intento sin reCAPTCHA | IP: ${req.headers.get('x-forwarded-for') || 'unknown'} | guest_id: ${guestId}`);
       return NextResponse.json({ error: 'Falta el token de reCAPTCHA.' }, { status: 400 });
     }
     // Validar reCAPTCHA v3 con Google
@@ -146,7 +146,7 @@ export async function POST(req: NextRequest) {
     const verifyData = await verifyRes.json();
     if (!verifyData.success || (verifyData.score !== undefined && verifyData.score < 0.5)) {
       // Logging intento sospechoso: fallo de reCAPTCHA
-      console.warn(`[SUSPECT] Fallo reCAPTCHA | IP: ${req.headers.get('x-forwarded-for') || req.ip || 'unknown'} | guest_id: ${guestId} | score: ${verifyData.score}`);
+      console.warn(`[SUSPECT] Fallo reCAPTCHA | IP: ${req.headers.get('x-forwarded-for') || 'unknown'} | guest_id: ${guestId} | score: ${verifyData.score}`);
       return NextResponse.json({ error: 'No se pudo verificar reCAPTCHA. Intenta de nuevo.' }, { status: 403 });
     }
   }
@@ -162,7 +162,7 @@ export async function POST(req: NextRequest) {
     filter = { guest_id: guestId };
     who = `guest_id: ${guestId}`;
   } else {
-    const ip = req.headers.get('x-forwarded-for')?.split(',')[0] || req.ip || 'unknown';
+    const ip = req.headers.get('x-forwarded-for')?.split(',')[0] || 'unknown';
     filter = { ip };
     who = `ip: ${ip}`;
   }
