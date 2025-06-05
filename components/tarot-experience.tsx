@@ -9,6 +9,7 @@ import TarotReading from "./tarot-reading";
 import CardRevealModal from "./card-reveal-modal";
 import { createClient } from "@/lib/supabase/client";
 import ReactMarkdown from 'react-markdown';
+import FingerprintJS from '@fingerprintjs/fingerprintjs';
 
 interface Card {
   id: string;
@@ -53,6 +54,17 @@ export default function TarotExperience() {
       }
     };
     fetchDeck();
+  }, []);
+
+  // Inicializar fingerprint sólo una vez
+  useEffect(() => {
+    if (typeof window !== 'undefined' && !localStorage.getItem('guest_id')) {
+      FingerprintJS.load().then(fp => {
+        fp.get().then(result => {
+          localStorage.setItem('guest_id', result.visitorId);
+        });
+      });
+    }
   }, []);
 
   const READING_TYPE_CARD_COUNT: Record<string, number> = {
@@ -151,6 +163,16 @@ export default function TarotExperience() {
   const fetchReading = async (cards: SelectedCard[]): Promise<void> => {
     setLoadingReading(true);
     try {
+      // Obtener token de reCAPTCHA v3
+      let recaptchaToken = '';
+      if (!isUserAuthenticated && typeof window !== 'undefined' && window.grecaptcha && process.env.NEXT_PUBLIC_RECAPTCHA_SITE_KEY) {
+        recaptchaToken = await window.grecaptcha.execute(process.env.NEXT_PUBLIC_RECAPTCHA_SITE_KEY, { action: 'reading' });
+      }
+      // Obtener guest_id (fingerprint) si no autenticado
+      let guestId = null;
+      if (!isUserAuthenticated && typeof window !== 'undefined') {
+        guestId = localStorage.getItem('guest_id') || '';
+      }
       const res = await fetch("/api/reading/generate", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
@@ -158,6 +180,8 @@ export default function TarotExperience() {
           type: readingType,
           question,
           cards: cards.map((c) => ({ id: c.card.id, orientation: c.orientation })),
+          recaptchaToken,
+          guest_id: guestId,
         }),
       });
       const data: ReadingResponse = await res.json();

@@ -110,7 +110,77 @@ const PROMPT_CONFIG: Record<string, { instructions: string; layout?: string[] }>
 
 export async function POST(req: NextRequest) {
   const supabase = createClient();
-  const { type, question, cards }: { type: ReadingType, question?: string, cards: {id: number, orientation: 'upright' | 'reversed'}[] } = await req.json();
+  const body = await req.json();
+
+  // --- Obtener user_id, guest_id o IP ---
+  let userId = null;
+  let guestId = null;
+  let isPremium = false;
+  try {
+    const { data: { user } } = await supabase.auth.getUser();
+    if (user) {
+      userId = user.id;
+      isPremium = user.user_metadata?.premium === true;
+    } else {
+      guestId = body.guest_id || null;
+    }
+  } catch (e) {
+    // Si falla, continuar como no autenticado
+  }
+
+  // --- Solo pedir y validar reCAPTCHA si el usuario NO está autenticado ---
+  if (!userId) {
+    const recaptchaToken = body.recaptchaToken;
+    if (!recaptchaToken) {
+      // Logging intento sospechoso: petición sin reCAPTCHA
+      console.warn(`[SUSPECT] Intento sin reCAPTCHA | IP: ${req.headers.get('x-forwarded-for') || req.ip || 'unknown'} | guest_id: ${guestId}`);
+      return NextResponse.json({ error: 'Falta el token de reCAPTCHA.' }, { status: 400 });
+    }
+    // Validar reCAPTCHA v3 con Google
+    const secret = process.env.RECAPTCHA_SECRET_KEY;
+    const verifyRes = await fetch('https://www.google.com/recaptcha/api/siteverify', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
+      body: `secret=${secret}&response=${recaptchaToken}`,
+    });
+    const verifyData = await verifyRes.json();
+    if (!verifyData.success || (verifyData.score !== undefined && verifyData.score < 0.5)) {
+      // Logging intento sospechoso: fallo de reCAPTCHA
+      console.warn(`[SUSPECT] Fallo reCAPTCHA | IP: ${req.headers.get('x-forwarded-for') || req.ip || 'unknown'} | guest_id: ${guestId} | score: ${verifyData.score}`);
+      return NextResponse.json({ error: 'No se pudo verificar reCAPTCHA. Intenta de nuevo.' }, { status: 403 });
+    }
+  }
+
+  // --- Rate limiting: solo una consulta diaria por usuario free/no registrado ---
+  // Determinar filtro: user_id, guest_id o IP
+  let filter = {};
+  let who = '';
+  if (userId) {
+    filter = { user_id: userId };
+    who = `user_id: ${userId}`;
+  } else if (guestId) {
+    filter = { guest_id: guestId };
+    who = `guest_id: ${guestId}`;
+  } else {
+    const ip = req.headers.get('x-forwarded-for')?.split(',')[0] || req.ip || 'unknown';
+    filter = { ip };
+    who = `ip: ${ip}`;
+  }
+  // Buscar si ya hizo una lectura hoy (por user_id, guest_id o IP)
+  const today = new Date();
+  today.setHours(0,0,0,0);
+  const { data: readingsToday, error: errorReadings } = await supabase
+    .from('readings')
+    .select('id,created_at')
+    .match(filter)
+    .gte('created_at', today.toISOString());
+  if (!isPremium && readingsToday && readingsToday.length >= 1) {
+    // Logging intento sospechoso: más de 1 intento diario
+    console.warn(`[SUSPECT] Exceso de consultas diarias | ${who} | intentos hoy: ${readingsToday.length}`);
+    return NextResponse.json({ error: 'Solo puedes hacer 1 lectura gratuita por día. Inicia sesión o suscríbete para más.' }, { status: 429 });
+  }
+
+  const { type, question, cards }: { type: ReadingType, question?: string, cards: {id: number, orientation: 'upright' | 'reversed'}[] } = body;
   console.log('POST /api/reading/generate - request body:', { type, question, cards });
 
   // Lógica de cantidad de cartas según tipo

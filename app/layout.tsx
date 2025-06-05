@@ -5,6 +5,7 @@ import "./globals.css";
 import { AuthButton } from "@/components/auth-button";
 import Footer from "@/components/ui/footer";
 import Link from "next/link";
+import Script from "next/script";
 
 const defaultUrl = process.env.VERCEL_URL
   ? `https://${process.env.VERCEL_URL}`
@@ -30,6 +31,11 @@ export default function RootLayout({
   return (
     <html lang="en" suppressHydrationWarning>
       <body className={`${geistSans.className} antialiased`}>
+        {/* Google reCAPTCHA v3 */}
+        <Script
+          src={`https://www.google.com/recaptcha/api.js?render=${process.env.NEXT_PUBLIC_RECAPTCHA_SITE_KEY}`}
+          strategy="afterInteractive"
+        />
         <ThemeProvider
           attribute="class"
           defaultTheme="system"

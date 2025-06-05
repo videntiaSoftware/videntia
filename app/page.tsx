@@ -31,6 +31,7 @@ export default function Home() {
         {/* Experiencia interactiva de tarot */}
         <TarotExperience />
       </div>
+      {/* TODO: Agregar sección de testimonios de usuarios en la página principal */}
     </main>
   );
 }
