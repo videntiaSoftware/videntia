@@ -45,8 +45,8 @@ export default function TarotDeck({ deck, isShuffling, selectedCards, onSelectCa
   // Posición de cada carta en 3 filas de 7 cartas (21 cartas, la 22 va centrada abajo)
   function getCardPosition(i: number, total: number, isMobile: boolean) {
     // 3 filas de 7 cartas, la última (22) centrada abajo
-    let row = Math.floor(i / 7);
-    let col = i % 7;
+    const row = Math.floor(i / 7);
+    const col = i % 7;
     let x = 0, y = 0, rotate = 0;
     // Ajuste: spacing más chico en mobile
     const cardSpacingX = isMobile ? 38 : 90;
