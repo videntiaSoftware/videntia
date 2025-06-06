@@ -4,7 +4,7 @@ import TarotExperienceSteps from "@/components/tarot-experience-steps";
 
 export default function Home() {
   return (
-    <main className="min-h-screen flex flex-col items-center justify-start py-4 px-2 font-sans">
+    <main className="min-h-screen flex flex-col items-center justify-start font-sans">
       <div className="absolute inset-0 bg-[url('/tarot-bg.jpg')] bg-cover bg-center opacity-20 z-0" />
       <div className="relative z-10 w-full max-w-4xl mx-auto">
         {/* Sección destacada para login/registro y beneficios 

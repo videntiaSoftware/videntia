@@ -1,3 +1,5 @@
+// Este helper solo debe usarse en el App Router (carpeta /app), nunca en middleware ni en el Pages Router.
+// Si lo usas fuera del contexto de Server Components del App Router, causará errores de build.
 import { createServerClient } from "@supabase/ssr";
 import { cookies } from "next/headers";
 

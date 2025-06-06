@@ -1,4 +1,4 @@
-import { createClient } from "@/lib/supabase/server";
+import { createClient } from "@/app/_helpers/supabase-server";
 import { redirect } from "next/navigation";
 import Image from "next/image";
 

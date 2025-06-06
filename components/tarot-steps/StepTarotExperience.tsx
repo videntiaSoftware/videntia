@@ -213,37 +213,24 @@ export default function StepTarotExperience({ readingType }: { readingType: stri
 
   return (
     <div className="w-full flex flex-col items-center justify-center animate-fade-in-up mt-12">
-      <h2 className="font-cinzel text-3xl md:text-4xl text-amber-200 mb-6 text-center drop-shadow">
-        Hacé tu pregunta
+      <h2 className="font-cinzel text-3xl md:text-4xl text-amber-200 mb-6 text-center">
+        {showReading ? 'Interpretación final' : 'Tarot interactivo'}
       </h2>
-      <div className="w-full max-w-md flex flex-col md:flex-row gap-4 mb-6">
-        <Input
-          ref={questionRef}
-          type="text"
-          placeholder="¿Qué deseas saber?"
-          value={question}
-          onChange={(e) => setQuestion(e.target.value)}
-          className={`w-full bg-slate-700 border-purple-400/30 text-white placeholder:text-slate-400 pr-10 font-cormorant text-xl`}
-          disabled={isRecording}
-        />
-        <Button
-          onClick={shuffleDeck}
-          className="bg-amber-600 hover:bg-amber-700 text-white font-cinzel text-lg px-8 py-3 shadow-lg"
-          disabled={isShuffling || !question.trim()}
-        >
-          Mezclar
-        </Button>
-      </div>
       <div className="w-full flex flex-col items-center">
-        <TarotDeck
-          deck={deck}
-          isShuffling={isShuffling}
-          selectedCards={selectedCards}
-          onSelectCard={selectCard}
-          tarotBackUrl={"https://jhtjdapbeiybxpqvyqqs.supabase.co/storage/v1/object/public/deck//740937b3-dc03-49e3-acbf-1d2da17eddaf.png"}
-          deckRevealed={deckRevealed}
-        />
+        {/* Mostrar el mazo y la experiencia solo si no se han revelado todas las cartas */}
+        {revealIndex === null && !showReading && (
+          <TarotDeck
+            deck={deck}
+            isShuffling={isShuffling}
+            selectedCards={selectedCards}
+            onSelectCard={selectCard}
+            tarotBackUrl={"https://jhtjdapbeiybxpqvyqqs.supabase.co/storage/v1/object/public/deck//740937b3-dc03-49e3-acbf-1d2da17eddaf.png"}
+            deckRevealed={deckRevealed}
+            // Se puede pasar la pregunta como prop si TarotDeck la necesita
+          />
+        )}
       </div>
+      {/* Modal de revelado de carta */}
       {revealIndex !== null && selectedCards[revealIndex] && (
         <CardRevealModal
           card={{
@@ -270,6 +257,7 @@ export default function StepTarotExperience({ readingType }: { readingType: stri
           layoutLabels={READING_TYPE_LAYOUTS[readingType]?.layout}
         />
       )}
+      {/* Interpretación final */}
       {showReading && (
         <div className="mt-8 bg-slate-900/90 rounded-lg p-6 border border-purple-500/30 shadow-xl text-white">
           <h2 className="text-2xl font-bold text-amber-300 mb-4">Interpretación final</h2>
@@ -308,4 +296,4 @@ export default function StepTarotExperience({ readingType }: { readingType: stri
       )}
     </div>
   );
-} 
+}

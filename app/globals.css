@@ -84,6 +84,11 @@
   }
 }
 
+/* DEBUG: Visualiza el overflow horizontal */
+/* * {
+  outline: 1px solid red !important;
+} */
+
 .font-cinzel {
   font-family: 'Cinzel Decorative', var(--font-cinzel-decorative), cursive;
 }

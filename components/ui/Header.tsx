@@ -1,11 +1,10 @@
 "use client";
 import { useState, useEffect } from "react";
 import Link from "next/link";
-import { AuthButton } from "@/components/auth-button";
 import { Menu, X } from "lucide-react";
 import { createClient } from "@/lib/supabase/client";
 
-export default function Header() {
+export default function Header({ authButton }: { authButton: React.ReactNode }) {
   const [menuOpen, setMenuOpen] = useState(false);
   const [isLoggedIn, setIsLoggedIn] = useState(false);
 
@@ -31,7 +30,7 @@ export default function Header() {
             <Link href="/profile/historia-personal" className="hover:underline hover:text-amber-700 transition-colors">Historial de lecturas</Link>
           )}
           <div className="ml-4">
-            <AuthButton />
+            {authButton}
           </div>
         </nav>
       </div>
@@ -43,12 +42,10 @@ export default function Header() {
             {isLoggedIn && (
               <Link href="/profile/historia-personal" className="hover:underline hover:text-amber-700 transition-colors" onClick={() => setMenuOpen(false)}>Historial de lecturas</Link>
             )}
-            <div className="mt-2">
-              <AuthButton />
-            </div>
+            <div className="ml-4">{authButton}</div>
           </nav>
         </div>
       )}
     </header>
   );
-} 
+}

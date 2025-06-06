@@ -1,6 +1,6 @@
 import { redirect } from "next/navigation";
 
-import { createClient } from "@/lib/supabase/server";
+import { createClient } from "@/app/_helpers/supabase-server";
 
 
 export default async function ProtectedPage() {

@@ -9,17 +9,21 @@ export default function StepWelcome({ onFinish }: { onFinish: () => void }) {
     const timer = setTimeout(() => {
       setShowWelcome(false);
       setTimeout(() => onFinish(), 800);
-    }, 2200);
+    }, 4200); // antes 2200
     return () => clearTimeout(timer);
   }, [onFinish]);
 
   return (
     <div
       className={cn(
-        "fixed inset-0 z-50 flex flex-col items-center justify-center transition-opacity duration-700",
+        "fixed inset-0 z-[99] flex flex-col items-center justify-center transition-opacity duration-700 bg-black/80 backdrop-blur-sm",
         showWelcome ? "opacity-100" : "opacity-0 pointer-events-none"
       )}
-      style={{ background: "transparent" }}
+      style={{
+        backgroundImage: "url('https://jhtjdapbeiybxpqvyqqs.supabase.co/storage/v1/object/public/assets//fondo.png')",
+        backgroundSize: "cover",
+        backgroundPosition: "center",
+      }}
     >
       {/* Viñeta oscura MUY fuerte */}
       <div className="pointer-events-none absolute inset-0 z-0">
@@ -78,9 +82,9 @@ export default function StepWelcome({ onFinish }: { onFinish: () => void }) {
           to { transform: scale(1.10); }
         }
         .animate-zoom-in-smooth {
-          animation: zoom-in-smooth 2.2s linear forwards;
+          animation: zoom-in-smooth 4.2s linear forwards;
         }
       `}</style>
     </div>
   );
-} 
+}

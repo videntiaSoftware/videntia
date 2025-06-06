@@ -3,7 +3,7 @@ import { Geist, Cinzel_Decorative, Cormorant_Garamond } from "next/font/google";
 import "./globals.css";
 import Link from "next/link";
 import Script from "next/script";
-import Header from "@/components/ui/Header";
+import Footer from "@/components/ui/footer";
 
 const defaultUrl = process.env.VERCEL_URL
   ? `https://${process.env.VERCEL_URL}`
@@ -41,15 +41,14 @@ export default function RootLayout({
   children: React.ReactNode;
 }>) {
   return (
-    <html lang="en" className="dark" suppressHydrationWarning>
-      <body className={`${geistSans.className} ${cinzelDecorative.variable} ${cormorantGaramond.variable} antialiased`}>
-        {/* Google reCAPTCHA v3 */}
-        <Script
-          src={`https://www.google.com/recaptcha/api.js?render=${process.env.NEXT_PUBLIC_RECAPTCHA_SITE_KEY}`}
-          strategy="afterInteractive"
-        />
-        <Header />
-        {children}
+    <html lang="es">
+      <body
+        className={`min-h-screen flex flex-col max-w-screen ${geistSans.variable} ${cinzelDecorative.variable} ${cormorantGaramond.variable}`}
+      >
+        <div className="flex-1 flex flex-col w-full max-w-screen overflow-x-auto">
+          {children}
+        </div>
+        {/* <Footer /> */}
       </body>
     </html>
   );
