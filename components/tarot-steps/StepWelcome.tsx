@@ -64,7 +64,13 @@ export default function StepWelcome({ onFinish }: { onFinish: () => void }) {
             )}
           />
           <div className="flex flex-col items-center relative z-10">
-            <h1 className="font-cinzel text-4xl md:text-5xl text-amber-200 tracking-widest mb-2 drop-shadow-lg">Videntia Tarot</h1>
+            <h1 className="font-cinzel tracking-widest mb-2 drop-shadow-lg text-amber-200 text-center whitespace-nowrap overflow-hidden text-ellipsis"
+                style={{
+                  fontSize: 'clamp(1.6rem, 7vw, 2.8rem)',
+                  maxWidth: '95vw',
+                  lineHeight: 1.1,
+                }}
+            >Videntia Tarot</h1>
             <p className="font-cormorant text-lg md:text-2xl text-slate-200/90 tracking-wide text-center max-w-md animate-fade-in-up">Qué tendrán las cartas para ti?</p>
           </div>
         </div>
