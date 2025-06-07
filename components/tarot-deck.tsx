@@ -1,7 +1,7 @@
 "use client"
 
 import { useState, useEffect, useRef } from "react"
-import { motion, AnimatePresence } from "framer-motion"
+import { motion, AnimatePresence } from "framer-motion";
 
 // Card type definition
 export interface Card {
@@ -36,7 +36,9 @@ export default function TarotDeck({ deck, isShuffling, selectedCards, onSelectCa
   const containerRef = useRef<HTMLDivElement>(null)
 
   // Mostrar las 22 cartas del mazo
-  const displayedDeck = deck.slice(0, 22)
+  // Las primeras 10 son las seleccionadas, las otras 12 aparecen después de la mezcla
+  const [showAllCards, setShowAllCards] = useState(false);
+  const displayedDeck = showAllCards ? deck.slice(0, 22) : deck.slice(0, 10);
 
   // Un solo estado de animación: las cartas siempre están en su posición final (abanico/fila)
   // Mezcla: animación de "shuffle" (pequeño movimiento) al montar
@@ -87,20 +89,17 @@ export default function TarotDeck({ deck, isShuffling, selectedCards, onSelectCa
   // Gestionar la transición entre estados de mazo apilado y desplegado
   useEffect(() => {
     if (flowState === 'shuffling') {
-      setIsStacked(true); // Inicialmente mostrar mazo apilado
+      setIsStacked(true); // Mostrar mazo apilado
       setShuffleAnimations(true);
-      // Después de un tiempo, cambiar a abanico
-      const timer1 = setTimeout(() => {
+      // Después de un tiempo, pasar directamente a abanico y mostrar todas las cartas
+      const timer = setTimeout(() => {
         setIsStacked(false);
-      }, 1500);
-      // Después, cambiar al estado de selección
-      const timer2 = setTimeout(() => {
         setShuffleAnimations(false);
         setFlowState('selection');
-      }, 2500);
+        setShowAllCards(true);
+      }, 1400); // Mezcla más lenta y en una sola etapa
       return () => {
-        clearTimeout(timer1);
-        clearTimeout(timer2);
+        clearTimeout(timer);
       };
     }
   }, [flowState]);
@@ -176,10 +175,62 @@ export default function TarotDeck({ deck, isShuffling, selectedCards, onSelectCa
   // Aumentar el tamaño de las cartas en mobile y desktop
   // Mejorar la legibilidad de los nombres de las cartas
 
+  // --- NUEVO: Instrucciones dinámicas para selección ---
+  const selectionLabels = [
+    { label: 'Selecciona la primera carta', desc: 'La primera carta representa el pasado.' },
+    { label: 'Selecciona la segunda carta', desc: 'La segunda carta representa el presente.' },
+    { label: 'Selecciona la tercera carta', desc: 'La tercera carta representa el futuro.' },
+  ];
+
+  // Detectar mobile con un hook local
+  const [isMobile, setIsMobile] = useState(false);
+  useEffect(() => {
+    const checkMobile = () => setIsMobile(window.innerWidth < 640);
+    checkMobile();
+    window.addEventListener('resize', checkMobile);
+    return () => window.removeEventListener('resize', checkMobile);
+  }, []);
+
+  // Instrucciones dinámicas
+  const [canShuffle, setCanShuffle] = useState(false);
+  useEffect(() => {
+    setCanShuffle(!!userQuestion.trim());
+  }, [userQuestion]);
+
+  // Instrucciones para cada estado
+  let topInstruction = '';
+  if (flowState === 'initial') {
+    if (!canShuffle) {
+      topInstruction = 'Escribe tu pregunta para comenzar.';
+    } else {
+      topInstruction = 'Toca el mazo para mezclar y elegir tus cartas.';
+    }
+  } else if (flowState === 'selection') {
+    // Ejemplo para 3 cartas, se puede hacer dinámico según layout
+    const selectionLabels = [
+      { label: 'Selecciona la primera carta', desc: 'La primera carta representa el pasado.' },
+      { label: 'Selecciona la segunda carta', desc: 'La segunda carta representa el presente.' },
+      { label: 'Selecciona la tercera carta', desc: 'La tercera carta representa el futuro.' },
+    ];
+    topInstruction = `${selectionLabels[selectedCards.length]?.label || ''} ${selectionLabels[selectedCards.length]?.desc || ''}`;
+  }
+
+  // Función para mezclar el mazo y pasar al siguiente paso
+  const handleShuffle = () => {
+    if (canShuffle && flowState === 'initial') {
+      setFlowState('shuffling');
+    }
+  };
+
   // Renderizado principal
   return (
     <div className="relative w-full flex flex-col items-center justify-center min-h-[60vh] max-h-[90vh] overflow-visible">
-      {/* FASE 1: FORMULARIO INICIAL */}
+      {/* Instrucción arriba del input */}
+      {topInstruction && (
+        <div className="mb-2 text-center text-lg text-amber-200" style={{ fontFamily: 'Garamond, serif', fontWeight: 500 }}>
+          {topInstruction}
+        </div>
+      )}
       {/* Input y botón solo en initial, encima del mazo, nunca duplicados */}
       {flowState === 'initial' && (
         <motion.div 
@@ -193,40 +244,41 @@ export default function TarotDeck({ deck, isShuffling, selectedCards, onSelectCa
             value={userQuestion}
             onChange={(e) => setUserQuestion(e.target.value)}
             placeholder="Escribe tu pregunta al tarot..."
-            className="w-full p-3 mb-4 rounded-lg bg-slate-800/70 border border-amber-500/30 text-amber-100 placeholder-amber-300/50 focus:outline-none focus:ring-2 focus:ring-amber-500/50"
+            className="w-full p-3 mb-4 rounded-lg bg-slate-800/70 border border-amber-500/30 text-amber-100 placeholder-amber-300/50 focus:outline-none focus:ring-2 focus:ring-amber-500/50 font-[Garamond] text-lg"
+            style={{ fontFamily: 'Garamond, serif' }}
           />
-          <button
-            onClick={() => {
-              if (userQuestion.trim()) {
-                setFlowState('shuffling');
-              }
-            }}
-            disabled={!userQuestion.trim()}
-            className="w-full py-3 rounded-lg bg-amber-600 hover:bg-amber-500 disabled:bg-slate-700 disabled:cursor-not-allowed text-white font-semibold shadow-lg font-cinzel text-lg transition-colors duration-300"
-          >
-            Mezclar Cartas
-          </button>
+          {/* Solo mostrar el botón en desktop y si hay pregunta */}
+          {!isMobile && canShuffle && (
+            <button
+              onClick={() => setFlowState('shuffling')}
+              className="w-full py-3 rounded-lg bg-amber-600 hover:bg-amber-500 text-white font-semibold shadow-lg font-cinzel text-lg transition-colors duration-300"
+            >
+              Mezclar Cartas
+            </button>
+          )}
         </motion.div>
       )}
       {/* Mazo apilado y animación de transición a abanico */}
       {(flowState === 'initial' || flowState === 'shuffling' || flowState === 'selection') && (
         <div
           ref={containerRef}
-          className="relative flex items-center justify-center w-full max-w-xs sm:max-w-sm md:max-w-2xl h-[340px] sm:h-[420px] md:h-[520px] mx-auto pointer-events-none select-none"
+          className="relative flex items-center justify-center w-full max-w-xs sm:max-w-sm md:max-w-2xl h-[340px] sm:h-[420px] md:h-[520px] mx-auto pointer-events-auto select-none"
           style={{ minHeight: '260px', transform: typeof window !== 'undefined' && window.innerWidth < 640 ? 'translateX(-44px)' : undefined }}
+          onClick={handleShuffle}
         >
-          {displayedDeck.map((card, i) => {
+          {deck.slice(0, showAllCards ? 22 : 10).map((card, i) => {
             let x = 0, y = 0, rotate = i * 2 - 20;
             // Aumentar tamaño de cartas
             let scale = 1.8 - i * 0.018; // antes 1.6
             let showBack = true;
             let animateProps = {};
             if (flowState === 'shuffling') {
-              // Animación "explosiva": cada carta se va a una posición aleatoria fuera del viewport
+              // Animación "explosiva": cada carta se va a una posición aleatoria, pero menos lejos del centro
               const vw = typeof window !== 'undefined' ? window.innerWidth : 800;
               const vh = typeof window !== 'undefined' ? window.innerHeight : 600;
-              const randX = (Math.random() - 0.5) * vw * 1.5;
-              const randY = (Math.random() - 0.5) * vh * 1.5;
+              // Reducir el factor de dispersión de 1.5 a 0.5
+              const randX = (Math.random() - 0.5) * vw * 0.5;
+              const randY = (Math.random() - 0.5) * vh * 0.5;
               const randRot = (Math.random() - 0.5) * 360;
               animateProps = {
                 x: randX,
@@ -309,6 +361,31 @@ export default function TarotDeck({ deck, isShuffling, selectedCards, onSelectCa
               </motion.div>
             );
           })}
+        </div>
+      )}
+      {/* Instrucciones dinámicas durante la selección */}
+      {flowState === 'selection' && selectedCards.length < 3 && (
+        <div className="mt-6 text-center">
+          <div className="text-xl font-semibold text-amber-200 mb-2" style={{ fontFamily: 'Garamond, serif' }}>{topInstruction}</div>
+        </div>
+      )}
+      {/* Cartas seleccionadas abajo, reveladas */}
+      {flowState === 'selection' && selectedCards.length > 0 && (
+        <div className="flex flex-row items-end justify-center gap-2 mt-8">
+          {selectedCards.map((sel, idx) => (
+            <motion.div
+              key={sel.card.id}
+              className="w-[96px] h-[154px] md:w-[140px] md:h-[224px] rounded-lg border-2 border-amber-500/80 bg-cover bg-center shadow-xl"
+              style={{ backgroundImage: `url('${sel.card.image_url}')`, backgroundColor: '#1e293b' }}
+              initial={{ y: 80, opacity: 0 }}
+              animate={{ y: 0, opacity: 1 }}
+              transition={{ delay: idx * 0.2, duration: 0.5 }}
+            >
+              <div className="bg-black/80 text-amber-200 text-base w-full text-center rounded py-1 font-semibold shadow-md">
+                {sel.card.name}
+              </div>
+            </motion.div>
+          ))}
         </div>
       )}
       {/* {showOverlay && selectedForReveal && (

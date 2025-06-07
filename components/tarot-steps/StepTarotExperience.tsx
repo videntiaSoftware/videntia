@@ -41,9 +41,11 @@ export default function StepTarotExperience({ readingType }: { readingType: stri
   useEffect(() => {
     const fetchDeck = async () => {
       const supabase = createClient();
-      const { data, error } = await supabase.from("tarot_cards").select("*", { head: false });
+      const { data, error } = await supabase.from("tarot_cards").select("*");
       if (!error && data) {
-        const deckWithImages = data.map((card: Record<string, unknown>) => ({
+        // Mezclar y tomar 10 para la animación, pero guardar las 22 para la posición final
+        const shuffled = data.sort(() => Math.random() - 0.5);
+        const deckWithImages = shuffled.map((card: Record<string, unknown>) => ({
           ...card,
           image_url: typeof card.image_url === 'string' && !card.image_url.startsWith('http')
             ? `https://jhtjdapbeiybxpqvyqqs.supabase.co/storage/v1/object/public/deck/${card.image_url}`
@@ -125,15 +127,16 @@ export default function StepTarotExperience({ readingType }: { readingType: stri
     setShowReading(false);
     setReadingData(null);
     setDeckRevealed(false);
-    const shuffled = [...deck]
-      .sort(() => Math.random() - 0.5)
-      .sort(() => Math.random() - 0.5)
-      .sort(() => Math.random() - 0.5);
-    setDeck(shuffled);
+    // Mezclar solo las primeras 10 cartas, el resto queda igual
+    setDeck((prevDeck) => {
+      const first10 = prevDeck.slice(0, 10).sort(() => Math.random() - 0.5);
+      const rest = prevDeck.slice(10);
+      return [...first10, ...rest];
+    });
     setTimeout(() => {
       setIsShuffling(false);
       setDeckRevealed(true);
-    }, 1500);
+    }, 900);
   };
 
   const selectCard = (card: TarotDeckCard): void => {
@@ -148,7 +151,7 @@ export default function StepTarotExperience({ readingType }: { readingType: stri
       setTimeout(() => {
         setRevealIndex(0);
         fetchReading(newSelectedCards);
-      }, 700);
+      }, 1000); // Espera 1 segundo antes de abrir el modal
     }
   };
 
@@ -211,22 +214,28 @@ export default function StepTarotExperience({ readingType }: { readingType: stri
   const startSpeechToText = () => {};
   const cancelSpeechToText = () => {};
 
+  // Obtener título y descripción del tipo de lectura
+  const readingTitle = READING_TYPE_LAYOUTS[readingType]?.label || 'Tarot';
+  const readingDesc = READING_TYPE_LAYOUTS[readingType]?.instructions || '';
+
   return (
     <div className="w-full flex flex-col items-center justify-center animate-fade-in-up mt-12">
-      <h2 className="font-cinzel text-3xl md:text-4xl text-amber-200 mb-6 text-center">
-        {showReading ? 'Interpretación final' : 'Tarot interactivo'}
+      <h2 className="font-cinzel text-3xl md:text-4xl text-amber-200 mb-2 text-center">
+        {readingTitle}
       </h2>
+      <div className="text-base md:text-lg text-purple-200 mb-4 text-center" style={{ fontFamily: 'Garamond, serif' }}>
+        {readingDesc}
+      </div>
       <div className="w-full flex flex-col items-center">
         {/* Mostrar el mazo y la experiencia solo si no se han revelado todas las cartas */}
         {revealIndex === null && !showReading && (
           <TarotDeck
-            deck={deck}
+            deck={deck} // Pasar las 22 cartas para la posición final
             isShuffling={isShuffling}
             selectedCards={selectedCards}
             onSelectCard={selectCard}
             tarotBackUrl={"https://jhtjdapbeiybxpqvyqqs.supabase.co/storage/v1/object/public/deck//740937b3-dc03-49e3-acbf-1d2da17eddaf.png"}
             deckRevealed={deckRevealed}
-            // Se puede pasar la pregunta como prop si TarotDeck la necesita
           />
         )}
       </div>
