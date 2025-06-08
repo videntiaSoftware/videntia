@@ -28,6 +28,7 @@ interface SelectedCard {
 }
 
 export default function StepTarotExperience({ readingType }: { readingType: string }) {
+  console.log("[StepTarotExperience] Componente montado");
   const [question, setQuestion] = useState("");
   const [isShuffling, setIsShuffling] = useState(false);
   const [selectedCards, setSelectedCards] = useState<SelectedCard[]>([]);
@@ -150,6 +151,7 @@ export default function StepTarotExperience({ readingType }: { readingType: stri
   };
 
   const selectCard = (card: TarotDeckCard): void => {
+    console.log("[selectCard] Seleccionando carta", card);
     if (isShuffling || showReading) return;
     if (selectedCards.find((c) => c.card.id === card.id)) return;
     const cardsNeeded = READING_TYPE_CARD_COUNT[readingType] || 3;
@@ -159,21 +161,32 @@ export default function StepTarotExperience({ readingType }: { readingType: stri
     setSelectedCards(newSelectedCards);
     if (newSelectedCards.length === cardsNeeded) {
       setTimeout(() => {
+        console.log("[selectCard] Se seleccionaron todas las cartas, pasando a reveal");
         setRevealIndex(0);
-        fetchReading(newSelectedCards);
-      }, 1000); // Espera 1 segundo antes de abrir el modal
+        // fetchReading(newSelectedCards); // <-- Mover esto a onFinish
+      }, 1000);
     }
   };
 
   const fetchReading = async (cards: SelectedCard[]): Promise<void> => {
+    console.log("[fetchReading] Ejecutando fetchReading", cards);
     setLoadingReading(true);
     try {
       const supabase = createClient();
       const { data: userData } = await supabase.auth.getUser();
       const isUserAuthenticated = !!userData?.user;
       let recaptchaToken = '';
+      let recaptchaOk = false;
       if (!isUserAuthenticated && typeof window !== 'undefined' && (window as any).grecaptcha && process.env.NEXT_PUBLIC_RECAPTCHA_SITE_KEY) {
-        recaptchaToken = await (window as any).grecaptcha.execute(process.env.NEXT_PUBLIC_RECAPTCHA_SITE_KEY, { action: 'reading' });
+        try {
+          recaptchaToken = await (window as any).grecaptcha.execute(process.env.NEXT_PUBLIC_RECAPTCHA_SITE_KEY, { action: 'reading' });
+          recaptchaOk = typeof recaptchaToken === 'string' && recaptchaToken.length > 0;
+          console.log("[fetchReading] reCAPTCHA token generado:", recaptchaToken, "OK:", recaptchaOk);
+        } catch (err) {
+          console.error("[fetchReading] Error ejecutando grecaptcha:", err);
+        }
+      } else {
+        console.warn("[fetchReading] grecaptcha no está disponible o usuario autenticado");
       }
       let guestId = null;
       if (!isUserAuthenticated && typeof window !== 'undefined') {
@@ -185,6 +198,14 @@ export default function StepTarotExperience({ readingType }: { readingType: stri
         questionRef.current?.focus();
         return;
       }
+      console.log("[fetchReading] Antes del fetch a /api/reading/generate", {
+        type: readingType,
+        question: question.trim(),
+        cards: cards.map((c) => ({ id: c.card.id, orientation: c.orientation })),
+        recaptchaToken,
+        recaptchaOk,
+        guest_id: guestId,
+      });
       const res = await fetch("/api/reading/generate", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
@@ -196,7 +217,9 @@ export default function StepTarotExperience({ readingType }: { readingType: stri
           guest_id: guestId,
         }),
       });
+      console.log("[fetchReading] Respuesta recibida de /api/reading/generate", res);
       const data = await res.json();
+      console.log("[fetchReading] Data recibida:", data);
       setReadingData(data);
       setShowReading(true);
       // Guardar la lectura en la base de datos
@@ -210,7 +233,7 @@ export default function StepTarotExperience({ readingType }: { readingType: stri
         await supabase.from("readings").insert([insertObj]);
       }
     } catch (e) {
-      // Manejo de error
+      console.error("[fetchReading] Error en fetchReading", e);
     } finally {
       setLoadingReading(false);
     }
@@ -304,8 +327,10 @@ export default function StepTarotExperience({ readingType }: { readingType: stri
                 }}
                 onPrev={() => setRevealIndex((prev) => (prev !== null && prev > 0 ? prev - 1 : prev))}
                 onFinish={() => {
+                  console.log("[StepCardReveal] onFinish llamado", selectedCards);
                   setRevealIndex(null);
                   setShowReading(true);
+                  fetchReading(selectedCards);
                 }}
               />
             </motion.div>
