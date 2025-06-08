@@ -179,12 +179,18 @@ export default function StepTarotExperience({ readingType }: { readingType: stri
       if (!isUserAuthenticated && typeof window !== 'undefined') {
         guestId = localStorage.getItem('guest_id') || '';
       }
+      // Validar que la pregunta no esté vacía
+      if (!question || question.trim() === "") {
+        setLoadingReading(false);
+        questionRef.current?.focus();
+        return;
+      }
       const res = await fetch("/api/reading/generate", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
           type: readingType,
-          question,
+          question: question.trim(),
           cards: cards.map((c) => ({ id: c.card.id, orientation: c.orientation })),
           recaptchaToken,
           guest_id: guestId,
