@@ -3,6 +3,7 @@ import Modal from 'react-modal';
 import { motion } from 'framer-motion';
 import { Button } from '@/components/ui/button';
 import { ChevronLeft, ChevronRight } from 'lucide-react';
+import TypewriterText from './TypewriterText';
 
 import './CardRevealModal.css';
 
@@ -77,117 +78,86 @@ export default function CardRevealModal({ card, reading, cardIndex, totalCards, 
     <Modal
       isOpen={!!card}
       onRequestClose={onClose}
-      className="card-reveal-modal"
-      overlayClassName="card-reveal-modal-overlay"
+      className="card-reveal-modal fixed inset-0 flex items-center justify-center z-50"
+      overlayClassName="fixed inset-0 z-40 bg-[url('https://jhtjdapbeiybxpqvyqqs.supabase.co/storage/v1/object/public/assets//fondo.png')] bg-cover bg-center before:absolute before:inset-0 before:bg-gradient-to-b before:from-transparent before:to-black before:to-90% before:opacity-90 before:pointer-events-none card-reveal-modal-overlay"
       ariaHideApp={false}
     >
-      <div className="card-reveal-modal-content bg-gradient-to-b from-slate-950/95 to-slate-900/95">
-        <button className="close-button text-amber-300 hover:text-amber-200" onClick={onClose}>
+      <div className="relative flex flex-col items-center justify-center w-full max-w-lg min-h-[70vh] p-0 bg-transparent shadow-none">
+        <button className="absolute top-6 right-6 text-purple-200 hover:text-white font-cinzel text-3xl z-10 bg-transparent border-none" onClick={onClose}>
           &times;
         </button>
-        <div className="flex flex-col items-center justify-center gap-8 w-full">
-          {/* Mini-visualización de cartas en la parte superior */}
-          <div className="flex flex-row items-center justify-center gap-3 mb-6 pt-2">
-            {Array.from({ length: totalCards }).map((_, idx) => {
-              const isCurrent = idx === cardIndex;
-              let showFront = false;
-              if (flippedTop[idx]) showFront = true;
-              const url = showFront
-                ? (selectedCards && selectedCards[idx] && selectedCards[idx].card.image_url
-                    ? selectedCards[idx].card.image_url
-                    : undefined)
-                : "https://jhtjdapbeiybxpqvyqqs.supabase.co/storage/v1/object/public/deck//740937b3-dc03-49e3-acbf-1d2da17eddaf.png";
-              return (
-                <div
-                  key={idx}
-                  className={`w-12 h-20 md:w-16 md:h-24 rounded-md border-2 ${showFront ? 'border-amber-400/80' : 'border-amber-500/30'} bg-cover bg-center transition-all duration-500 
-                    ${isCurrent ? 'ring-4 ring-amber-400 scale-115 shadow-[0_0_10px_rgba(251,191,36,0.5)] z-10' : 'opacity-60 hover:opacity-80'}`}
-                  style={{
-                    backgroundImage: url ? `url('${url}')` : undefined,
-                    backgroundColor: showFront ? '#1e293b' : '#4c1d95',
-                    transform: selectedCards && selectedCards[idx] && selectedCards[idx].orientation === 'reversed' && showFront ? 'rotate(180deg)' : undefined,
-                  }}
-                />
-              );
-            })}
-          </div>
-          {/* Carta principal con animación de giro */}
-          <div className="flex flex-col items-center justify-center w-full">
+        <motion.div
+          className="flex flex-col items-center justify-center w-full"
+          initial={{ opacity: 0, y: 40 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ duration: 0.7, type: 'tween', delay: 0.7 }} // delay para esperar el fade-in del overlay
+        >
+          <div className="w-full flex flex-col items-center justify-center">
             <motion.div
-              className="relative w-44 h-72 md:w-52 md:h-80 preserve-3d"
+              className="relative w-44 h-72 md:w-52 md:h-80 mb-8"
               animate={{ rotateY: isFlipped ? 180 : 0 }}
-              transition={{ duration: 1.2, type: "spring", stiffness: 70, damping: 15 }}
+              transition={{ duration: 1.2, type: 'spring', stiffness: 70, damping: 15 }}
             >
               {/* Dorso de la carta */}
               <div
-                className="absolute w-full h-full backface-hidden rounded-lg border-2 border-amber-500 overflow-hidden bg-cover bg-center shadow-[0_0_15px_5px_rgba(251,191,36,0.25)]"
-                style={{ backgroundImage: "url('https://jhtjdapbeiybxpqvyqqs.supabase.co/storage/v1/object/public/deck//740937b3-dc03-49e3-acbf-1d2da17eddaf.png')", backgroundColor: '#4c1d95' }}
+                className="absolute w-full h-full backface-hidden rounded-xl overflow-hidden bg-cover bg-center shadow-2xl"
+                style={{ backgroundImage: "url('https://jhtjdapbeiybxpqvyqqs.supabase.co/storage/v1/object/public/deck//740937b3-dc03-49e3-acbf-1d2da17eddaf.png')", backgroundColor: '#4c1d95', border: 'none' }}
               />
               {/* Frente de la carta */}
               <div
-                className="absolute w-full h-full backface-hidden rounded-lg border-2 border-amber-500 overflow-hidden bg-cover bg-center flex flex-col items-center justify-end p-2 shadow-[0_0_15px_5px_rgba(251,191,36,0.25)]"
+                className="absolute w-full h-full backface-hidden rounded-xl overflow-hidden bg-cover bg-center flex flex-col items-center justify-end p-2 shadow-2xl"
                 style={{
                   backgroundImage: card.image_url ? `url('${card.image_url}')` : `url('/tarot-cards/${card.id}.jpg')`,
                   backgroundColor: '#1e293b',
                   transform: 'rotateY(180deg)' + (orientation === 'reversed' ? ' rotate(180deg)' : ''),
+                  border: 'none',
                 }}
-              >
-                <div className="bg-black/80 backdrop-blur-sm text-amber-300 text-sm w-full text-center rounded py-1 font-medium flex flex-col items-center">
-                  <span className="font-bold">{card.name}</span>
-                  {/* Mostrar etiqueta de posición si existe */}
-                  {layoutLabels && layoutLabels[cardIndex] && (
-                    <span className="text-xs text-purple-300 mt-1">{layoutLabels[cardIndex]}</span>
-                  )}
-                  <span className="text-xs text-purple-300 mt-1">{orientation === 'reversed' ? 'Invertida' : 'Al derecho'}</span>
-                </div>
+              />
+            </motion.div>
+            <h2 className="font-cinzel text-4xl text-purple-100 mb-6 text-center drop-shadow-lg tracking-widest select-none min-h-[2.5em] flex items-center justify-center w-full">
+              {card.name}
+            </h2>
+            <div className="text-center text-purple-300 text-lg mb-2 font-cormorant bg-transparent tracking-wider uppercase select-none min-h-[2em] flex items-center justify-center w-full">
+              {layoutLabels && layoutLabels[cardIndex] ? layoutLabels[cardIndex] : ''}
+            </div>
+            <p className="text-amber-200 mb-5 text-base text-center font-cormorant tracking-widest select-none min-h-[2em] flex items-center justify-center w-full">
+              {card.type === 'major' ? 'Arcano Mayor' : 'Arcano Menor'} · {orientation === 'reversed' ? 'Invertida' : 'Al derecho'}
+            </p>
+            <motion.div
+              className="w-full max-w-xl mx-auto mt-2 px-4 min-h-[5.5em] flex items-center justify-center"
+              initial={{ opacity: 0, y: 20 }}
+              animate={{ opacity: showInterpretation ? 1 : 0, y: showInterpretation ? 0 : 20 }}
+              transition={{ duration: 0.6, delay: 0.3 }}
+            >
+              <div className="font-cormorant text-lg text-white/95 text-center leading-relaxed tracking-wide w-full bg-transparent shadow-none px-2 min-h-[4em] flex items-center justify-center">
+                <TypewriterText text={reading || 'Sin interpretación.'} speed={28} className="font-cormorant" />
               </div>
             </motion.div>
           </div>
-          {/* Interpretación con animación de aparición */}
-          {showInterpretation && (
-            <motion.div 
-              className="w-full max-w-xl mx-auto mt-6"
-              initial={{ opacity: 0, y: 20 }}
-              animate={{ opacity: 1, y: 0 }}
-              transition={{ duration: 0.6, delay: 0.3 }}
-            >
-              <h2 className="text-2xl font-bold text-amber-300 mb-3 text-center">{card.name}</h2>
-              {/* Mostrar etiqueta de posición con mejor estilo */}
-              {layoutLabels && layoutLabels[cardIndex] && (
-                <div className="text-center text-purple-300 text-lg mb-2 font-semibold bg-purple-900/30 py-1 rounded-full">
-                  {layoutLabels[cardIndex]}
-                </div>
-              )}
-              <p className="text-amber-200 mb-5 text-sm text-center font-medium">
-                {card.type === 'major' ? 'Arcano Mayor' : 'Arcano Menor'} · {orientation === 'reversed' ? 'Invertida' : 'Al derecho'}
-              </p>
-              <div className="prose prose-invert max-w-none bg-slate-900/70 p-4 rounded-lg border border-purple-500/20">
-                <p className="text-white/95 whitespace-pre-line text-center leading-relaxed">{reading || 'Sin interpretación.'}</p>
-              </div>
-            </motion.div>
-          )}
-        </div>
-        <div className="p-5 mt-4 border-t border-purple-500/30 flex justify-between">
+        </motion.div>
+        <div className="p-0 mt-8 flex justify-between w-full gap-8 min-h-[4em]">
           <Button
-            variant="outline"
+            variant="ghost"
             onClick={onPrev}
             disabled={cardIndex === 0}
-            className={`border-amber-500/30 ${cardIndex === 0 ? 'text-slate-400' : 'text-amber-200 hover:bg-amber-900/20'}`}
+            className={`font-cormorant text-lg px-6 py-2 bg-transparent shadow-none hover:bg-purple-900/30 transition-all ${cardIndex === 0 ? 'text-slate-400' : 'text-purple-200 hover:text-white'}`}
+            style={{ border: 'none' }}
           >
-            <ChevronLeft className="h-4 w-4 mr-2" />
+            <ChevronLeft className="h-5 w-5 mr-2" />
             Anterior
           </Button>
           <motion.div whileHover={{ scale: 1.05 }} whileTap={{ scale: 0.98 }}>
             <Button 
               onClick={onNext} 
-              className={`${cardIndex < totalCards - 1 
-                ? 'bg-amber-600 hover:bg-amber-500 text-white' 
-                : 'bg-green-600 hover:bg-green-500 text-white'}`}
+              className={`font-cormorant text-lg px-8 py-2 shadow-xl transition-all ${cardIndex < totalCards - 1 
+                ? 'bg-gradient-to-r from-purple-800 via-amber-700 to-amber-500 hover:from-amber-700 hover:to-purple-800 text-white' 
+                : 'bg-gradient-to-r from-green-700 via-green-600 to-green-400 hover:from-green-600 hover:to-green-400 text-white'}`}
+              style={{ border: 'none' }}
             >
               {cardIndex < totalCards - 1 ? (
                 <>
                   Siguiente carta
-                  <ChevronRight className="h-4 w-4 ml-2" />
+                  <ChevronRight className="h-5 w-5 ml-2" />
                 </>
               ) : (
                 'Completar lectura'

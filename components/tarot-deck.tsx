@@ -46,24 +46,33 @@ export default function TarotDeck({ deck, isShuffling, selectedCards, onSelectCa
 
   // Posición de cada carta en 3 filas de 7 cartas (21 cartas, la 22 va centrada abajo)
   function getCardPosition(i: number, total: number, isMobile: boolean) {
-    // 3 filas de 7 cartas, la última (22) centrada abajo
-    const row = Math.floor(i / 7);
-    const col = i % 7;
+    // 8 cartas primera fila, 7 segunda, 7 tercera
+    let row = 0, col = 0;
+    if (i < 8) {
+      row = 0; col = i;
+    } else if (i < 15) {
+      row = 1; col = i - 8;
+    } else {
+      row = 2; col = i - 15;
+    }
     let x = 0, y = 0, rotate = 0;
-    // Ajuste: spacing más chico en mobile
-    const cardSpacingX = isMobile ? 38 : 90;
-    const cardSpacingY = isMobile ? 62 : 130;
-    if (i < 21) {
-      // 3 filas de 7
+    const cardSpacingX = isMobile ? 36 : 88;
+    const cardSpacingY = isMobile ? 62 : 128;
+    if (row === 0) {
+      const totalWidth = 7 * cardSpacingX;
+      x = (col * cardSpacingX) - totalWidth / 2;
+      y = -cardSpacingY;
+      rotate = (col - 3.5) * (isMobile ? 3.5 : 6);
+    } else if (row === 1) {
       const totalWidth = 6 * cardSpacingX;
       x = (col * cardSpacingX) - totalWidth / 2;
-      y = (row - 1) * cardSpacingY;
+      y = 0;
       rotate = (col - 3) * (isMobile ? 3.5 : 6);
     } else {
-      // la carta 22 va centrada abajo
-      x = 0;
-      y = 2 * cardSpacingY;
-      rotate = 0;
+      const totalWidth = 6 * cardSpacingX;
+      x = (col * cardSpacingX) - totalWidth / 2;
+      y = cardSpacingY;
+      rotate = (col - 3) * (isMobile ? 3.5 : 6);
     }
     return { x, y, rotate };
   }
@@ -225,12 +234,13 @@ export default function TarotDeck({ deck, isShuffling, selectedCards, onSelectCa
   // Renderizado principal
   return (
     <div className="relative w-full flex flex-col items-center justify-center min-h-[60vh] max-h-[90vh] overflow-visible">
-      {/* Instrucción arriba del input */}
-      {topInstruction && (
-        <div className="mb-2 text-center text-lg text-amber-200" style={{ fontFamily: 'Garamond, serif', fontWeight: 500 }}>
-          {topInstruction}
-        </div>
-      )}
+      {/* Instrucción arriba del input, siempre ocupa el mismo espacio para evitar saltos de layout */}
+      <div
+        className="mb-2 text-center text-lg text-amber-200 flex items-center justify-center"
+        style={{ fontFamily: 'Garamond, serif', fontWeight: 500, minHeight: '3.5em' }}
+      >
+        {topInstruction || '\u00A0'}
+      </div>
       {/* Input y botón solo en initial, encima del mazo, nunca duplicados */}
       {flowState === 'initial' && (
         <motion.div 
@@ -364,19 +374,22 @@ export default function TarotDeck({ deck, isShuffling, selectedCards, onSelectCa
         </div>
       )}
       {/* Instrucciones dinámicas durante la selección */}
-      {flowState === 'selection' && selectedCards.length < 3 && (
+      {/* {flowState === 'selection' && selectedCards.length < 3 && (
         <div className="mt-6 text-center">
           <div className="text-xl font-semibold text-amber-200 mb-2" style={{ fontFamily: 'Garamond, serif' }}>{topInstruction}</div>
         </div>
-      )}
+      )} */}
       {/* Cartas seleccionadas abajo, reveladas */}
       {flowState === 'selection' && selectedCards.length > 0 && (
-        <div className="flex flex-row items-end justify-center gap-2 mt-8">
+        <div
+          className="fixed left-0 right-0 bottom-0 z-40 flex flex-row items-end justify-center gap-2 pb-4 md:pb-8"
+          style={{ pointerEvents: 'none', background: 'linear-gradient(to top, rgba(30, 41, 59, 0.92) 60%, transparent 100%)', minHeight: '180px' }}
+        >
           {selectedCards.map((sel, idx) => (
             <motion.div
               key={sel.card.id}
-              className="w-[96px] h-[154px] md:w-[140px] md:h-[224px] rounded-lg border-2 border-amber-500/80 bg-cover bg-center shadow-xl"
-              style={{ backgroundImage: `url('${sel.card.image_url}')`, backgroundColor: '#1e293b' }}
+              className="w-[72px] h-[116px] md:w-[110px] md:h-[176px] rounded-lg border-2 border-amber-500/80 bg-cover bg-center shadow-xl relative"
+              style={{ backgroundImage: `url('${sel.card.image_url}')`, backgroundColor: '#1e293b', pointerEvents: 'auto', zIndex: 100 + idx }}
               initial={{ y: 80, opacity: 0 }}
               animate={{ y: 0, opacity: 1 }}
               transition={{ delay: idx * 0.2, duration: 0.5 }}
