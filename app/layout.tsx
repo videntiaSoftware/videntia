@@ -42,6 +42,12 @@ export default function RootLayout({
 }>) {
   return (
     <html lang="es">
+      <head>
+        <Script
+          src={`https://www.google.com/recaptcha/api.js?render=${process.env.NEXT_PUBLIC_RECAPTCHA_SITE_KEY}`}
+          strategy="beforeInteractive"
+        />
+      </head>
       <body
         className={`min-h-screen flex flex-col max-w-screen ${geistSans.variable} ${cinzelDecorative.variable} ${cormorantGaramond.variable}`}
       >

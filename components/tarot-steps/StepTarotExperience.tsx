@@ -300,21 +300,21 @@ export default function StepTarotExperience({ readingType }: { readingType: stri
             className="absolute left-0 top-0 w-full min-h-screen flex flex-col items-center justify-center"
           >
             <div className="mt-8 bg-slate-900/90 rounded-lg p-6 border border-purple-500/30 shadow-xl text-white">
-              <h2 className="text-2xl font-bold text-amber-300 mb-4">Interpretación final</h2>
+              <h2 className="text-2xl md:text-3xl font-bold text-amber-300 mb-4 font-cinzel text-center">Interpretación final</h2>
               <div className="mb-4">
-                <p className="text-purple-200 mb-2 font-semibold">Pregunta:</p>
-                <p className="mb-4">{question}</p>
-                <p className="text-purple-200 mb-2 font-semibold">Cartas seleccionadas:</p>
+                <p className="text-purple-200 mb-2 font-semibold font-cinzel">Pregunta:</p>
+                <p className="mb-4 font-cormorant text-lg text-amber-100" style={{ fontFamily: 'Cormorant Garamond, Garamond, serif' }}>{question}</p>
+                <p className="text-purple-200 mb-2 font-semibold font-cinzel">Cartas seleccionadas:</p>
                 <ul className="mb-4">
                   {selectedCards.map((c, i) => (
                     <li key={c.card.id} className="mb-2">
-                      <span className="font-bold text-amber-200">{c.card.name}</span>
+                      <span className="font-bold text-amber-200 font-cinzel">{c.card.name}</span>
                       {READING_TYPE_LAYOUTS[readingType]?.layout &&
-                        <span className="ml-2 text-xs text-purple-300">({READING_TYPE_LAYOUTS[readingType].layout[i]})</span>
+                        <span className="ml-2 text-xs text-purple-300 font-cormorant" style={{ fontFamily: 'Cormorant Garamond, Garamond, serif' }}>({READING_TYPE_LAYOUTS[readingType].layout[i]})</span>
                       }
                       {" · "}
-                      <span className="italic text-purple-300">{c.orientation === 'reversed' ? 'Invertida' : 'Al derecho'}</span>
-                      <div className="text-sm text-white/90 mt-1">
+                      <span className="italic text-purple-300 font-cormorant" style={{ fontFamily: 'Cormorant Garamond, Garamond, serif' }}>{c.orientation === 'reversed' ? 'Invertida' : 'Al derecho'}</span>
+                      <div className="text-sm text-white/90 mt-1 font-cormorant" style={{ fontFamily: 'Cormorant Garamond, Garamond, serif' }}>
                         {c.orientation === 'reversed' ? c.card.interpretation_reversed || 'Sin interpretación.' : c.card.interpretation_upright || 'Sin interpretación.'}
                       </div>
                     </li>
@@ -322,15 +322,15 @@ export default function StepTarotExperience({ readingType }: { readingType: stri
                 </ul>
               </div>
               <div className="mt-4 p-4 bg-black/40 rounded">
-                <h3 className="text-lg font-semibold text-amber-300 mb-2">Conclusión</h3>
-                <div className="prose prose-invert max-w-none">
+                <h3 className="text-lg md:text-xl font-semibold text-amber-300 mb-2 font-cinzel">Conclusión</h3>
+                <div className="prose prose-invert max-w-none font-cormorant text-lg" style={{ fontFamily: 'Cormorant Garamond, Garamond, serif' }}>
                   <ReactMarkdown>{readingData?.interpretation || "Esta es la conclusión de la lectura según las cartas seleccionadas."}</ReactMarkdown>
                 </div>
               </div>
               <Button className="mt-6" onClick={resetReading}>Hacer otra pregunta</Button>
               <div className="mt-8 p-4 bg-amber-50/80 dark:bg-slate-800/80 border border-amber-200 dark:border-slate-700 rounded-lg text-amber-900 dark:text-amber-100 text-center">
-                <h4 className="font-semibold mb-1">¿Quieres guardar esta lectura?</h4>
-                <p className="text-sm mb-2">Inicia sesión o regístrate para guardar tu historial, acceder a tus tiradas favoritas y recibir recomendaciones personalizadas.</p>
+                <h4 className="font-semibold mb-1 font-cinzel">¿Quieres guardar esta lectura?</h4>
+                <p className="text-sm mb-2 font-cormorant" style={{ fontFamily: 'Cormorant Garamond, Garamond, serif' }}>Inicia sesión o regístrate para guardar tu historial, acceder a tus tiradas favoritas y recibir recomendaciones personalizadas.</p>
               </div>
             </div>
           </motion.div>
