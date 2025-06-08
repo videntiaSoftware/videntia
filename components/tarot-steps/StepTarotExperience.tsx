@@ -198,39 +198,43 @@ export default function StepTarotExperience({ readingType }: { readingType: stri
         questionRef.current?.focus();
         return;
       }
-      console.log("[fetchReading] Antes del fetch a /api/reading/generate", {
-        type: readingType,
-        question: question.trim(),
-        cards: cards.map((c) => ({ id: c.card.id, orientation: c.orientation })),
-        recaptchaToken,
-        recaptchaOk,
-        guest_id: guestId,
-      });
-      const res = await fetch("/api/reading/generate", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({
+      try {
+        console.log("[fetchReading] Antes del fetch a /api/reading/generate", {
           type: readingType,
           question: question.trim(),
           cards: cards.map((c) => ({ id: c.card.id, orientation: c.orientation })),
           recaptchaToken,
+          recaptchaOk,
           guest_id: guestId,
-        }),
-      });
-      console.log("[fetchReading] Respuesta recibida de /api/reading/generate", res);
-      const data = await res.json();
-      console.log("[fetchReading] Data recibida:", data);
-      setReadingData(data);
-      setShowReading(true);
-      // Guardar la lectura en la base de datos
-      const insertObj: any = {
-        question: data.question,
-        reading_type: readingType,
-        cards_drawn: data.cards,
-        interpretation: data.interpretation,
-      };
-      if (isUserAuthenticated) {
-        await supabase.from("readings").insert([insertObj]);
+        });
+        const res = await fetch("/api/reading/generate", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({
+            type: readingType,
+            question: question.trim(),
+            cards: cards.map((c) => ({ id: c.card.id, orientation: c.orientation })),
+            recaptchaToken,
+            guest_id: guestId,
+          }),
+        });
+        console.log("[fetchReading] Respuesta recibida de /api/reading/generate", res);
+        const data = await res.json();
+        console.log("[fetchReading] Data recibida:", data);
+        setReadingData(data);
+        setShowReading(true);
+        // Guardar la lectura en la base de datos
+        const insertObj: any = {
+          question: data.question,
+          reading_type: readingType,
+          cards_drawn: data.cards,
+          interpretation: data.interpretation,
+        };
+        if (isUserAuthenticated) {
+          await supabase.from("readings").insert([insertObj]);
+        }
+      } catch (err) {
+        console.error("[fetchReading] Error antes/durante el fetch a /api/reading/generate:", err);
       }
     } catch (e) {
       console.error("[fetchReading] Error en fetchReading", e);
