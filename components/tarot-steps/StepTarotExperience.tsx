@@ -10,6 +10,7 @@ import { createClient } from "@/lib/supabase/client";
 import ReactMarkdown from 'react-markdown';
 import FingerprintJS from '@fingerprintjs/fingerprintjs';
 import { AnimatePresence, motion } from 'framer-motion';
+import Script from "next/script";
 
 interface Card {
   id: string;
@@ -66,6 +67,14 @@ export default function StepTarotExperience({ readingType }: { readingType: stri
         });
       });
     }
+  }, []);
+
+  useEffect(() => {
+    // Ocultar el badge de reCAPTCHA v3
+    const style = document.createElement('style');
+    style.innerHTML = `.grecaptcha-badge { visibility: hidden !important; }`;
+    document.head.appendChild(style);
+    return () => { document.head.removeChild(style); };
   }, []);
 
   const READING_TYPE_CARD_COUNT: Record<string, number> = {
@@ -225,117 +234,123 @@ export default function StepTarotExperience({ readingType }: { readingType: stri
   else if (showReading) currentStep = 'reading';
 
   return (
-    <div className="w-full flex flex-col items-center justify-center mt-12 min-h-screen relative">
-      <AnimatePresence mode="wait">
-        {currentStep === 'select' && (
-          <motion.div
-            key="select"
-            initial={{ opacity: 0 }}
-            animate={{ opacity: 1 }}
-            exit={{ opacity: 0 }}
-            transition={{ duration: 0.7, ease: 'easeInOut' }}
-            className="w-full flex flex-col items-center justify-center absolute left-0 top-0"
-          >
-            <h2 className="font-cinzel text-3xl md:text-4xl text-amber-200 mb-2 text-center">
-              {readingTitle}
-            </h2>
-            <div className="text-base md:text-lg text-purple-200 mb-4 text-center" style={{ fontFamily: 'Garamond, serif' }}>
-              {readingDesc}
-            </div>
-            <div className="w-full flex flex-col items-center">
-              {revealIndex === null && !showReading && (
-                <TarotDeck
-                  deck={deck}
-                  isShuffling={isShuffling}
-                  selectedCards={selectedCards}
-                  onSelectCard={selectCard}
-                  tarotBackUrl={"https://jhtjdapbeiybxpqvyqqs.supabase.co/storage/v1/object/public/deck//740937b3-dc03-49e3-acbf-1d2da17eddaf.png"}
-                  deckRevealed={deckRevealed}
-                />
-              )}
-            </div>
-          </motion.div>
-        )}
-        {currentStep === 'reveal' && (
-          <motion.div
-            key="reveal"
-            initial={{ opacity: 0 }}
-            animate={{ opacity: 1 }}
-            exit={{ opacity: 0 }}
-            transition={{ duration: 0.7, ease: 'easeInOut' }}
-            className="absolute left-0 top-0 w-full min-h-screen flex flex-col items-center justify-center"
-          >
-            <StepCardReveal
-              cards={selectedCards as any}
-              readings={selectedCards.map((c) =>
-                c.orientation === 'reversed'
-                  ? c.card.interpretation_reversed || 'Sin interpretación.'
-                  : c.card.interpretation_upright || 'Sin interpretación.'
-              )}
-              layoutLabels={READING_TYPE_LAYOUTS[readingType]?.layout}
-              currentIndex={revealIndex!}
-              onNext={() => {
-                if (revealIndex! < selectedCards.length - 1) {
-                  setRevealIndex(revealIndex! + 1);
-                } else {
+    <>
+      <Script
+        src={`https://www.google.com/recaptcha/api.js?render=${process.env.NEXT_PUBLIC_RECAPTCHA_SITE_KEY}`}
+        strategy="afterInteractive"
+      />
+      <div className="w-full flex flex-col items-center justify-center mt-12 min-h-screen relative">
+        <AnimatePresence mode="wait">
+          {currentStep === 'select' && (
+            <motion.div
+              key="select"
+              initial={{ opacity: 0 }}
+              animate={{ opacity: 1 }}
+              exit={{ opacity: 0 }}
+              transition={{ duration: 0.7, ease: 'easeInOut' }}
+              className="w-full flex flex-col items-center justify-center absolute left-0 top-0"
+            >
+              <h2 className="font-cinzel text-3xl md:text-4xl text-amber-200 mb-2 text-center">
+                {readingTitle}
+              </h2>
+              <div className="text-base md:text-lg text-purple-200 mb-4 text-center" style={{ fontFamily: 'Garamond, serif' }}>
+                {readingDesc}
+              </div>
+              <div className="w-full flex flex-col items-center">
+                {revealIndex === null && !showReading && (
+                  <TarotDeck
+                    deck={deck}
+                    isShuffling={isShuffling}
+                    selectedCards={selectedCards}
+                    onSelectCard={selectCard}
+                    tarotBackUrl={"https://jhtjdapbeiybxpqvyqqs.supabase.co/storage/v1/object/public/deck//740937b3-dc03-49e3-acbf-1d2da17eddaf.png"}
+                    deckRevealed={deckRevealed}
+                  />
+                )}
+              </div>
+            </motion.div>
+          )}
+          {currentStep === 'reveal' && (
+            <motion.div
+              key="reveal"
+              initial={{ opacity: 0 }}
+              animate={{ opacity: 1 }}
+              exit={{ opacity: 0 }}
+              transition={{ duration: 0.7, ease: 'easeInOut' }}
+              className="absolute left-0 top-0 w-full min-h-screen flex flex-col items-center justify-center"
+            >
+              <StepCardReveal
+                cards={selectedCards as any}
+                readings={selectedCards.map((c) =>
+                  c.orientation === 'reversed'
+                    ? c.card.interpretation_reversed || 'Sin interpretación.'
+                    : c.card.interpretation_upright || 'Sin interpretación.'
+                )}
+                layoutLabels={READING_TYPE_LAYOUTS[readingType]?.layout}
+                currentIndex={revealIndex!}
+                onNext={() => {
+                  if (revealIndex! < selectedCards.length - 1) {
+                    setRevealIndex(revealIndex! + 1);
+                  } else {
+                    setRevealIndex(null);
+                    setShowReading(true);
+                  }
+                }}
+                onPrev={() => setRevealIndex((prev) => (prev !== null && prev > 0 ? prev - 1 : prev))}
+                onFinish={() => {
                   setRevealIndex(null);
                   setShowReading(true);
-                }
-              }}
-              onPrev={() => setRevealIndex((prev) => (prev !== null && prev > 0 ? prev - 1 : prev))}
-              onFinish={() => {
-                setRevealIndex(null);
-                setShowReading(true);
-              }}
-            />
-          </motion.div>
-        )}
-        {currentStep === 'reading' && (
-          <motion.div
-            key="reading"
-            initial={{ opacity: 0 }}
-            animate={{ opacity: 1 }}
-            exit={{ opacity: 0 }}
-            transition={{ duration: 0.7, ease: 'easeInOut' }}
-            className="absolute left-0 top-0 w-full min-h-screen flex flex-col items-center justify-center"
-          >
-            <div className="mt-8 bg-slate-900/90 rounded-lg p-6 border border-purple-500/30 shadow-xl text-white">
-              <h2 className="text-2xl md:text-3xl font-bold text-amber-300 mb-4 font-cinzel text-center">Interpretación final</h2>
-              <div className="mb-4">
-                <p className="text-purple-200 mb-2 font-semibold font-cinzel">Pregunta:</p>
-                <p className="mb-4 font-cormorant text-lg text-amber-100" style={{ fontFamily: 'Cormorant Garamond, Garamond, serif' }}>{question}</p>
-                <p className="text-purple-200 mb-2 font-semibold font-cinzel">Cartas seleccionadas:</p>
-                <ul className="mb-4">
-                  {selectedCards.map((c, i) => (
-                    <li key={c.card.id} className="mb-2">
-                      <span className="font-bold text-amber-200 font-cinzel">{c.card.name}</span>
-                      {READING_TYPE_LAYOUTS[readingType]?.layout &&
-                        <span className="ml-2 text-xs text-purple-300 font-cormorant" style={{ fontFamily: 'Cormorant Garamond, Garamond, serif' }}>({READING_TYPE_LAYOUTS[readingType].layout[i]})</span>
-                      }
-                      {" · "}
-                      <span className="italic text-purple-300 font-cormorant" style={{ fontFamily: 'Cormorant Garamond, Garamond, serif' }}>{c.orientation === 'reversed' ? 'Invertida' : 'Al derecho'}</span>
-                      <div className="text-sm text-white/90 mt-1 font-cormorant" style={{ fontFamily: 'Cormorant Garamond, Garamond, serif' }}>
-                        {c.orientation === 'reversed' ? c.card.interpretation_reversed || 'Sin interpretación.' : c.card.interpretation_upright || 'Sin interpretación.'}
-                      </div>
-                    </li>
-                  ))}
-                </ul>
-              </div>
-              <div className="mt-4 p-4 bg-black/40 rounded">
-                <h3 className="text-lg md:text-xl font-semibold text-amber-300 mb-2 font-cinzel">Conclusión</h3>
-                <div className="prose prose-invert max-w-none font-cormorant text-lg" style={{ fontFamily: 'Cormorant Garamond, Garamond, serif' }}>
-                  <ReactMarkdown>{readingData?.interpretation || "Esta es la conclusión de la lectura según las cartas seleccionadas."}</ReactMarkdown>
+                }}
+              />
+            </motion.div>
+          )}
+          {currentStep === 'reading' && (
+            <motion.div
+              key="reading"
+              initial={{ opacity: 0 }}
+              animate={{ opacity: 1 }}
+              exit={{ opacity: 0 }}
+              transition={{ duration: 0.7, ease: 'easeInOut' }}
+              className="absolute left-0 top-0 w-full min-h-screen flex flex-col items-center justify-center"
+            >
+              <div className="mt-8 bg-slate-900/90 rounded-lg p-6 border border-purple-500/30 shadow-xl text-white">
+                <h2 className="text-2xl md:text-3xl font-bold text-amber-300 mb-4 font-cinzel text-center">Interpretación final</h2>
+                <div className="mb-4">
+                  <p className="text-purple-200 mb-2 font-semibold font-cinzel">Pregunta:</p>
+                  <p className="mb-4 font-cormorant text-lg text-amber-100" style={{ fontFamily: 'Cormorant Garamond, Garamond, serif' }}>{question}</p>
+                  <p className="text-purple-200 mb-2 font-semibold font-cinzel">Cartas seleccionadas:</p>
+                  <ul className="mb-4">
+                    {selectedCards.map((c, i) => (
+                      <li key={c.card.id} className="mb-2">
+                        <span className="font-bold text-amber-200 font-cinzel">{c.card.name}</span>
+                        {READING_TYPE_LAYOUTS[readingType]?.layout &&
+                          <span className="ml-2 text-xs text-purple-300 font-cormorant" style={{ fontFamily: 'Cormorant Garamond, Garamond, serif' }}>({READING_TYPE_LAYOUTS[readingType].layout[i]})</span>
+                        }
+                        {" · "}
+                        <span className="italic text-purple-300 font-cormorant" style={{ fontFamily: 'Cormorant Garamond, Garamond, serif' }}>{c.orientation === 'reversed' ? 'Invertida' : 'Al derecho'}</span>
+                        <div className="text-sm text-white/90 mt-1 font-cormorant" style={{ fontFamily: 'Cormorant Garamond, Garamond, serif' }}>
+                          {c.orientation === 'reversed' ? c.card.interpretation_reversed || 'Sin interpretación.' : c.card.interpretation_upright || 'Sin interpretación.'}
+                        </div>
+                      </li>
+                    ))}
+                  </ul>
+                </div>
+                <div className="mt-4 p-4 bg-black/40 rounded">
+                  <h3 className="text-lg md:text-xl font-semibold text-amber-300 mb-2 font-cinzel">Conclusión</h3>
+                  <div className="prose prose-invert max-w-none font-cormorant text-lg" style={{ fontFamily: 'Cormorant Garamond, Garamond, serif' }}>
+                    <ReactMarkdown>{readingData?.interpretation || "Esta es la conclusión de la lectura según las cartas seleccionadas."}</ReactMarkdown>
+                  </div>
+                </div>
+                <Button className="mt-6" onClick={resetReading}>Hacer otra pregunta</Button>
+                <div className="mt-8 p-4 bg-amber-50/80 dark:bg-slate-800/80 border border-amber-200 dark:border-slate-700 rounded-lg text-amber-900 dark:text-amber-100 text-center">
+                  <h4 className="font-semibold mb-1 font-cinzel">¿Quieres guardar esta lectura?</h4>
+                  <p className="text-sm mb-2 font-cormorant" style={{ fontFamily: 'Cormorant Garamond, Garamond, serif' }}>Inicia sesión o regístrate para guardar tu historial, acceder a tus tiradas favoritas y recibir recomendaciones personalizadas.</p>
                 </div>
               </div>
-              <Button className="mt-6" onClick={resetReading}>Hacer otra pregunta</Button>
-              <div className="mt-8 p-4 bg-amber-50/80 dark:bg-slate-800/80 border border-amber-200 dark:border-slate-700 rounded-lg text-amber-900 dark:text-amber-100 text-center">
-                <h4 className="font-semibold mb-1 font-cinzel">¿Quieres guardar esta lectura?</h4>
-                <p className="text-sm mb-2 font-cormorant" style={{ fontFamily: 'Cormorant Garamond, Garamond, serif' }}>Inicia sesión o regístrate para guardar tu historial, acceder a tus tiradas favoritas y recibir recomendaciones personalizadas.</p>
-              </div>
-            </div>
-          </motion.div>
-        )}
-      </AnimatePresence>
-    </div>
+            </motion.div>
+          )}
+        </AnimatePresence>
+      </div>
+    </>
   );
 }

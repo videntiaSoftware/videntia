@@ -12,6 +12,13 @@ export default function Footer() {
       </div>
 
       <div className="mt-2">&copy; {new Date().getFullYear()} Videntia</div>
+      <div className="w-full text-xs text-center text-slate-400 py-2 mt-2">
+        Este sitio está protegido por reCAPTCHA y se aplican la
+        <a href="https://policies.google.com/privacy" target="_blank" rel="noopener noreferrer" className="underline mx-1">Política de Privacidad</a>
+        y los
+        <a href="https://policies.google.com/terms" target="_blank" rel="noopener noreferrer" className="underline mx-1">Términos de Servicio</a>
+        de Google.
+      </div>
     </footer>
   );
 }
