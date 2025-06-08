@@ -131,6 +131,8 @@ export async function POST(req: NextRequest) {
   // --- Solo pedir y validar reCAPTCHA si el usuario NO está autenticado ---
   if (!userId) {
     const recaptchaToken = body.recaptchaToken;
+    console.log("[reCAPTCHA] Token recibido en backend:", recaptchaToken);
+    console.log("[reCAPTCHA] Clave secreta usada:", process.env.RECAPTCHA_SECRET_KEY);
     if (!recaptchaToken) {
       // Logging intento sospechoso: petición sin reCAPTCHA
       console.warn(`[SUSPECT] Intento sin reCAPTCHA | IP: ${req.headers.get('x-forwarded-for') || 'unknown'} | guest_id: ${guestId}`);
@@ -144,6 +146,7 @@ export async function POST(req: NextRequest) {
       body: `secret=${secret}&response=${recaptchaToken}`,
     });
     const verifyData = await verifyRes.json();
+    console.log("[reCAPTCHA] Respuesta de Google:", verifyData);
     if (!verifyData.success || (verifyData.score !== undefined && verifyData.score < 0.5)) {
       // Logging intento sospechoso: fallo de reCAPTCHA
       console.warn(`[SUSPECT] Fallo reCAPTCHA | IP: ${req.headers.get('x-forwarded-for') || 'unknown'} | guest_id: ${guestId} | score: ${verifyData.score}`);
