@@ -198,29 +198,6 @@ export default function StepTarotExperience({ readingType }: { readingType: stri
         questionRef.current?.focus();
         return;
       }
-      // Validar cards y sus propiedades antes del fetch
-      if (!Array.isArray(cards) || cards.length === 0) {
-        console.error("[fetchReading] Error: cards no es un array válido", cards);
-        setLoadingReading(false);
-        return;
-      }
-      for (const [i, c] of cards.entries()) {
-        if (!c || !c.card || typeof c.card.id === 'undefined' || typeof c.orientation === 'undefined') {
-          console.error(`[fetchReading] Error: card inválida en posición ${i}", c);
-          setLoadingReading(false);
-          return;
-        }
-      }
-      if (!readingType || typeof readingType !== 'string') {
-        console.error("[fetchReading] Error: readingType inválido", readingType);
-        setLoadingReading(false);
-        return;
-      }
-      if (!question || typeof question !== 'string') {
-        console.error("[fetchReading] Error: question inválida", question);
-        setLoadingReading(false);
-        return;
-      }
       try {
         console.log("[fetchReading] Antes del fetch a /api/reading/generate", {
           type: readingType,
