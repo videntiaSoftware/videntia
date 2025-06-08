@@ -9,7 +9,7 @@ export default function StepWelcome({ onFinish }: { onFinish: () => void }) {
     const timer = setTimeout(() => {
       setShowWelcome(false);
       setTimeout(() => onFinish(), 800);
-    }, 4200); // antes 2200
+    }, 3200); // antes 2200
     return () => clearTimeout(timer);
   }, [onFinish]);
 
