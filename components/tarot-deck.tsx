@@ -21,12 +21,23 @@ interface TarotDeckProps {
   onSelectCard: (card: Card) => void;
   tarotBackUrl?: string;
   deckRevealed?: boolean;
+  initialQuestion?: string;
+  onQuestionChange?: (question: string) => void;
 }
 
-export default function TarotDeck({ deck, isShuffling, selectedCards, onSelectCard, tarotBackUrl, deckRevealed }: TarotDeckProps) {
+export default function TarotDeck({ 
+  deck, 
+  isShuffling, 
+  selectedCards, 
+  onSelectCard, 
+  tarotBackUrl, 
+  deckRevealed,
+  initialQuestion = '', 
+  onQuestionChange
+}: TarotDeckProps) {
   // FASE 1: NUEVO FLUJO DE ESTADOS
   const [flowState, setFlowState] = useState<'initial' | 'shuffling' | 'selection' | 'finalReading'>('initial');
-  const [userQuestion, setUserQuestion] = useState<string>('');
+  const [userQuestion, setUserQuestion] = useState<string>(initialQuestion);
   const [hoveredCard, setHoveredCard] = useState<Card | null>(null)
   const [flippedCards, setFlippedCards] = useState<string[]>([])
   const [selectedForReveal, setSelectedForReveal] = useState<Card | null>(null)
@@ -204,7 +215,11 @@ export default function TarotDeck({ deck, isShuffling, selectedCards, onSelectCa
   const [canShuffle, setCanShuffle] = useState(false);
   useEffect(() => {
     setCanShuffle(!!userQuestion.trim());
-  }, [userQuestion]);
+    // Sync with parent component whenever userQuestion changes
+    if (onQuestionChange) {
+      onQuestionChange(userQuestion);
+    }
+  }, [userQuestion, onQuestionChange]);
 
   // Instrucciones para cada estado
   let topInstruction = '';
@@ -228,6 +243,10 @@ export default function TarotDeck({ deck, isShuffling, selectedCards, onSelectCa
   const handleShuffle = () => {
     if (canShuffle && flowState === 'initial') {
       setFlowState('shuffling');
+      // Make sure parent has the latest question
+      if (onQuestionChange) {
+        onQuestionChange(userQuestion);
+      }
     }
   };
 
@@ -252,7 +271,13 @@ export default function TarotDeck({ deck, isShuffling, selectedCards, onSelectCa
           <input
             type="text"
             value={userQuestion}
-            onChange={(e) => setUserQuestion(e.target.value)}
+            onChange={(e) => {
+              const newValue = e.target.value;
+              setUserQuestion(newValue);
+              if (onQuestionChange) {
+                onQuestionChange(newValue);
+              }
+            }}
             placeholder="Escribe tu pregunta al tarot..."
             className="w-full p-3 mb-4 rounded-lg bg-slate-800/70 border border-amber-500/30 text-amber-100 placeholder-amber-300/50 focus:outline-none focus:ring-2 focus:ring-amber-500/50 font-[Garamond] text-lg"
             style={{ fontFamily: 'Garamond, serif' }}

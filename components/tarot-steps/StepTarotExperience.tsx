@@ -77,6 +77,11 @@ export default function StepTarotExperience({ readingType }: { readingType: stri
     document.head.appendChild(style);
     return () => { document.head.removeChild(style); };
   }, []);
+  
+  // Log the question state changes for debugging
+  useEffect(() => {
+    console.log("[StepTarotExperience] Question state updated:", question);
+  }, [question]);
 
   const READING_TYPE_CARD_COUNT: Record<string, number> = {
     three_card: 3,
@@ -133,6 +138,7 @@ export default function StepTarotExperience({ readingType }: { readingType: stri
       questionRef.current?.focus();
       return;
     }
+    console.log("[shuffleDeck] Usando pregunta:", question);
     setIsShuffling(true);
     setSelectedCards([]);
     setShowReading(false);
@@ -210,6 +216,8 @@ export default function StepTarotExperience({ readingType }: { readingType: stri
         questionRef.current?.focus();
         return;
       }
+      
+      console.log("[fetchReading] Utilizando pregunta:", question);
       
       // Validación exhaustiva de las variables necesarias para el fetch
       if (!Array.isArray(cards)) {
@@ -382,6 +390,8 @@ export default function StepTarotExperience({ readingType }: { readingType: stri
                     onSelectCard={selectCard}
                     tarotBackUrl={"https://jhtjdapbeiybxpqvyqqs.supabase.co/storage/v1/object/public/deck//740937b3-dc03-49e3-acbf-1d2da17eddaf.png"}
                     deckRevealed={deckRevealed}
+                    initialQuestion={question}
+                    onQuestionChange={setQuestion}
                   />
                 )}
               </div>
