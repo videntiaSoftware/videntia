@@ -172,13 +172,18 @@ export default function StepTarotExperience({ readingType }: { readingType: stri
     console.log("[fetchReading] Ejecutando fetchReading", cards);
     setLoadingReading(true);
     try {
+      // Inspeccionar la estructura completa de cards para debuggear
+      console.log("[fetchReading] Estructura de cards:", JSON.stringify(cards, null, 2));
+
       const supabase = createClient();
       const { data: userData } = await supabase.auth.getUser();
       const isUserAuthenticated = !!userData?.user;
       let recaptchaToken = '';
       let recaptchaOk = false;
+      
       if (!isUserAuthenticated && typeof window !== 'undefined' && (window as any).grecaptcha && process.env.NEXT_PUBLIC_RECAPTCHA_SITE_KEY) {
         try {
+          console.log("[fetchReading] Intentando obtener token reCAPTCHA...");
           recaptchaToken = await (window as any).grecaptcha.execute(process.env.NEXT_PUBLIC_RECAPTCHA_SITE_KEY, { action: 'reading' });
           recaptchaOk = typeof recaptchaToken === 'string' && recaptchaToken.length > 0;
           console.log("[fetchReading] reCAPTCHA token generado:", recaptchaToken, "OK:", recaptchaOk);
@@ -186,58 +191,137 @@ export default function StepTarotExperience({ readingType }: { readingType: stri
           console.error("[fetchReading] Error ejecutando grecaptcha:", err);
         }
       } else {
-        console.warn("[fetchReading] grecaptcha no está disponible o usuario autenticado");
+        console.warn("[fetchReading] grecaptcha no está disponible o usuario autenticado", {
+          isUserAuthenticated,
+          grecaptchaExists: typeof window !== 'undefined' && !!(window as any).grecaptcha,
+          siteKeyExists: !!process.env.NEXT_PUBLIC_RECAPTCHA_SITE_KEY
+        });
       }
+      
       let guestId = null;
       if (!isUserAuthenticated && typeof window !== 'undefined') {
         guestId = localStorage.getItem('guest_id') || '';
       }
+      
       // Validar que la pregunta no esté vacía
       if (!question || question.trim() === "") {
+        console.warn("[fetchReading] Pregunta vacía, cancelando");
         setLoadingReading(false);
         questionRef.current?.focus();
         return;
       }
+      
+      // Validación exhaustiva de las variables necesarias para el fetch
+      if (!Array.isArray(cards)) {
+        console.error("[fetchReading] Error: cards no es un array", cards);
+        setLoadingReading(false);
+        return;
+      }
+      
+      if (cards.length === 0) {
+        console.error("[fetchReading] Error: cards está vacío");
+        setLoadingReading(false);
+        return;
+      }
+      
+      console.log("[fetchReading] readingType:", readingType);
+      if (!readingType) {
+        console.error("[fetchReading] Error: readingType es undefined o null");
+        setLoadingReading(false);
+        return;
+      }
+      
+      // Validar estructura de cada carta
+      const processedCards = [];
+      for (let i = 0; i < cards.length; i++) {
+        const c = cards[i];
+        if (!c || typeof c !== 'object') {
+          console.error(`[fetchReading] Error: card en posición ${i} no es un objeto válido`, c);
+          setLoadingReading(false);
+          return;
+        }
+        
+        if (!c.card) {
+          console.error(`[fetchReading] Error: card.card en posición ${i} es undefined`, c);
+          setLoadingReading(false);
+          return;
+        }
+        
+        if (typeof c.card.id === 'undefined') {
+          console.error(`[fetchReading] Error: card.card.id en posición ${i} es undefined`, c.card);
+          setLoadingReading(false);
+          return;
+        }
+        
+        if (typeof c.orientation === 'undefined') {
+          console.error(`[fetchReading] Error: card.orientation en posición ${i} es undefined`, c);
+          setLoadingReading(false);
+          return;
+        }
+        
+        processedCards.push({ id: c.card.id, orientation: c.orientation });
+      }
+      
+      // Preparar payload para el fetch
+      const payload = {
+        type: readingType,
+        question: question.trim(),
+        cards: processedCards,
+        recaptchaToken,
+        guest_id: guestId,
+      };
+      
+      console.log("[fetchReading] Payload para fetch:", payload);
+      
+      // Intentar el fetch con un try/catch específico
       try {
-        console.log("[fetchReading] Antes del fetch a /api/reading/generate", {
-          type: readingType,
-          question: question.trim(),
-          cards: cards.map((c) => ({ id: c.card.id, orientation: c.orientation })),
-          recaptchaToken,
-          recaptchaOk,
-          guest_id: guestId,
-        });
+        console.log("[fetchReading] Antes del fetch a /api/reading/generate");
         const res = await fetch("/api/reading/generate", {
           method: "POST",
           headers: { "Content-Type": "application/json" },
-          body: JSON.stringify({
-            type: readingType,
-            question: question.trim(),
-            cards: cards.map((c) => ({ id: c.card.id, orientation: c.orientation })),
-            recaptchaToken,
-            guest_id: guestId,
-          }),
+          body: JSON.stringify(payload),
         });
-        console.log("[fetchReading] Respuesta recibida de /api/reading/generate", res);
+        
+        console.log("[fetchReading] Respuesta recibida:", {
+          status: res.status,
+          statusText: res.statusText,
+          ok: res.ok,
+          headers: Object.fromEntries(res.headers.entries())
+        });
+        
+        if (!res.ok) {
+          throw new Error(`Error en la respuesta: ${res.status} ${res.statusText}`);
+        }
+        
         const data = await res.json();
         console.log("[fetchReading] Data recibida:", data);
+        
         setReadingData(data);
         setShowReading(true);
+        
         // Guardar la lectura en la base de datos
-        const insertObj: any = {
-          question: data.question,
-          reading_type: readingType,
-          cards_drawn: data.cards,
-          interpretation: data.interpretation,
-        };
         if (isUserAuthenticated) {
+          const insertObj = {
+            question: data.question,
+            reading_type: readingType,
+            cards_drawn: data.cards,
+            interpretation: data.interpretation,
+          };
           await supabase.from("readings").insert([insertObj]);
         }
-      } catch (err) {
-        console.error("[fetchReading] Error antes/durante el fetch a /api/reading/generate:", err);
+      } catch (fetchErr) {
+        console.error("[fetchReading] Error en el fetch:", fetchErr);
+        // Intentar un fetch simplificado para depuración
+        try {
+          console.log("[fetchReading] Intentando fetch de prueba simple...");
+          const testRes = await fetch("/api");
+          console.log("[fetchReading] Fetch de prueba simple resultado:", testRes.status);
+        } catch (testErr) {
+          console.error("[fetchReading] Error incluso en fetch simple:", testErr);
+        }
       }
     } catch (e) {
-      console.error("[fetchReading] Error en fetchReading", e);
+      console.error("[fetchReading] Error global en fetchReading:", e);
     } finally {
       setLoadingReading(false);
     }
