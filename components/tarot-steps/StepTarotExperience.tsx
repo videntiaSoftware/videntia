@@ -6,11 +6,14 @@ import { Input } from "@/components/ui/input";
 import TarotDeck, { Card as TarotDeckCard } from "@/components/tarot-deck";
 import TarotReading from "@/components/tarot-reading";
 import StepCardReveal from './StepCardReveal';
+import AdComponent from "@/components/AdComponent";
 import { createClient } from "@/lib/supabase/client";
+import { getUserTier, canAccessReadingType, getTierLimits } from "@/lib/user-tiers";
 import ReactMarkdown from 'react-markdown';
 import FingerprintJS from '@fingerprintjs/fingerprintjs';
 import { AnimatePresence, motion } from 'framer-motion';
 import Script from "next/script";
+import SubtleAuthPrompt from "@/components/SubtleAuthPrompt";
 
 interface Card {
   id: string;
@@ -39,6 +42,12 @@ export default function StepTarotExperience({ readingType }: { readingType: stri
   const [deckRevealed, setDeckRevealed] = useState(false);
   const [revealIndex, setRevealIndex] = useState<number | null>(null);
   const [isRecording, setIsRecording] = useState(false);
+  const [userTier, setUserTier] = useState<'guest' | 'free' | 'premium'>('guest');
+  const [showAdModal, setShowAdModal] = useState(false);
+  const [limitReached, setLimitReached] = useState(false);
+  const [errorMessage, setErrorMessage] = useState<string>('');
+  const [readingsToday, setReadingsToday] = useState(0);
+  const [showAuthPrompt, setShowAuthPrompt] = useState(false);
   const questionRef = useRef<HTMLInputElement>(null);
 
   useEffect(() => {
@@ -60,6 +69,38 @@ export default function StepTarotExperience({ readingType }: { readingType: stri
     fetchDeck();
   }, []);
 
+  // Check user tier and reading access
+  useEffect(() => {
+    const checkUserAccess = async () => {
+      const supabase = createClient();
+      const { data: userData } = await supabase.auth.getUser();
+      const tier = getUserTier(userData?.user || null);
+      setUserTier(tier);
+
+      // Check if user can access this reading type
+      if (!canAccessReadingType(tier, readingType)) {
+        setLimitReached(true);
+        setErrorMessage(`La lectura "${readingType}" requiere una cuenta Premium. Upgrade para acceder a todas las lecturas.`);
+      }
+
+      // Get today's reading count
+      if (userData?.user) {
+        const today = new Date();
+        today.setHours(0,0,0,0);
+        
+        const { data: readings } = await supabase
+          .from('readings')
+          .select('id')
+          .eq('user_id', userData.user.id)
+          .gte('created_at', today.toISOString());
+        
+        setReadingsToday(readings?.length || 0);
+      }
+    };
+
+    checkUserAccess();
+  }, [readingType]);
+
   useEffect(() => {
     if (typeof window !== 'undefined' && !localStorage.getItem('guest_id')) {
       FingerprintJS.load().then(fp => {
@@ -77,6 +118,22 @@ export default function StepTarotExperience({ readingType }: { readingType: stri
     document.head.appendChild(style);
     return () => { document.head.removeChild(style); };
   }, []);
+
+  // Función para esperar a que reCAPTCHA esté listo
+  const waitForRecaptcha = (): Promise<boolean> => {
+    return new Promise((resolve) => {
+      const checkRecaptcha = () => {
+        if (typeof window !== 'undefined' && (window as any).grecaptcha && (window as any).grecaptcha.ready) {
+          (window as any).grecaptcha.ready(() => {
+            resolve(true);
+          });
+        } else {
+          setTimeout(checkRecaptcha, 100);
+        }
+      };
+      checkRecaptcha();
+    });
+  };
   
   // Log the question state changes for debugging
   useEffect(() => {
@@ -187,9 +244,11 @@ export default function StepTarotExperience({ readingType }: { readingType: stri
       let recaptchaToken = '';
       let recaptchaOk = false;
       
-      if (!isUserAuthenticated && typeof window !== 'undefined' && (window as any).grecaptcha && process.env.NEXT_PUBLIC_RECAPTCHA_SITE_KEY) {
+      if (!isUserAuthenticated && typeof window !== 'undefined' && process.env.NEXT_PUBLIC_RECAPTCHA_SITE_KEY) {
         try {
-          console.log("[fetchReading] Intentando obtener token reCAPTCHA...");
+          console.log("[fetchReading] Esperando a que reCAPTCHA esté listo...");
+          await waitForRecaptcha();
+          console.log("[fetchReading] reCAPTCHA listo, obteniendo token...");
           recaptchaToken = await (window as any).grecaptcha.execute(process.env.NEXT_PUBLIC_RECAPTCHA_SITE_KEY, { action: 'reading' });
           recaptchaOk = typeof recaptchaToken === 'string' && recaptchaToken.length > 0;
           console.log("[fetchReading] reCAPTCHA token generado:", recaptchaToken, "OK:", recaptchaOk);
@@ -197,9 +256,8 @@ export default function StepTarotExperience({ readingType }: { readingType: stri
           console.error("[fetchReading] Error ejecutando grecaptcha:", err);
         }
       } else {
-        console.warn("[fetchReading] grecaptcha no está disponible o usuario autenticado", {
+        console.warn("[fetchReading] reCAPTCHA no requerido", {
           isUserAuthenticated,
-          grecaptchaExists: typeof window !== 'undefined' && !!(window as any).grecaptcha,
           siteKeyExists: !!process.env.NEXT_PUBLIC_RECAPTCHA_SITE_KEY
         });
       }
@@ -298,6 +356,21 @@ export default function StepTarotExperience({ readingType }: { readingType: stri
         });
         
         if (!res.ok) {
+          const errorData = await res.json();
+          console.log("[fetchReading] Error response:", errorData);
+          
+          // Handle tier-based errors
+          if (res.status === 429 && errorData.canWatchAds) {
+            setShowAdModal(true);
+            setLimitReached(true);
+            setErrorMessage(errorData.error || 'Has alcanzado tu límite diario.');
+            return;
+          } else if (res.status === 429) {
+            setLimitReached(true);
+            setErrorMessage(errorData.error || 'Has alcanzado tu límite diario.');
+            return;
+          }
+          
           throw new Error(`Error en la respuesta: ${res.status} ${res.statusText}`);
         }
         
@@ -306,6 +379,13 @@ export default function StepTarotExperience({ readingType }: { readingType: stri
         
         setReadingData(data);
         setShowReading(true);
+        
+        // Mostrar prompt de autenticación para usuarios invitados después de completar la lectura
+        if (userTier === 'guest') {
+          setTimeout(() => {
+            setShowAuthPrompt(true);
+          }, 3000); // Esperar 3 segundos después de mostrar la lectura
+        }
         
         // Guardar la lectura en la base de datos
         if (isUserAuthenticated) {
@@ -343,6 +423,16 @@ export default function StepTarotExperience({ readingType }: { readingType: stri
     setReadingData(null);
     setDeckRevealed(false);
     setRevealIndex(null);
+    setLimitReached(false);
+    setErrorMessage('');
+    setShowAdModal(false);
+  };
+
+  const handleAdComplete = () => {
+    setShowAdModal(false);
+    setLimitReached(false);
+    setErrorMessage('');
+    // User can now try their reading again
   };
 
   // Placeholder para voz
@@ -355,7 +445,8 @@ export default function StepTarotExperience({ readingType }: { readingType: stri
 
   // Determinar el paso actual
   let currentStep = 'select';
-  if (revealIndex !== null && selectedCards[revealIndex]) currentStep = 'reveal';
+  if (limitReached) currentStep = 'limit';
+  else if (revealIndex !== null && selectedCards[revealIndex]) currentStep = 'reveal';
   else if (showReading) currentStep = 'reading';
 
   return (
@@ -364,8 +455,100 @@ export default function StepTarotExperience({ readingType }: { readingType: stri
         src={`https://www.google.com/recaptcha/api.js?render=${process.env.NEXT_PUBLIC_RECAPTCHA_SITE_KEY}`}
         strategy="afterInteractive"
       />
+      
+      {/* Ad Modal */}
+      {showAdModal && (
+        <div className="fixed inset-0 bg-black/50 z-50 flex items-center justify-center">
+          <div className="bg-slate-900 border border-amber-500/30 rounded-lg p-6 max-w-md mx-4">
+            <AdComponent
+              userTier={userTier}
+              onAdWatched={handleAdComplete}
+              rewardType="extra_reading"
+            />
+            <Button
+              variant="ghost"
+              onClick={() => setShowAdModal(false)}
+              className="mt-4 text-purple-300 hover:text-white w-full"
+            >
+              Cerrar
+            </Button>
+          </div>
+        </div>
+      )}
+      
       <div className="w-full flex flex-col items-center justify-center mt-12 min-h-screen relative">
         <AnimatePresence mode="wait">
+          {/* Limit Reached Screen */}
+          {currentStep === 'limit' && (
+            <motion.div
+              key="limit"
+              initial={{ opacity: 0, y: 20 }}
+              animate={{ opacity: 1, y: 0 }}
+              exit={{ opacity: 0, y: -20 }}
+              transition={{ duration: 0.5 }}
+              className="w-full max-w-md mx-auto px-6 text-center"
+            >
+              <div className="bg-slate-900/90 border border-amber-500/30 rounded-lg p-6">
+                <h2 className="font-cinzel text-2xl text-amber-300 mb-4">
+                  Límite Alcanzado
+                </h2>
+                <p className="text-purple-200 mb-6 font-cormorant text-lg">
+                  {errorMessage}
+                </p>
+                
+                {userTier === 'free' && !showAdModal && (
+                  <div className="space-y-4">
+                    <Button
+                      onClick={() => setShowAdModal(true)}
+                      className="w-full bg-blue-600 hover:bg-blue-700 text-white"
+                    >
+                      🎬 Ver Anuncio para Lectura Adicional
+                    </Button>
+                    <div className="text-xs text-blue-300/70">
+                      Ve un anuncio corto para obtener una lectura extra
+                    </div>
+                  </div>
+                )}
+                
+                {userTier === 'guest' && (
+                  <div className="space-y-4">
+                    <Button
+                      asChild
+                      className="w-full bg-blue-600 hover:bg-blue-700 text-white"
+                    >
+                      <a href="/auth/sign-up">
+                        🆓 Crear Cuenta Gratuita
+                      </a>
+                    </Button>
+                    <div className="text-xs text-blue-300/70">
+                      3 lecturas diarias + historial guardado
+                    </div>
+                  </div>
+                )}
+                
+                <div className="mt-6 pt-4 border-t border-amber-500/20">
+                  <Button
+                    asChild
+                    variant="outline"
+                    className="w-full border-amber-500 text-amber-300 hover:bg-amber-500/10"
+                  >
+                    <a href="#premium">
+                      ✨ Upgrade a Premium - Lecturas Ilimitadas
+                    </a>
+                  </Button>
+                </div>
+                
+                <Button
+                  variant="ghost"
+                  onClick={resetReading}
+                  className="mt-4 text-purple-300 hover:text-white"
+                >
+                  Volver
+                </Button>
+              </div>
+            </motion.div>
+          )}
+
           {currentStep === 'select' && (
             <motion.div
               key="select"
@@ -480,6 +663,12 @@ export default function StepTarotExperience({ readingType }: { readingType: stri
           )}
         </AnimatePresence>
       </div>
+      
+      {/* Prompt de autenticación para usuarios invitados */}
+      <SubtleAuthPrompt 
+        showPrompt={showAuthPrompt}
+        onClose={() => setShowAuthPrompt(false)}
+      />
     </>
   );
 }

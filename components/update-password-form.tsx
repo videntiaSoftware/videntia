@@ -44,30 +44,35 @@ export function UpdatePasswordForm({
 
   return (
     <div className={cn("flex flex-col gap-6", className)} {...props}>
-      <Card>
-        <CardHeader>
-          <CardTitle className="text-2xl">Reset Your Password</CardTitle>
-          <CardDescription>
-            Please enter your new password below.
+      <Card className="bg-slate-900/90 border-amber-500/30 shadow-2xl">
+        <CardHeader className="text-center">
+          <CardTitle className="text-2xl font-cinzel text-amber-300">Nueva Contraseña</CardTitle>
+          <CardDescription className="text-amber-200/80 font-cormorant">
+            Ingresa tu nueva contraseña a continuación
           </CardDescription>
         </CardHeader>
         <CardContent>
           <form onSubmit={handleForgotPassword}>
             <div className="flex flex-col gap-6">
               <div className="grid gap-2">
-                <Label htmlFor="password">New password</Label>
+                <Label htmlFor="password" className="text-amber-200 font-cormorant">Nueva contraseña</Label>
                 <Input
                   id="password"
                   type="password"
-                  placeholder="New password"
+                  placeholder="Nueva contraseña"
                   required
                   value={password}
                   onChange={(e) => setPassword(e.target.value)}
+                  className="bg-slate-800/70 border-amber-500/30 text-amber-100 placeholder-amber-300/50 focus:border-amber-400 focus:ring-amber-400/50"
                 />
               </div>
-              {error && <p className="text-sm text-red-500">{error}</p>}
-              <Button type="submit" className="w-full" disabled={isLoading}>
-                {isLoading ? "Saving..." : "Save new password"}
+              {error && <p className="text-sm text-red-400 bg-red-900/20 p-2 rounded border border-red-500/30">{error}</p>}
+              <Button 
+                type="submit" 
+                className="w-full bg-amber-600 hover:bg-amber-700 text-white font-cinzel font-semibold" 
+                disabled={isLoading}
+              >
+                {isLoading ? "Guardando..." : "Guardar nueva contraseña"}
               </Button>
             </div>
           </form>

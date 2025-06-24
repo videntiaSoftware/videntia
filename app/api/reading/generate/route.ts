@@ -1,5 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { createClient } from '@/lib/supabase/client';
+import { getUserTier, getTierLimits, canAccessReadingType, hasReachedDailyLimit, getTotalDailyReadings } from '@/lib/user-tiers';
+import { analyzeUserBehavior, checkRateLimit, validateDeviceFingerprint, analyzeQuestionContent, calculatePunishment } from '@/lib/anti-abuse';
 
 // export type ReadingType = 'single' | 'three_card' | 'love' | 'career' | 'celtic_cross';
 type ReadingType = 'single' | 'three_card' | 'love' | 'career' | 'celtic_cross';
@@ -112,50 +114,99 @@ export async function POST(req: NextRequest) {
   const supabase = createClient();
   const body = await req.json();
 
-  // --- Obtener user_id, guest_id o IP ---
+  // --- Enhanced User Authentication & Tier Detection ---
   let userId = null;
+  let user = null;
+  let userTier: 'guest' | 'free' | 'premium' = 'guest';
   let guestId = null;
-  let isPremium = false;
+  
   try {
-    const { data: { user } } = await supabase.auth.getUser();
-    if (user) {
+    const { data: userData } = await supabase.auth.getUser();
+    if (userData?.user) {
+      user = userData.user;
       userId = user.id;
-      isPremium = user.user_metadata?.premium === true;
+      userTier = getUserTier(user);
     } else {
       guestId = body.guest_id || null;
     }
   } catch (e) {
-    // Si falla, continuar como no autenticado
+    // Continue as guest if auth fails
   }
 
-  // --- Solo pedir y validar reCAPTCHA si el usuario NO está autenticado ---
-  if (!userId) {
+  console.log(`[API] User tier: ${userTier}, User ID: ${userId}, Guest ID: ${guestId}`);
+
+  // --- Enhanced Anti-Abuse Analysis ---
+  const userActivity = {
+    sessionDuration: body.sessionDuration || 0,
+    readingsRequested: body.readingsRequested || 1,
+    timeSpentPerReading: body.timeSpentPerReading || 60000,
+    repeatQuestions: body.repeatQuestions || 0,
+    deviceFingerprint: body.deviceFingerprint || '',
+    ipAddress: req.headers.get('x-forwarded-for')?.split(',')[0] || 'unknown',
+    userAgent: req.headers.get('user-agent') || '',
+    timezoneOffset: body.timezoneOffset || 0,
+  };
+
+  const suspicionAnalysis = analyzeUserBehavior(userActivity);
+  console.log(`[ANTI-ABUSE] Suspicion level: ${suspicionAnalysis.level}, Score: ${suspicionAnalysis.score}`);
+
+  // --- Question Content Analysis ---
+  const question = body.question || '';
+  const questionAnalysis = analyzeQuestionContent(question);
+  if (questionAnalysis.isSpam) {
+    console.warn(`[SPAM] Detected spam question: ${questionAnalysis.reasons.join(', ')}`);
+    return NextResponse.json({ 
+      error: 'La pregunta contiene contenido no permitido.',
+      details: questionAnalysis.reasons 
+    }, { status: 400 });
+  }
+
+  // --- Reading Type Access Control ---
+  const readingType = body.type as ReadingType;
+  if (!canAccessReadingType(userTier, readingType)) {
+    return NextResponse.json({ 
+      error: 'Este tipo de lectura está disponible solo para usuarios premium.',
+      upgradeRequired: true,
+      readingType,
+    }, { status: 403 });
+  }
+
+  // --- Enhanced reCAPTCHA Validation (for non-premium users) ---
+  if (userTier !== 'premium') {
     const recaptchaToken = body.recaptchaToken;
     console.log("[reCAPTCHA] Token recibido en backend:", recaptchaToken);
-    console.log("[reCAPTCHA] Clave secreta usada:", process.env.RECAPTCHA_SECRET_KEY);
+    
     if (!recaptchaToken) {
-      // Logging intento sospechoso: petición sin reCAPTCHA
-      console.warn(`[SUSPECT] Intento sin reCAPTCHA | IP: ${req.headers.get('x-forwarded-for') || 'unknown'} | guest_id: ${guestId}`);
-      return NextResponse.json({ error: 'Falta el token de reCAPTCHA.' }, { status: 400 });
+      console.warn(`[SUSPECT] Intento sin reCAPTCHA | IP: ${userActivity.ipAddress} | guest_id: ${guestId}`);
+      return NextResponse.json({ error: 'Falta el token de reCAPTCHA. Por favor, recarga la página e intenta de nuevo.' }, { status: 400 });
     }
-    // Validar reCAPTCHA v3 con Google
+    
+    // Validate reCAPTCHA with Google
     const secret = process.env.RECAPTCHA_SECRET_KEY;
-    const verifyRes = await fetch('https://www.google.com/recaptcha/api/siteverify', {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
-      body: `secret=${secret}&response=${recaptchaToken}`,
-    });
-    const verifyData = await verifyRes.json();
-    console.log("[reCAPTCHA] Respuesta de Google:", verifyData);
-    if (!verifyData.success || (verifyData.score !== undefined && verifyData.score < 0.5)) {
-      // Logging intento sospechoso: fallo de reCAPTCHA
-      console.warn(`[SUSPECT] Fallo reCAPTCHA | IP: ${req.headers.get('x-forwarded-for') || 'unknown'} | guest_id: ${guestId} | score: ${verifyData.score}`);
-      return NextResponse.json({ error: 'No se pudo verificar reCAPTCHA. Intenta de nuevo.' }, { status: 403 });
+    
+    try {
+      const verifyRes = await fetch('https://www.google.com/recaptcha/api/siteverify', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
+        body: `secret=${secret}&response=${recaptchaToken}`,
+      });
+      const verifyData = await verifyRes.json();
+      console.log("[reCAPTCHA] Respuesta de Google:", verifyData);
+      
+      if (!verifyData.success || (verifyData.score !== undefined && verifyData.score < 0.5)) {
+        console.warn(`[SUSPECT] Fallo reCAPTCHA | IP: ${userActivity.ipAddress} | guest_id: ${guestId} | score: ${verifyData.score}`);
+        return NextResponse.json({ 
+          error: 'No se pudo verificar reCAPTCHA. Por favor, recarga la página e intenta de nuevo.' 
+        }, { status: 403 });
+      }
+    } catch (recaptchaError) {
+      console.error(`[reCAPTCHA] Error de conectividad:`, recaptchaError);
+      // En caso de error de conectividad con Google, permitir la lectura pero logear el evento
+      console.warn(`[reCAPTCHA] Fallback activado por error de conectividad | IP: ${userActivity.ipAddress} | guest_id: ${guestId}`);
     }
   }
 
-  // --- Rate limiting: solo una consulta diaria por usuario free/no registrado ---
-  // Determinar filtro: user_id, guest_id o IP
+  // --- Enhanced Rate Limiting by Tier ---
   let filter = {};
   let who = '';
   if (userId) {
@@ -165,11 +216,12 @@ export async function POST(req: NextRequest) {
     filter = { guest_id: guestId };
     who = `guest_id: ${guestId}`;
   } else {
-    const ip = req.headers.get('x-forwarded-for')?.split(',')[0] || 'unknown';
+    const ip = userActivity.ipAddress;
     filter = { ip };
     who = `ip: ${ip}`;
   }
-  // Buscar si ya hizo una lectura hoy (por user_id, guest_id o IP)
+
+  // Check today's readings
   const today = new Date();
   today.setHours(0,0,0,0);
   const { data: readingsToday, error: errorReadings } = await supabase
@@ -177,14 +229,57 @@ export async function POST(req: NextRequest) {
     .select('id,created_at')
     .match(filter)
     .gte('created_at', today.toISOString());
-  if (!isPremium && readingsToday && readingsToday.length >= 1) {
-    // Logging intento sospechoso: más de 1 intento diario
-    console.warn(`[SUSPECT] Exceso de consultas diarias | ${who} | intentos hoy: ${readingsToday.length}`);
-    return NextResponse.json({ error: 'Solo puedes hacer 1 lectura gratuita por día. Inicia sesión o suscríbete para más.' }, { status: 429 });
+
+  const todayCount = readingsToday?.length || 0;
+  
+  // Get ads watched today (for free tier bonus)
+  let adsWatchedToday = 0;
+  if (userTier === 'free' && userId) {
+    const { data: adsData } = await supabase
+      .from('ad_sessions')
+      .select('id')
+      .eq('user_id', userId)
+      .eq('verified', true)
+      .gte('created_at', today.toISOString()) || { data: [] };
+    adsWatchedToday = adsData?.length || 0;
   }
 
-  const { type, question, cards }: { type: ReadingType, question?: string, cards: {id: number, orientation: 'upright' | 'reversed'}[] } = body;
-  console.log('POST /api/reading/generate - request body:', { type, question, cards });
+  const totalAllowedReadings = getTotalDailyReadings(userTier, adsWatchedToday);
+  const hasReachedLimit = hasReachedDailyLimit(userTier, todayCount) && totalAllowedReadings !== -1;
+
+  if (hasReachedLimit) {
+    console.warn(`[RATE_LIMIT] Exceso de consultas diarias | ${who} | intentos hoy: ${todayCount} | límite: ${totalAllowedReadings}`);
+    
+    // Provide different messages based on tier
+    let errorMessage = '';
+    let suggestions: string[] = [];
+    
+    if (userTier === 'guest') {
+      errorMessage = 'Has alcanzado tu límite de 1 lectura gratuita por día.';
+      suggestions = [
+        'Crea una cuenta gratuita para obtener 3 lecturas diarias',
+        'Regístrate para guardar tu historial de lecturas'
+      ];
+    } else if (userTier === 'free') {
+      errorMessage = `Has usado tus ${totalAllowedReadings} lecturas diarias.`;
+      suggestions = [
+        'Ve un anuncio para obtener lecturas adicionales',
+        'Upgrade a Premium para lecturas ilimitadas'
+      ];
+    }
+    
+    return NextResponse.json({ 
+      error: errorMessage,
+      suggestions,
+      tier: userTier,
+      usedReadings: todayCount,
+      totalAllowed: totalAllowedReadings,
+      canWatchAds: userTier === 'free' && adsWatchedToday < 2,
+    }, { status: 429 });
+  }
+
+  const { type, question: questionFromBody, cards }: { type: ReadingType, question?: string, cards: {id: number, orientation: 'upright' | 'reversed'}[] } = body;
+  console.log('POST /api/reading/generate - request body:', { type, question: questionFromBody, cards });
 
   // Lógica de cantidad de cartas según tipo
   const typeToCount: Record<ReadingType, number> = {
@@ -233,7 +328,7 @@ export async function POST(req: NextRequest) {
     return `- ${c.name} ${pos} [${c.orientation}]: keywords: ${c.keywords}. Interpretación: ${c.interpretation}`;
   }).join('\n');
 
-  const prompt = `Pregunta: "${question || ''}"
+  const prompt = `Pregunta: "${questionFromBody || ''}"
 ${cardsList}
 ${config.instructions}\nRedacta una conclusión general para esta tirada, integrando los significados de las cartas y la pregunta.`;
   console.log('Prompt enviado a Gemini:', prompt);
@@ -248,10 +343,54 @@ ${config.instructions}\nRedacta una conclusión general para esta tirada, integr
     interpretation = 'No se pudo obtener interpretación.';
   }
 
+  // --- Enhanced reading storage with tier-appropriate data ---
+  if (userId && userTier !== 'guest') {
+    try {
+      const insertObj = {
+        user_id: userId,
+        question: questionFromBody,
+        reading_type: type,
+        cards_drawn: cards,
+        interpretation: interpretation,
+        user_tier: userTier,
+        created_at: new Date().toISOString(),
+      };
+      
+      // Check storage limits for free tier
+      if (userTier === 'free') {
+        const tierLimits = getTierLimits(userTier);
+        if (tierLimits.maxStoredReadings > 0) {
+          const { data: existingReadings } = await supabase
+            .from('readings')
+            .select('id')
+            .eq('user_id', userId)
+            .order('created_at', { ascending: false });
+          
+          if (existingReadings && existingReadings.length >= tierLimits.maxStoredReadings) {
+            // Delete oldest readings to make room
+            const toDelete = existingReadings.slice(tierLimits.maxStoredReadings - 1);
+            await supabase
+              .from('readings')
+              .delete()
+              .in('id', toDelete.map(r => r.id));
+          }
+        }
+      }
+      
+      await supabase.from("readings").insert([insertObj]);
+    } catch (saveError) {
+      console.error('Error saving reading:', saveError);
+      // Don't fail the request if saving fails
+    }
+  }
+
   return NextResponse.json({
     cards: cardsInfo,
     interpretation,
     type,
-    question,
+    question: questionFromBody,
+    tier: userTier,
+    readingsToday: todayCount + 1,
+    remainingReadings: totalAllowedReadings === -1 ? -1 : Math.max(0, totalAllowedReadings - todayCount - 1),
   });
 }

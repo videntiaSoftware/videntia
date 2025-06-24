@@ -57,6 +57,10 @@ export default {
         md: "calc(var(--radius) - 2px)",
         sm: "calc(var(--radius) - 4px)",
       },
+      fontFamily: {
+        'cinzel': ['Cinzel', 'serif'],
+        'cormorant': ['Cormorant Garamond', 'serif'],
+      },
     },
   },
   plugins: [require("tailwindcss-animate")],

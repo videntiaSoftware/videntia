@@ -5,6 +5,9 @@ import { cn } from "@/lib/utils";
 import StepWelcome from "./tarot-steps/StepWelcome";
 import StepTypeSelector from "./tarot-steps/StepTypeSelector";
 import StepTarotExperience from "./tarot-steps/StepTarotExperience";
+import UserTierBadge from "./UserTierBadge";
+import { createClient } from "@/lib/supabase/client";
+import { getUserTier, getTierLimits } from "@/lib/user-tiers";
 
 const READING_TYPES = [
   {
@@ -47,9 +50,63 @@ const READING_TYPES = [
 export default function TarotExperienceSteps() {
   const [step, setStep] = useState(0);
   const [selectedType, setSelectedType] = useState("three_card");
+  const [userTier, setUserTier] = useState<'guest' | 'free' | 'premium'>('guest');
+  const [readingsToday, setReadingsToday] = useState(0);
+  const [adsWatched, setAdsWatched] = useState(0);
+
+  useEffect(() => {
+    const checkUserTier = async () => {
+      const supabase = createClient();
+      const { data: userData } = await supabase.auth.getUser();
+      const tier = getUserTier(userData?.user || null);
+      setUserTier(tier);
+
+      // Get today's reading count and ads watched
+      if (userData?.user) {
+        // Get readings count for today
+        const today = new Date();
+        today.setHours(0,0,0,0);
+        
+        const { data: readings } = await supabase
+          .from('readings')
+          .select('id')
+          .eq('user_id', userData.user.id)
+          .gte('created_at', today.toISOString());
+        
+        setReadingsToday(readings?.length || 0);
+
+        // Get ads watched today for free users
+        if (tier === 'free') {
+          const { data: ads } = await supabase
+            .from('ad_sessions')
+            .select('id')
+            .eq('user_id', userData.user.id)
+            .eq('verified', true)
+            .gte('created_at', today.toISOString());
+          
+          setAdsWatched(ads?.length || 0);
+        }
+      }
+    };
+    
+    checkUserTier();
+  }, []);
+
+  const tierLimits = getTierLimits(userTier);
+  const maxReadings = tierLimits.dailyReadings;
 
   return (
     <div className="w-full min-h-[60vh] flex flex-col items-center justify-center relative">
+      {/* User Tier Badge - subtle and elegant */}
+      <div className="fixed top-6 right-6 z-50">
+        <UserTierBadge
+          tier={userTier}
+          readingsToday={readingsToday}
+          maxReadings={maxReadings}
+          adsWatched={adsWatched}
+        />
+      </div>
+
       {step === 0 && (
         <StepWelcome onFinish={() => setStep(1)} />
       )}
@@ -59,6 +116,7 @@ export default function TarotExperienceSteps() {
             setSelectedType(type);
             setStep(2);
           }}
+          isPremiumUser={userTier === 'premium'}
         />
       )}
       {step === 2 && (

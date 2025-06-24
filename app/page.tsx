@@ -1,38 +1,40 @@
 import { AuthButton } from "@/components/auth-button";
 import TarotExperienceSteps from "@/components/tarot-experience-steps";
+import { createClient } from "@/app/_helpers/supabase-server";
 
+export default async function Home() {
+  const supabase = await createClient();
+  const { data } = await supabase.auth.getUser();
+  const isAuthenticated = !!data?.user;
 
-export default function Home() {
   return (
     <main className="min-h-screen flex flex-col items-center justify-start font-sans">
       <div className="absolute inset-0 bg-[url('/tarot-bg.jpg')] bg-cover bg-center opacity-20 z-0" />
       <div className="relative z-10 w-full max-w-4xl mx-auto">
-        {/* Sección destacada para login/registro y beneficios 
-        <section className="mb-8 mt-4 flex flex-col md:flex-row items-center justify-between gap-6 bg-amber-50/80 dark:bg-slate-800/80 border border-amber-200 dark:border-slate-700 rounded-xl p-6 shadow-lg">
-          <div className="flex-1">
-            <h2 className="text-xl md:text-2xl font-bold text-amber-700 dark:text-amber-200 mb-2">Inicia sesión o regístrate</h2>
-            <p className="text-amber-900 dark:text-amber-100 mb-2">Guarda tu historial de lecturas, accede a tus tiradas favoritas y personaliza tu experiencia.</p>
-            <ul className="list-disc pl-5 text-amber-900 dark:text-amber-100 text-sm mb-2">
-              <li>Historial de chats y lecturas</li>
-              <li>Recordar tu tipo de lectura favorita</li>
-              <li>Acceso a funciones exclusivas</li>
-            </ul>
-            <div className="mt-3">
-              <AuthButton />
+        
+        {/* Header solo para usuarios autenticados */}
+        {isAuthenticated && (
+          <header className="flex justify-between items-center py-3 px-6 bg-gradient-to-r from-slate-900/40 to-purple-900/40 backdrop-blur-sm rounded-b-lg border-b border-amber-500/20">
+            <div className="flex items-center gap-3">
+              <div className="flex items-center gap-2">
+                <div className="w-8 h-8 rounded-full bg-gradient-to-r from-amber-400 to-amber-600 flex items-center justify-center">
+                  <span className="text-sm">✨</span>
+                </div>
+                <div>
+                  <h1 className="text-lg font-cinzel text-amber-300 font-bold leading-none">Videntia</h1>
+                  <span className="text-xs text-amber-400/60 font-cormorant">Tarot Místico</span>
+                </div>
+              </div>
             </div>
-          </div>
-          
-          <div className="flex flex-col items-center gap-2">
-            <span className="rounded bg-amber-100 text-amber-800 px-3 py-1 text-xs font-semibold">Suscripción Premium $1.99 USD / $2000 ARS</span>
-            <span className="text-xs text-amber-700 dark:text-amber-200">Accede a lecturas ilimitadas y contenido especial</span>
-           
-            <div className="w-32 h-16 bg-amber-200/60 dark:bg-slate-700/60 rounded-lg flex items-center justify-center text-amber-700 dark:text-amber-100 text-xs">[Anuncio aquí]</div>
-          </div>
-        </section>
+            <AuthButton />
+          </header>
+        )}
+
         {/* Experiencia interactiva de tarot */}
-        <TarotExperienceSteps />
+        <div className={isAuthenticated ? "mt-4" : ""}>
+          <TarotExperienceSteps />
+        </div>
       </div>
-      {/* TODO: Agregar sección de testimonios de usuarios en la página principal */}
     </main>
   );
 }

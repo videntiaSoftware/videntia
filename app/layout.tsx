@@ -1,7 +1,7 @@
 import type { Metadata } from "next";
 import { Geist, Cinzel_Decorative, Cormorant_Garamond } from "next/font/google";
+import Script from "next/script";
 import "./globals.css";
-import Link from "next/link";
 import Footer from "@/components/ui/footer";
 
 const defaultUrl = process.env.VERCEL_URL
@@ -10,8 +10,18 @@ const defaultUrl = process.env.VERCEL_URL
 
 export const metadata: Metadata = {
   metadataBase: new URL(defaultUrl),
-  title: "Next.js and Supabase Starter Kit",
-  description: "The fastest way to build apps with Next.js and Supabase",
+  title: "Videntia - Tu Guía Espiritual de Tarot",
+  description: "Descubre tu destino con lecturas de tarot personalizadas, análisis espirituales profundos y conexión con tu intuición interior.",
+  keywords: ["tarot", "espiritualidad", "lecturas", "adivinación", "cartas", "místico", "destino"],
+  authors: [{ name: "Videntia" }],
+  openGraph: {
+    title: "Videntia - Tu Guía Espiritual de Tarot",
+    description: "Descubre tu destino con lecturas de tarot personalizadas",
+    url: defaultUrl,
+    siteName: "Videntia",
+    locale: "es_AR",
+    type: "website",
+  },
 };
 
 const geistSans = Geist({
@@ -42,8 +52,14 @@ export default function RootLayout({
   return (
     <html lang="es">
       <body
-        className={`min-h-screen flex flex-col max-w-screen ${geistSans.variable} ${cinzelDecorative.variable} ${cormorantGaramond.variable}`}
+        className={`min-h-screen flex flex-col max-w-screen bg-slate-950 text-amber-100 ${geistSans.variable} ${cinzelDecorative.variable} ${cormorantGaramond.variable}`}
       >
+        {/* Cargar reCAPTCHA v3 */}
+        <Script
+          src={`https://www.google.com/recaptcha/api.js?render=${process.env.NEXT_PUBLIC_RECAPTCHA_SITE_KEY}`}
+          strategy="lazyOnload"
+        />
+        
         <div className="flex-1 flex flex-col w-full max-w-screen overflow-x-auto">
           {children}
         </div>

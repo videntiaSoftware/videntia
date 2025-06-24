@@ -49,35 +49,36 @@ export function LoginForm({
 
   return (
     <div className={cn("flex flex-col gap-6", className)} {...props}>
-      <Card>
-        <CardHeader>
-          <CardTitle className="text-2xl">Login</CardTitle>
-          <CardDescription>
-            Enter your email below to login to your account
+      <Card className="bg-slate-900/90 border-amber-500/30 shadow-2xl">
+        <CardHeader className="text-center">
+          <CardTitle className="text-2xl font-cinzel text-amber-300">Iniciar Sesión</CardTitle>
+          <CardDescription className="text-amber-200/80 font-cormorant">
+            Accede a tu cuenta para continuar tu viaje espiritual
           </CardDescription>
         </CardHeader>
         <CardContent>
           <form onSubmit={handleLogin}>
             <div className="flex flex-col gap-6">
               <div className="grid gap-2">
-                <Label htmlFor="email">Email</Label>
+                <Label htmlFor="email" className="text-amber-200 font-cormorant">Email</Label>
                 <Input
                   id="email"
                   type="email"
-                  placeholder="m@example.com"
+                  placeholder="tu@email.com"
                   required
                   value={email}
                   onChange={(e) => setEmail(e.target.value)}
+                  className="bg-slate-800/70 border-amber-500/30 text-amber-100 placeholder-amber-300/50 focus:border-amber-400 focus:ring-amber-400/50"
                 />
               </div>
               <div className="grid gap-2">
                 <div className="flex items-center">
-                  <Label htmlFor="password">Password</Label>
+                  <Label htmlFor="password" className="text-amber-200 font-cormorant">Contraseña</Label>
                   <Link
                     href="/auth/forgot-password"
-                    className="ml-auto inline-block text-sm underline-offset-4 hover:underline"
+                    className="ml-auto inline-block text-sm underline-offset-4 hover:underline text-amber-300 hover:text-amber-200"
                   >
-                    Forgot your password?
+                    ¿Olvidaste tu contraseña?
                   </Link>
                 </div>
                 <Input
@@ -86,32 +87,37 @@ export function LoginForm({
                   required
                   value={password}
                   onChange={(e) => setPassword(e.target.value)}
+                  className="bg-slate-800/70 border-amber-500/30 text-amber-100 placeholder-amber-300/50 focus:border-amber-400 focus:ring-amber-400/50"
                 />
               </div>
-              {error && <p className="text-sm text-red-500">{error}</p>}
-              <Button type="submit" className="w-full" disabled={isLoading}>
-                {isLoading ? "Logging in..." : "Login"}
+              {error && <p className="text-sm text-red-400 bg-red-900/20 p-2 rounded border border-red-500/30">{error}</p>}
+              <Button 
+                type="submit" 
+                className="w-full bg-amber-600 hover:bg-amber-700 text-white font-cinzel font-semibold py-2 shadow-lg" 
+                disabled={isLoading}
+              >
+                {isLoading ? "Iniciando sesión..." : "Iniciar Sesión"}
               </Button>
             </div>
             <div className="mt-4 text-center text-sm">
-              Don&apos;t have an account?{" "}
+              ¿No tienes una cuenta?{" "}
               <Link
                 href="/auth/sign-up"
-                className="underline underline-offset-4"
+                className="underline underline-offset-4 text-amber-300 hover:text-amber-200 font-semibold"
               >
-                Sign up
+                Regístrate aquí
               </Link>
             </div>
           </form>
           <div className="my-4 flex items-center gap-2">
-            <div className="flex-1 h-px bg-slate-300/30" />
-            <span className="text-xs text-slate-400">o</span>
-            <div className="flex-1 h-px bg-slate-300/30" />
+            <div className="flex-1 h-px bg-amber-500/30" />
+            <span className="text-xs text-amber-400 font-cormorant">o continúa con</span>
+            <div className="flex-1 h-px bg-amber-500/30" />
           </div>
           <Button
             type="button"
             variant="outline"
-            className="w-full flex items-center justify-center gap-2"
+            className="w-full flex items-center justify-center gap-2 border-amber-500/30 bg-slate-800/50 text-amber-200 hover:bg-amber-900/30 hover:text-amber-100"
             onClick={async () => {
               const supabase = createClient();
               setIsLoading(true);
