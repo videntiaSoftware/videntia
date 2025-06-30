@@ -7,9 +7,9 @@ export async function GET(request: NextRequest) {
     
     // Verificar si las tablas existen y tienen datos
     const results = {
-      user_profiles: { exists: false, count: 0, error: null },
-      daily_cards: { exists: false, count: 0, error: null },
-      notification_logs: { exists: false, count: 0, error: null }
+      user_profiles: { exists: false, count: 0, error: null as string | null },
+      daily_cards: { exists: false, count: 0, error: null as string | null },
+      notification_logs: { exists: false, count: 0, error: null as string | null }
     };
 
     // Verificar user_profiles

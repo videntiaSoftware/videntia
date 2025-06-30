@@ -18,24 +18,26 @@ export async function POST(request: NextRequest) {
     const supabase = await createClient();
     const targetDate = date || new Date().toISOString().split('T')[0];
     
-    let { data: cardData, error } = await supabase
+    const { data: cardData, error } = await supabase
       .from('daily_cards')
       .select('*')
       .eq('date_for', targetDate)
       .single();
+    
+    let cardDataMutable = cardData;
 
     // Si no hay carta para la fecha específica, obtener una aleatoria
-    if (error || !cardData) {
+    if (error || !cardDataMutable) {
       console.log(`No card found for ${targetDate}, getting a random one`);
       const { data: randomCard } = await supabase
         .from('daily_cards')
         .select('*')
         .limit(1);
       
-      cardData = randomCard?.[0];
+      cardDataMutable = randomCard?.[0];
     }
     
-    if (!cardData) {
+    if (!cardDataMutable) {
       return NextResponse.json(
         { error: 'No cards available in database' },
         { status: 404 }
@@ -51,7 +53,7 @@ export async function POST(request: NextRequest) {
       body: JSON.stringify({
         email,
         name: 'Usuario de Prueba',
-        card_data: cardData
+        card_data: cardDataMutable
       }),
     });
 
@@ -68,9 +70,9 @@ export async function POST(request: NextRequest) {
       success: true,
       message: 'Daily card email sent successfully',
       card: {
-        name: cardData.card_name,
-        meaning: cardData.card_meaning,
-        date_for: cardData.date_for
+        name: cardDataMutable.card_name,
+        meaning: cardDataMutable.card_meaning,
+        date_for: cardDataMutable.date_for
       }
     });
 
@@ -93,24 +95,26 @@ export async function GET(request: NextRequest) {
     const supabase = await createClient();
     const targetDate = date || new Date().toISOString().split('T')[0];
     
-    let { data: cardData, error } = await supabase
+    const { data: cardData, error } = await supabase
       .from('daily_cards')
       .select('*')
       .eq('date_for', targetDate)
       .single();
 
+    let cardDataMutable = cardData;
+
     // Si no hay carta para la fecha específica, obtener una aleatoria
-    if (error || !cardData) {
+    if (error || !cardDataMutable) {
       console.log(`No card found for ${targetDate}, getting a random one`);
       const { data: randomCard } = await supabase
         .from('daily_cards')
         .select('*')
         .limit(1);
       
-      cardData = randomCard?.[0];
+      cardDataMutable = randomCard?.[0];
     }
     
-    if (!cardData) {
+    if (!cardDataMutable) {
       // Vamos a verificar si hay alguna carta en la base de datos
       const { data: allCards, error: allCardsError } = await supabase
         .from('daily_cards')

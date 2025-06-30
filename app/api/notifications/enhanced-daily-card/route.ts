@@ -87,7 +87,7 @@ class PersonalizedDailyCardService {
             results.push({
               userId: user.id,
               email: user.email,
-              error: error.message
+              error: error instanceof Error ? error.message : 'Unknown error'
             });
           }
         }
@@ -103,7 +103,7 @@ class PersonalizedDailyCardService {
       
     } catch (error) {
       console.error('Error in sendDailyCardsToAllUsers:', error);
-      return { success: false, error: error.message };
+      return { success: false, error: error instanceof Error ? error.message : 'Unknown error' };
     }
   }
 

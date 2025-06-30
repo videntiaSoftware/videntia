@@ -107,7 +107,7 @@ export function useUserProfile(user: User | null) {
 
   useEffect(() => {
     fetchProfile();
-  }, [user]);
+  }, [user]); // Much cleaner! 🎉
 
   return {
     profile,

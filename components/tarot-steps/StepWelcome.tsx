@@ -1,5 +1,6 @@
 "use client";
 import { useEffect, useState } from "react";
+import Image from "next/image";
 import { cn } from "@/lib/utils";
 
 export default function StepWelcome({ onFinish }: { onFinish: () => void }) {
@@ -53,11 +54,14 @@ export default function StepWelcome({ onFinish }: { onFinish: () => void }) {
               filter: "blur(1.2px)",
             }} />
           </div>
-          <img
+          <Image
             src="https://jhtjdapbeiybxpqvyqqs.supabase.co/storage/v1/object/public/assets//videntia-logo.png"
             alt="Videntia Logo"
             width={160}
             height={160}
+            priority
+            placeholder="blur"
+            blurDataURL="data:image/jpeg;base64,/9j/4AAQSkZJRgABAQAAAQABAAD/2wBDAAYEBQYFBAYGBQYHBwYIChAKCgkJChQODwwQFxQYGBcUFhYaHSUfGhsjHBYWICwgIyYnKSopGR8tMC0oMCUoKSj/2wBDAQcHBwoIChMKChMoGhYaKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCj/wAARCAAQABADASIAAhEBAxEB/8QAFQABAQAAAAAAAAAAAAAAAAAAAAv/xAAhEAACAQMDBQAAAAAAAAAAAAABAgMABAUGIWGBkaGx0f/EABUBAQEAAAAAAAAAAAAAAAAAAAMF/8QAGhEAAgIDAAAAAAAAAAAAAAAAAAECEgMRkf/aAAwDAQACEQMRAD8AltJagyeH0AthI5xdrLcNM91BF5pX2HaH9bcfaSXWGaRmknyJckliyjqTzSlT54b6bk+h0R//2Q=="
             className={cn(
               "mb-6 drop-shadow-xl relative z-10 transition-opacity duration-700",
               showWelcome ? "opacity-100" : "opacity-0 blur-sm"
