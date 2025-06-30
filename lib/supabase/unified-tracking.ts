@@ -43,23 +43,37 @@ export async function trackReadingUnified(data: ReadingTrackingData): Promise<vo
   const supabase = createClient();
   
   try {
-    console.log('[UNIFIED_TRACKING] Iniciando tracking unificado:', data);
+    console.log('[UNIFIED_TRACKING] Iniciando tracking unificado con datos:', {
+      reading_type: data.reading_type,
+      user_id: data.user_id,
+      guest_id: data.guest_id,
+      has_question: !!data.question,
+      has_cards: !!data.cards_selected,
+      has_interpretation: !!data.interpretation
+    });
     
     // 1. GUARDAR EN TABLA PRINCIPAL DE LECTURAS
+    console.log('[UNIFIED_TRACKING] Paso 1: Guardando en tabla readings...');
     await saveToReadingsTable(supabase, data);
     
     // 2. GUARDAR ANALYTICS DE GUEST (siempre)
+    console.log('[UNIFIED_TRACKING] Paso 2: Guardando analytics de guest...');
     await saveGuestAnalytics(supabase, data);
     
     // 3. GUARDAR PERFIL DE INTERÉS (para monetización)
     if (data.question) {
+      console.log('[UNIFIED_TRACKING] Paso 3: Guardando perfil de interés...');
       await saveInterestProfile(supabase, data);
+    } else {
+      console.log('[UNIFIED_TRACKING] Paso 3: Saltando perfil de interés (sin pregunta)');
     }
     
     // 4. GUARDAR EVENTOS DE COMPORTAMIENTO
+    console.log('[UNIFIED_TRACKING] Paso 4: Guardando eventos de comportamiento...');
     await saveBehaviorEvent(supabase, data);
     
     // 5. ACTUALIZAR GUEST INSIGHTS
+    console.log('[UNIFIED_TRACKING] Paso 5: Actualizando insights de guest...');
     await updateGuestInsights(supabase, data.guest_id || data.user_id || '');
     
     console.log('[UNIFIED_TRACKING] Tracking completado exitosamente');
@@ -86,14 +100,23 @@ async function saveToReadingsTable(supabase: any, data: ReadingTrackingData): Pr
     created_at: new Date().toISOString()
   };
   
+  console.log('[UNIFIED_TRACKING] Intentando insertar en readings:', {
+    user_id: readingRecord.user_id,
+    guest_id: readingRecord.guest_id,
+    reading_type: readingRecord.reading_type,
+    has_question: !!readingRecord.question,
+    user_tier: readingRecord.user_tier
+  });
+  
   const { error } = await supabase
     .from('readings')
     .insert(readingRecord);
     
   if (error) {
     console.error('[UNIFIED_TRACKING] Error saving to readings:', error);
+    throw error; // Propagar el error para detener el flujo
   } else {
-    console.log('[UNIFIED_TRACKING] Saved to readings table');
+    console.log('[UNIFIED_TRACKING] ✅ Saved to readings table successfully');
   }
 }
 
@@ -239,13 +262,15 @@ export function prepareTrackingData(
   requestData: any,
   guestId?: string
 ): ReadingTrackingData {
-  return {
+  const finalGuestId = guestId || getOrCreateGuestId(requestData.fingerprintId);
+  
+  const trackingData = {
     reading_type: readingData.type || requestData.readingType,
     question: readingData.question || requestData.question,
     cards_selected: readingData.cards || requestData.cards || [],
     interpretation: readingData.interpretation,
     user_id: requestData.userId,
-    guest_id: guestId || getOrCreateGuestId(requestData.fingerprintId),
+    guest_id: finalGuestId,
     fingerprint_id: requestData.fingerprintId,
     session_id: requestData.sessionId,
     ip_address: requestData.ip_address,
@@ -256,4 +281,15 @@ export function prepareTrackingData(
     commercial_value: readingData.questionAnalysis?.commercial_value,
     question_analysis: readingData.questionAnalysis
   };
+  
+  console.log('[UNIFIED_TRACKING] Datos preparados:', {
+    reading_type: trackingData.reading_type,
+    user_id: trackingData.user_id,
+    guest_id: trackingData.guest_id,
+    has_question: !!trackingData.question,
+    has_cards: trackingData.cards_selected?.length || 0,
+    has_interpretation: !!trackingData.interpretation
+  });
+  
+  return trackingData;
 }
