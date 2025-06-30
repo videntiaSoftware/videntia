@@ -36,6 +36,20 @@ CREATE TABLE IF NOT EXISTS user_tiers (
     updated_at timestamptz DEFAULT now()
 );
 
+-- Create user_profiles table for extended user information and preferences
+CREATE TABLE IF NOT EXISTS user_profiles (
+    id uuid PRIMARY KEY DEFAULT gen_random_uuid(),
+    user_id uuid REFERENCES auth.users(id) ON DELETE CASCADE UNIQUE,
+    phone text,
+    notifications_enabled boolean DEFAULT false,
+    notification_preferences jsonb DEFAULT '{"daily_card": false, "weekly_insights": false, "marketing": false}'::jsonb,
+    timezone text DEFAULT 'UTC',
+    preferred_notification_time time DEFAULT '09:00:00',
+    last_daily_card_sent date,
+    created_at timestamptz DEFAULT now(),
+    updated_at timestamptz DEFAULT now()
+);
+
 -- Create abuse_reports table for tracking user behavior and abuse
 CREATE TABLE IF NOT EXISTS abuse_reports (
     id uuid PRIMARY KEY DEFAULT gen_random_uuid(),
@@ -48,6 +62,54 @@ CREATE TABLE IF NOT EXISTS abuse_reports (
     details jsonb, -- Store detailed analysis data
     punishment_applied text CHECK (punishment_applied IN ('warning', 'slow_down', 'temp_ban', 'permanent_ban')),
     punishment_expires_at timestamptz,
+    created_at timestamptz DEFAULT now()
+);
+
+-- Simplified notification system for daily card emails only
+
+-- User profiles with phone and daily notification preference
+CREATE TABLE IF NOT EXISTS user_profiles (
+    id uuid PRIMARY KEY DEFAULT gen_random_uuid(),
+    user_id uuid REFERENCES auth.users(id) ON DELETE CASCADE UNIQUE,
+    phone text,
+    daily_notifications_enabled boolean DEFAULT false,
+    last_daily_card_sent date,
+    created_at timestamptz DEFAULT now(),
+    updated_at timestamptz DEFAULT now()
+);
+
+-- Predefined daily cards for sending via email
+CREATE TABLE IF NOT EXISTS daily_cards (
+    id uuid PRIMARY KEY DEFAULT gen_random_uuid(),
+    card_name text NOT NULL,
+    card_meaning text NOT NULL,
+    daily_message text NOT NULL,
+    card_image_url text,
+    date_for date NOT NULL UNIQUE, -- Date this card is assigned to
+    created_at timestamptz DEFAULT now()
+);
+
+-- Sample daily cards for the coming week
+INSERT INTO daily_cards (card_name, card_meaning, daily_message, date_for) VALUES
+('El Loco', 'Nuevos comienzos, aventura, espontaneidad', 'Hoy el universo te invita a dar un paso valiente hacia lo desconocido. Tu intuición será tu mejor guía para navegar este nuevo territorio que se abre ante ti.', '2025-06-24'),
+('La Sacerdotisa', 'Intuición, sabiduría oculta, subconsciente', 'Confía en tu sabiduría interior. Las respuestas que buscas ya están dentro de ti, solo necesitas silenciar el ruido externo y escuchar la voz de tu alma.', '2025-06-25'),
+('El Mago', 'Manifestación, poder personal, acción', 'Tienes todas las herramientas necesarias para crear la realidad que deseas. Es momento de actuar con determinación y enfocar tu energía en tus objetivos.', '2025-06-26'),
+('La Emperatriz', 'Fertilidad, creatividad, abundancia', 'Hoy es un día para nutrir tus proyectos creativos. La abundancia fluye hacia ti cuando honras tu naturaleza creativa y permites que tu energía femenina se exprese.', '2025-06-27'),
+('El Emperador', 'Autoridad, estructura, control', 'Organiza tus objetivos y toma el control de tu destino. Tu liderazgo natural será reconocido y respetado por quienes te rodean.', '2025-06-28'),
+('Los Enamorados', 'Amor, armonía, relaciones', 'Las relaciones importantes en tu vida necesitan atención. Elige desde el amor, no desde el miedo. La unión y la armonía están a tu alcance.', '2025-06-29'),
+('El Carro', 'Control, determinación, dirección', 'Tu fuerza de voluntad te llevará lejos hoy. Mantén el rumbo y confía en tu capacidad de superar cualquier obstáculo que se presente en tu camino.', '2025-06-30'),
+('La Fuerza', 'Coraje interior, compasión, control suave', 'Tu verdadero poder radica en la gentileza y la compasión. Hoy, la fuerza suave conquistará donde la fuerza bruta no puede.', '2025-07-01'),
+('El Ermitaño', 'Introspección, búsqueda interior, sabiduría', 'Es tiempo de mirar hacia adentro. La soledad elegida te revelará verdades profundas sobre tu camino y propósito en la vida.', '2025-07-02'),
+('La Rueda de la Fortuna', 'Ciclos, cambios, destino', 'Los vientos del cambio soplan a tu favor. Acepta la transformación que viene, pues es parte del ciclo natural de crecimiento.', '2025-07-03')
+ON CONFLICT (date_for) DO NOTHING;
+
+-- Log of sent daily card notifications
+CREATE TABLE IF NOT EXISTS notification_logs (
+    id uuid PRIMARY KEY DEFAULT gen_random_uuid(),
+    user_id uuid REFERENCES auth.users(id) ON DELETE CASCADE,
+    daily_card_id uuid REFERENCES daily_cards(id),
+    sent_at timestamptz DEFAULT now(),
+    email_status text DEFAULT 'sent', -- sent, failed, bounced
     created_at timestamptz DEFAULT now()
 );
 
@@ -220,3 +282,26 @@ SELECT id, 'free'
 FROM auth.users
 WHERE id NOT IN (SELECT user_id FROM user_tiers)
 ON CONFLICT (user_id) DO NOTHING;
+
+-- Function to get today's card
+CREATE OR REPLACE FUNCTION get_daily_card(target_date date DEFAULT CURRENT_DATE)
+RETURNS daily_cards AS $$
+DECLARE
+    card daily_cards;
+BEGIN
+    SELECT * INTO card
+    FROM daily_cards
+    WHERE date_for = target_date
+    LIMIT 1;
+    
+    -- If no card for today, get a random one
+    IF card IS NULL THEN
+        SELECT * INTO card
+        FROM daily_cards
+        ORDER BY RANDOM()
+        LIMIT 1;
+    END IF;
+    
+    RETURN card;
+END;
+$$ LANGUAGE plpgsql SECURITY DEFINER;
