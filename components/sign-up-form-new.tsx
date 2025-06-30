@@ -12,22 +12,26 @@ import {
 } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
+import { Checkbox } from "@/components/ui/checkbox";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { useState } from "react";
-import { Crown, Sparkles, Mail, Key } from "lucide-react";
+import { Crown, Sparkles, Mail, Phone } from "lucide-react";
 
-export function LoginForm({
+export function SignUpForm({
   className,
   ...props
 }: React.ComponentPropsWithoutRef<"div">) {
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
+  const [repeatPassword, setRepeatPassword] = useState("");
+  const [phone, setPhone] = useState("");
+  const [acceptNotifications, setAcceptNotifications] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [isLoading, setIsLoading] = useState(false);
   const router = useRouter();
 
-  const handleGoogleLogin = async () => {
+  const handleGoogleSignUp = async () => {
     const supabase = createClient();
     setIsLoading(true);
     setError(null);
@@ -43,25 +47,49 @@ export function LoginForm({
       });
       if (error) throw error;
     } catch (error: any) {
-      setError(error.message || "Error al iniciar sesión con Google");
+      setError(error.message || "Error con el registro de Google");
     } finally {
       setIsLoading(false);
     }
   };
 
-  const handleEmailLogin = async (e: React.FormEvent) => {
+  const handleEmailSignUp = async (e: React.FormEvent) => {
     e.preventDefault();
     const supabase = createClient();
     setIsLoading(true);
     setError(null);
 
+    if (password !== repeatPassword) {
+      setError("Las contraseñas no coinciden");
+      setIsLoading(false);
+      return;
+    }
+
+    if (password.length < 6) {
+      setError("La contraseña debe tener al menos 6 caracteres");
+      setIsLoading(false);
+      return;
+    }
+
     try {
-      const { error } = await supabase.auth.signInWithPassword({
+      const { error } = await supabase.auth.signUp({
         email,
         password,
+        options: {
+          emailRedirectTo: `${window.location.origin}/protected`,
+          data: {
+            phone: phone || null,
+            notifications_enabled: acceptNotifications,
+            notification_preferences: {
+              daily_card: acceptNotifications,
+              weekly_insights: acceptNotifications,
+              marketing: false,
+            }
+          }
+        },
       });
       if (error) throw error;
-      router.push("/protected");
+      router.push("/auth/sign-up-success");
     } catch (error: unknown) {
       setError(error instanceof Error ? error.message : "Ocurrió un error");
     } finally {
@@ -77,16 +105,16 @@ export function LoginForm({
             <Crown className="h-6 w-6 text-amber-400" />
             <Sparkles className="h-4 w-4 text-amber-300" />
           </div>
-          <CardTitle className="text-2xl font-cinzel text-amber-300">Bienvenido de vuelta</CardTitle>
+          <CardTitle className="text-2xl font-cinzel text-amber-300">Únete a Videntia</CardTitle>
           <CardDescription className="text-amber-200/80 font-cormorant">
-            Accede a tu cuenta para continuar tu viaje espiritual
+            Descubre tu destino y conecta con tu intuición interior
           </CardDescription>
         </CardHeader>
         <CardContent className="space-y-6">
-          {/* Google Login - Arriba del formulario */}
+          {/* Google Sign Up - Arriba del formulario */}
           <Button
             type="button"
-            onClick={handleGoogleLogin}
+            onClick={handleGoogleSignUp}
             className="w-full flex items-center justify-center gap-3 bg-white hover:bg-gray-50 text-gray-900 border-0 shadow-lg py-3 text-base font-medium transition-all duration-200"
             disabled={isLoading}
           >
@@ -122,12 +150,12 @@ export function LoginForm({
           {/* Divider */}
           <div className="flex items-center gap-3">
             <div className="flex-1 h-px bg-amber-500/30" />
-            <span className="text-sm text-amber-400 font-cormorant px-2">o inicia sesión con email</span>
+            <span className="text-sm text-amber-400 font-cormorant px-2">o regístrate con email</span>
             <div className="flex-1 h-px bg-amber-500/30" />
           </div>
 
-          {/* Email Login Form */}
-          <form onSubmit={handleEmailLogin} className="space-y-4">
+          {/* Email Sign Up Form */}
+          <form onSubmit={handleEmailSignUp} className="space-y-4">
             <div className="grid gap-2">
               <Label htmlFor="email" className="text-amber-200 font-cormorant flex items-center gap-2">
                 <Mail className="h-4 w-4" />
@@ -145,18 +173,24 @@ export function LoginForm({
             </div>
 
             <div className="grid gap-2">
-              <div className="flex items-center justify-between">
-                <Label htmlFor="password" className="text-amber-200 font-cormorant flex items-center gap-2">
-                  <Key className="h-4 w-4" />
-                  Contraseña
-                </Label>
-                <Link
-                  href="/auth/forgot-password"
-                  className="text-sm text-amber-300 hover:text-amber-200 underline underline-offset-2 transition-colors"
-                >
-                  ¿Olvidaste tu contraseña?
-                </Link>
-              </div>
+              <Label htmlFor="phone" className="text-amber-200 font-cormorant flex items-center gap-2">
+                <Phone className="h-4 w-4" />
+                Teléfono <span className="text-xs text-amber-400/60">(opcional)</span>
+              </Label>
+              <Input
+                id="phone"
+                type="tel"
+                placeholder="+54 9 11 1234-5678"
+                value={phone}
+                onChange={(e) => setPhone(e.target.value)}
+                className="bg-slate-800/70 border-amber-500/30 text-amber-100 placeholder-amber-300/50 focus:border-amber-400 focus:ring-amber-400/50"
+              />
+            </div>
+
+            <div className="grid gap-2">
+              <Label htmlFor="password" className="text-amber-200 font-cormorant">
+                Contraseña
+              </Label>
               <Input
                 id="password"
                 type="password"
@@ -165,6 +199,41 @@ export function LoginForm({
                 onChange={(e) => setPassword(e.target.value)}
                 className="bg-slate-800/70 border-amber-500/30 text-amber-100 placeholder-amber-300/50 focus:border-amber-400 focus:ring-amber-400/50"
               />
+            </div>
+
+            <div className="grid gap-2">
+              <Label htmlFor="repeat-password" className="text-amber-200 font-cormorant">
+                Confirmar Contraseña
+              </Label>
+              <Input
+                id="repeat-password"
+                type="password"
+                required
+                value={repeatPassword}
+                onChange={(e) => setRepeatPassword(e.target.value)}
+                className="bg-slate-800/70 border-amber-500/30 text-amber-100 placeholder-amber-300/50 focus:border-amber-400 focus:ring-amber-400/50"
+              />
+            </div>
+
+            {/* Notifications Checkbox */}
+            <div className="flex items-start space-x-3 p-4 bg-slate-800/30 rounded-lg border border-amber-500/20">
+              <Checkbox 
+                id="notifications" 
+                checked={acceptNotifications}
+                onCheckedChange={(checked) => setAcceptNotifications(!!checked)}
+                className="border-amber-500/50 data-[state=checked]:bg-amber-600 data-[state=checked]:border-amber-600"
+              />
+              <div className="grid gap-1.5 leading-none">
+                <Label 
+                  htmlFor="notifications" 
+                  className="text-sm font-medium text-amber-200 font-cormorant cursor-pointer"
+                >
+                  Recibir notificaciones místicas
+                </Label>
+                <p className="text-xs text-amber-300/70">
+                  Tu carta del día, insights semanales y contenido espiritual personalizado
+                </p>
+              </div>
             </div>
 
             {error && (
@@ -182,24 +251,24 @@ export function LoginForm({
               {isLoading ? (
                 <div className="flex items-center gap-2">
                   <div className="w-4 h-4 border-2 border-white/30 border-t-white rounded-full animate-spin" />
-                  Accediendo...
+                  Creando tu cuenta espiritual...
                 </div>
               ) : (
                 <div className="flex items-center gap-2">
                   <Sparkles className="h-4 w-4" />
-                  Iniciar Sesión
+                  Crear Cuenta
                 </div>
               )}
             </Button>
           </form>
 
           <div className="text-center text-sm text-amber-300/80">
-            ¿No tienes cuenta aún?{" "}
+            ¿Ya tienes una cuenta?{" "}
             <Link 
-              href="/auth/sign-up" 
+              href="/auth/login" 
               className="text-amber-300 hover:text-amber-200 font-semibold underline underline-offset-2 transition-colors"
             >
-              Regístrate aquí
+              Inicia sesión aquí
             </Link>
           </div>
         </CardContent>

@@ -8,6 +8,7 @@ import { Badge } from "@/components/ui/badge";
 import UserTierDisplay from "@/components/UserTierDisplay";
 import { getUserTier, getTierLimits } from "@/lib/user-tiers";
 import DiscreteHomeLink from "@/components/ui/DiscreteHomeLink";
+import NotificationSettings from "@/components/NotificationSettings";
 
 export default async function ProfilePage() {
   const supabase = await createClient();
@@ -206,6 +207,11 @@ export default async function ProfilePage() {
             </div>
           </CardContent>
         </Card>
+      </div>
+
+      {/* Configuraciones de Notificaciones - Nueva sección */}
+      <div className="mt-6">
+        <NotificationSettings user={user} />
       </div>
     </div>
   );
