@@ -1,6 +1,5 @@
 import { createClient } from "@/app/_helpers/supabase-server";
 import { redirect } from "next/navigation";
-import Image from "next/image";
 import Link from "next/link";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
@@ -84,13 +83,12 @@ export default async function ProfilePage() {
             </CardHeader>
             <CardContent className="flex flex-col items-center gap-4">
               {user.user_metadata?.avatar_url && (
-                <Image
+                <img
                   src={user.user_metadata.avatar_url}
                   alt="Avatar"
                   width={100}
                   height={100}
                   className="w-24 h-24 rounded-full border-3 border-amber-400 shadow-lg"
-                  priority
                 />
               )}
               <div className="text-center">
