@@ -56,7 +56,6 @@ export async function POST(req: NextRequest) {
       success: true,
       url,
       type,
-      notification_metadata: response.data.notificationMetadata,
       url_notification_metadata: response.data.urlNotificationMetadata
     });
 
