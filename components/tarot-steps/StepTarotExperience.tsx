@@ -14,6 +14,7 @@ import FingerprintJS from '@fingerprintjs/fingerprintjs';
 import { AnimatePresence, motion } from 'framer-motion';
 import Script from "next/script";
 import SubtleAuthPrompt from "@/components/SubtleAuthPrompt";
+import PremiumAdComponent from "@/components/PremiumAdComponent";
 import { GuestCookieManager, CookieConsent } from "@/lib/cookies";
 
 interface Card {
@@ -49,6 +50,8 @@ export default function StepTarotExperience({ readingType }: { readingType: stri
   const [errorMessage, setErrorMessage] = useState<string>('');
   const [readingsToday, setReadingsToday] = useState(0);
   const [showAuthPrompt, setShowAuthPrompt] = useState(false);
+  const [showPremiumAd, setShowPremiumAd] = useState(false);
+  const [questionAnalysis, setQuestionAnalysis] = useState<any>(null);
   const questionRef = useRef<HTMLInputElement>(null);
 
   useEffect(() => {
@@ -142,6 +145,16 @@ export default function StepTarotExperience({ readingType }: { readingType: stri
           fingerprint_id: fingerprintId,
           is_returning: GuestCookieManager.isReturningGuest(),
           visit_count: guestIdentity.visit_count
+        });
+
+        // 🔥 ADVANCED TRACKING FOR REVENUE OPTIMIZATION
+        await trackAdvancedBehavior(guestIdentity.guest_id, {
+          event_type: 'session_start',
+          reading_type: readingType,
+          fingerprint_id: fingerprintId,
+          is_returning: GuestCookieManager.isReturningGuest(),
+          visit_count: guestIdentity.visit_count,
+          session_id: guestIdentity.session_id
         });
 
       } catch (error) {
@@ -424,6 +437,19 @@ export default function StepTarotExperience({ readingType }: { readingType: stri
         
         setReadingData(data);
         setShowReading(true);
+
+        // 🔥 CAPTURE QUESTION ANALYSIS FOR PREMIUM ADS
+        if (data.questionAnalysis) {
+          console.log('[PREMIUM_ADS] Question analysis received:', data.questionAnalysis);
+          setQuestionAnalysis(data.questionAnalysis);
+          
+          // Show premium ad if user is eligible
+          if (data.questionAnalysis.premium_eligible) {
+            setTimeout(() => {
+              setShowPremiumAd(true);
+            }, 5000); // Show premium ad 5 seconds after reading
+          }
+        }
         
         // Mostrar prompt de autenticación para usuarios invitados después de completar la lectura
         if (userTier === 'guest') {
@@ -471,6 +497,8 @@ export default function StepTarotExperience({ readingType }: { readingType: stri
     setLimitReached(false);
     setErrorMessage('');
     setShowAdModal(false);
+    setShowPremiumAd(false);
+    setQuestionAnalysis(null);
   };
 
   const handleAdComplete = () => {
@@ -714,6 +742,38 @@ export default function StepTarotExperience({ readingType }: { readingType: stri
         showPrompt={showAuthPrompt}
         onClose={() => setShowAuthPrompt(false)}
       />
+
+      {/* 🔥 PREMIUM AD COMPONENT - Revenue multiplier 10-25x */}
+      <PremiumAdComponent
+        questionAnalysis={questionAnalysis}
+        onAdComplete={() => {
+          setShowPremiumAd(false);
+          console.log('[PREMIUM_ADS] Ad interaction completed');
+        }}
+        onAdSkipped={() => {
+          setShowPremiumAd(false);
+          console.log('[PREMIUM_ADS] Ad skipped by user');
+        }}
+      />
     </>
   );
+}
+
+// 🔥 Advanced tracking function for revenue optimization
+async function trackAdvancedBehavior(guestId: string, eventData: any) {
+  try {
+    await fetch('/api/analytics/advanced-tracking', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({
+        guest_id: guestId,
+        event_type: eventData.event_type,
+        event_data: eventData,
+        page_url: window.location.href,
+        timestamp: new Date().toISOString()
+      })
+    });
+  } catch (error) {
+    console.error('[ADVANCED_TRACKING] Error:', error);
+  }
 }

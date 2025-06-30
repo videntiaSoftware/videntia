@@ -333,6 +333,37 @@ ${cardsList}
 ${config.instructions}\nRedacta una conclusión general para esta tirada, integrando los significados de las cartas y la pregunta.`;
   console.log('Prompt enviado a Gemini:', prompt);
 
+  // 🔥 ANALYZE QUESTION WITH LLM FOR PREMIUM AD TARGETING
+  let questionAnalysis = null;
+  if (questionFromBody && questionFromBody.trim().length >= 5 && guestId) {
+    try {
+      console.log('[QUESTION_ANALYSIS] Analyzing question for commercial targeting:', questionFromBody);
+      
+      const analysisResponse = await fetch(`${process.env.NEXT_PUBLIC_BASE_URL || 'http://localhost:3000'}/api/analytics/question-analysis`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          question: questionFromBody,
+          guest_id: guestId,
+          session_id: body.session_id || `session_${Date.now()}`
+        })
+      });
+
+      if (analysisResponse.ok) {
+        questionAnalysis = await analysisResponse.json();
+        console.log('[QUESTION_ANALYSIS] Success:', {
+          category: questionAnalysis.analysis?.category,
+          commercial_value: questionAnalysis.analysis?.commercial_value,
+          premium_cpm: questionAnalysis.ad_targeting?.estimated_cpm
+        });
+      } else {
+        console.warn('[QUESTION_ANALYSIS] Failed:', analysisResponse.status);
+      }
+    } catch (analysisError) {
+      console.error('[QUESTION_ANALYSIS] Error:', analysisError);
+    }
+  }
+
   // Llamada a Gemini para interpretación final
   let interpretation = '';
   try {
@@ -392,5 +423,13 @@ ${config.instructions}\nRedacta una conclusión general para esta tirada, integr
     tier: userTier,
     readingsToday: todayCount + 1,
     remainingReadings: totalAllowedReadings === -1 ? -1 : Math.max(0, totalAllowedReadings - todayCount - 1),
+    // 🔥 PREMIUM AD TARGETING DATA
+    questionAnalysis: questionAnalysis ? {
+      category: questionAnalysis.analysis?.category,
+      commercial_value: questionAnalysis.analysis?.commercial_value,
+      premium_eligible: questionAnalysis.ad_targeting?.premium_eligible,
+      estimated_cpm: questionAnalysis.ad_targeting?.estimated_cpm,
+      segments: questionAnalysis.ad_targeting?.segments
+    } : null
   });
 }
