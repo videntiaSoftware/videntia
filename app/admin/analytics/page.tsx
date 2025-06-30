@@ -60,7 +60,14 @@ export default function AdminAnalytics() {
       }, {} as Record<string, { count: number; revenue: number }>);
 
       const topCategories = Object.entries(categoryStats)
-        .map(([category, stats]) => ({ category, ...stats }))
+        .map(([category, stats]) => {
+          const categoryStats = stats as { count: number; revenue: number };
+          return { 
+            category, 
+            count: categoryStats.count, 
+            revenue: categoryStats.revenue 
+          };
+        })
         .sort((a, b) => b.revenue - a.revenue)
         .slice(0, 5);
 

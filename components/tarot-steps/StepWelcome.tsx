@@ -79,22 +79,6 @@ export default function StepWelcome({ onFinish }: { onFinish: () => void }) {
           </div>
         </div>
       </div>
-      <style jsx global>{`
-        @keyframes fade-in-up {
-          from { opacity: 0; transform: translateY(40px); }
-          to { opacity: 1; transform: translateY(0); }
-        }
-        .animate-fade-in-up {
-          animation: fade-in-up 0.8s cubic-bezier(.4,0,.2,1);
-        }
-        @keyframes zoom-in-smooth {
-          from { transform: scale(1); }
-          to { transform: scale(1.10); }
-        }
-        .animate-zoom-in-smooth {
-          animation: zoom-in-smooth 4.2s linear forwards;
-        }
-      `}</style>
     </div>
   );
 }

@@ -8,10 +8,10 @@ import { cookies } from 'next/headers';
 export async function POST(request: NextRequest) {
   try {
     const data = await request.json();
-    const cookieStore = cookies();
+    const cookieStore = await cookies();
 
     // Set httpOnly cookie that survives browser restarts
-    cookieStore.set('videntia_guest_secure', JSON.stringify(data), {
+    (cookieStore as any).set('videntia_guest_secure', JSON.stringify(data), {
       httpOnly: true, // Cannot be accessed by JavaScript
       secure: process.env.NODE_ENV === 'production', // HTTPS only in production
       sameSite: 'lax',
@@ -20,7 +20,7 @@ export async function POST(request: NextRequest) {
     });
 
     // Also set a tracking cookie for cross-session analysis
-    cookieStore.set('videntia_tracking', data.guest_id, {
+    (cookieStore as any).set('videntia_tracking', data.guest_id, {
       httpOnly: true,
       secure: process.env.NODE_ENV === 'production',
       sameSite: 'lax',
@@ -29,7 +29,7 @@ export async function POST(request: NextRequest) {
     });
 
     return NextResponse.json({ success: true });
-  } catch (error) {
+  } catch (error: any) {
     console.error('Error setting secure cookie:', error);
     return NextResponse.json({ error: 'Failed to set cookie' }, { status: 500 });
   }
@@ -40,9 +40,9 @@ export async function POST(request: NextRequest) {
  */
 export async function GET() {
   try {
-    const cookieStore = cookies();
-    const secureCookie = cookieStore.get('videntia_guest_secure');
-    const trackingCookie = cookieStore.get('videntia_tracking');
+    const cookieStore = await cookies();
+    const secureCookie = (cookieStore as any).get('videntia_guest_secure');
+    const trackingCookie = (cookieStore as any).get('videntia_tracking');
 
     if (!secureCookie) {
       return NextResponse.json({ data: null });
@@ -55,7 +55,7 @@ export async function GET() {
       tracking_id: trackingCookie?.value,
       has_secure_cookie: true
     });
-  } catch (error) {
+  } catch (error: any) {
     console.error('Error reading secure cookie:', error);
     return NextResponse.json({ error: 'Failed to read cookie' }, { status: 500 });
   }

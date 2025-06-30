@@ -204,15 +204,6 @@ export default function StepTypeSelector({ onSelectType, isPremiumUser = false }
 					&#8594;
 				</button>
 			</div>
-			<style jsx global>{`
-				@keyframes fade-in-up {
-					from { opacity: 0; transform: translateY(40px); }
-					to { opacity: 1; transform: translateY(0); }
-				}
-				.animate-fade-in-up {
-					animation: fade-in-up 0.8s cubic-bezier(.4,0,.2,1);
-				}
-			`}</style>
 		</div>
 	);
 }

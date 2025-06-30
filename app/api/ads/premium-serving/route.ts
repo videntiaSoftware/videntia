@@ -67,10 +67,10 @@ async function getUserTargetingProfile(supabase: any, guestId: string) {
   }
 
   // Build targeting profile
-  const categories = [...new Set(interests.map(i => i.primary_category))];
-  const allTags = interests.flatMap(i => i.generated_tags || []);
-  const avgCommercialValue = interests.reduce((sum, i) => sum + i.commercial_value, 0) / interests.length;
-  const allKeywords = interests.flatMap(i => i.ad_keywords || []);
+  const categories = [...new Set(interests.map((i: any) => i.primary_category))] as string[];
+  const allTags = interests.flatMap((i: any) => i.generated_tags || []);
+  const avgCommercialValue = interests.reduce((sum: number, i: any) => sum + i.commercial_value, 0) / interests.length;
+  const allKeywords = interests.flatMap((i: any) => i.ad_keywords || []);
 
   return {
     guest_id: guestId,
@@ -125,7 +125,15 @@ function generateGoogleAdConfig(targetingData: any, adUnitPath: string) {
   const baseConfig = {
     ad_unit_path: adUnitPath || '/videntia/homepage',
     size: [[300, 250], [728, 90], [320, 50]], // Responsive sizes
-    targeting: {},
+    targeting: {
+      interests: [] as string[],
+      keywords: [] as string[],
+      demographics: {} as Record<string, any>,
+      geo: {} as Record<string, any>,
+      premium_audience: [] as string[],
+      device: {} as Record<string, any>,
+      custom_segments: [] as string[]
+    },
     expected_cpm_uplift: 0
   };
 
@@ -148,7 +156,7 @@ function generateGoogleAdConfig(targetingData: any, adUnitPath: string) {
 
   // High-value user bonuses
   if (targetingData.commercial_score > 8) {
-    baseConfig.targeting.premium_audience = true;
+    baseConfig.targeting.premium_audience = ['high_value', 'premium_intent'];
     baseConfig.expected_cpm_uplift += 300; // Premium users get 300% extra
   }
 
@@ -248,10 +256,10 @@ export async function GET(req: NextRequest) {
 }
 
 function getTopPerformingSegments(ads: any[]): any[] {
-  const segmentPerformance = {};
+  const segmentPerformance: Record<string, { total_cpm: number; count: number }> = {};
 
   ads.forEach(ad => {
-    ad.targeting_segments?.forEach(segment => {
+    ad.targeting_segments?.forEach((segment: string) => {
       if (!segmentPerformance[segment]) {
         segmentPerformance[segment] = { total_cpm: 0, count: 0 };
       }
@@ -271,10 +279,10 @@ function getTopPerformingSegments(ads: any[]): any[] {
 }
 
 function getRevenueByCategory(ads: any[]): any[] {
-  const categoryRevenue = {};
+  const categoryRevenue: Record<string, number> = {};
 
   ads.forEach(ad => {
-    ad.interest_categories_matched?.forEach(category => {
+    ad.interest_categories_matched?.forEach((category: string) => {
       if (!categoryRevenue[category]) {
         categoryRevenue[category] = 0;
       }
@@ -284,5 +292,5 @@ function getRevenueByCategory(ads: any[]): any[] {
 
   return Object.entries(categoryRevenue)
     .map(([category, revenue]) => ({ category, revenue }))
-    .sort((a, b) => b.revenue - a.revenue);
+    .sort((a: any, b: any) => b.revenue - a.revenue);
 }

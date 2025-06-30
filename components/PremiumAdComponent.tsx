@@ -1,6 +1,7 @@
 "use client";
 import React, { useEffect, useState } from 'react';
 import { X, TrendingUp, Target, DollarSign } from 'lucide-react';
+import Image from 'next/image';
 
 interface PremiumAdComponentProps {
   questionAnalysis?: {
@@ -134,9 +135,11 @@ export default function PremiumAdComponent({
                   {adData.description || getDefaultAdDescription(questionAnalysis.category)}
                 </p>
                 {adData.image_url && (
-                  <img 
+                  <Image 
                     src={adData.image_url} 
                     alt="Ad content"
+                    width={400}
+                    height={128}
                     className="w-full h-32 object-cover rounded-lg mb-3"
                   />
                 )}

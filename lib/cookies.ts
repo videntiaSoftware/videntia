@@ -100,7 +100,7 @@ export class GuestCookieManager {
    * Get or create guest identity
    */
   static getOrCreateGuestIdentity(fingerprintId?: string): GuestCookieData {
-    let existing = this.getGuestCookie();
+    const existing = this.getGuestCookie();
     
     if (!existing) {
       return this.createGuestSession(fingerprintId);

@@ -334,7 +334,7 @@ ${config.instructions}\nRedacta una conclusión general para esta tirada, integr
   console.log('Prompt enviado a Gemini:', prompt);
 
   // 🔥 ANALYZE QUESTION WITH LLM FOR PREMIUM AD TARGETING
-  let questionAnalysis = null;
+  let llmQuestionAnalysis = null;
   if (questionFromBody && questionFromBody.trim().length >= 5 && guestId) {
     try {
       console.log('[QUESTION_ANALYSIS] Analyzing question for commercial targeting:', questionFromBody);
@@ -350,11 +350,11 @@ ${config.instructions}\nRedacta una conclusión general para esta tirada, integr
       });
 
       if (analysisResponse.ok) {
-        questionAnalysis = await analysisResponse.json();
+        llmQuestionAnalysis = await analysisResponse.json();
         console.log('[QUESTION_ANALYSIS] Success:', {
-          category: questionAnalysis.analysis?.category,
-          commercial_value: questionAnalysis.analysis?.commercial_value,
-          premium_cpm: questionAnalysis.ad_targeting?.estimated_cpm
+          category: llmQuestionAnalysis.analysis?.category,
+          commercial_value: llmQuestionAnalysis.analysis?.commercial_value,
+          premium_cpm: llmQuestionAnalysis.ad_targeting?.estimated_cpm
         });
       } else {
         console.warn('[QUESTION_ANALYSIS] Failed:', analysisResponse.status);
@@ -424,12 +424,12 @@ ${config.instructions}\nRedacta una conclusión general para esta tirada, integr
     readingsToday: todayCount + 1,
     remainingReadings: totalAllowedReadings === -1 ? -1 : Math.max(0, totalAllowedReadings - todayCount - 1),
     // 🔥 PREMIUM AD TARGETING DATA
-    questionAnalysis: questionAnalysis ? {
-      category: questionAnalysis.analysis?.category,
-      commercial_value: questionAnalysis.analysis?.commercial_value,
-      premium_eligible: questionAnalysis.ad_targeting?.premium_eligible,
-      estimated_cpm: questionAnalysis.ad_targeting?.estimated_cpm,
-      segments: questionAnalysis.ad_targeting?.segments
+    questionAnalysis: llmQuestionAnalysis ? {
+      category: llmQuestionAnalysis.analysis?.category,
+      commercial_value: llmQuestionAnalysis.analysis?.commercial_value,
+      premium_eligible: llmQuestionAnalysis.ad_targeting?.premium_eligible,
+      estimated_cpm: llmQuestionAnalysis.ad_targeting?.estimated_cpm,
+      segments: llmQuestionAnalysis.ad_targeting?.segments
     } : null
   });
 }

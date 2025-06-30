@@ -61,14 +61,14 @@ export async function GET(req: NextRequest) {
     const apiKey = url.searchParams.get('api_key');
     const segment = url.searchParams.get('segment');
 
-    if (!await verifyClientApiKey(apiKey)) {
+    if (!apiKey || !await verifyClientApiKey(apiKey)) {
       return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
     }
 
     const supabase = createClient();
     
     // Contar leads disponibles por segmento
-    const availability = await getLeadAvailability(supabase, segment);
+    const availability = await getLeadAvailability(supabase, segment || undefined);
 
     return NextResponse.json({
       success: true,
@@ -162,7 +162,7 @@ function anonymizeLeads(leads: any[]) {
   }));
 }
 
-async function getLeadAvailability(supabase: any, segment?: string) {
+async function getLeadAvailability(supabase: any, segment?: string): Promise<Record<string, number>> {
   const { data, error } = await supabase
     .from('user_interest_profiles')
     .select('primary_category')
@@ -171,8 +171,8 @@ async function getLeadAvailability(supabase: any, segment?: string) {
   if (error) throw error;
 
   // Contar por categoría
-  const counts = {};
-  data.forEach(lead => {
+  const counts: Record<string, number> = {};
+  data.forEach((lead: any) => {
     counts[lead.primary_category] = (counts[lead.primary_category] || 0) + 1;
   });
 

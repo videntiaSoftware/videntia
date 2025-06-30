@@ -14,7 +14,7 @@ export async function POST(req: NextRequest) {
     const supabase = createClient();
     
     // 1. Get high-value user segments from LLM analysis
-    const { data: segments } = await supabase
+    const { data: segments } = await (supabase as any)
       .from('user_interest_profiles')
       .select(`
         primary_category,
@@ -37,29 +37,29 @@ export async function POST(req: NextRequest) {
     }
 
     const googleAds = new GoogleAdsIntegration();
-    const createdCampaigns = [];
+    const createdCampaigns: any[] = [];
 
     // 2. Create Google Ads campaigns for each segment
-    for (const segment of segments) {
+    for (const segment of (segments as any[])) {
       try {
         const campaign = await googleAds.createTargetedCampaign({
           primary_category: segment.primary_category,
           generated_tags: segment.generated_tags,
           confidence_score: 8, // High confidence for campaign creation
           commercial_value: segment.commercial_value,
-          ad_keywords: segment.ad_keywords,
-          demographic_hints: segment.demographic_hints
+          ad_keywords: segment.ad_keywords as any,
+          demographic_hints: segment.demographic_hints as any
         }, segment.user_count);
 
         // 3. Log campaign creation
         await supabase
           .from('google_ads_campaigns')
           .insert({
-            campaign_id: campaign.campaign_id,
+            campaign_id: (campaign as any).campaign_id,
             category: segment.primary_category,
-            target_keywords: segment.ad_keywords,
-            daily_budget: googleAds.getCategoryBudget(segment.primary_category),
-            target_cpm: campaign.expected_cpm,
+            target_keywords: segment.ad_keywords as any,
+            daily_budget: (googleAds as any).getCategoryBudget(segment.primary_category),
+            target_cpm: (campaign as any).expected_cpm,
             user_segment_size: segment.user_count,
             status: 'active',
             created_by: 'auto_llm_system'
@@ -67,12 +67,12 @@ export async function POST(req: NextRequest) {
 
         createdCampaigns.push({
           category: segment.primary_category,
-          campaign_id: campaign.campaign_id,
-          budget: campaign.expected_cpm,
+          campaign_id: (campaign as any).campaign_id,
+          budget: (campaign as any).expected_cpm,
           users_targeted: segment.user_count
         });
 
-        console.log(`[AUTO_CAMPAIGNS] Created: ${campaign.campaign_id} for ${segment.primary_category}`);
+        console.log(`[AUTO_CAMPAIGNS] Created: ${(campaign as any).campaign_id} for ${segment.primary_category}`);
 
       } catch (campaignError) {
         console.error(`[AUTO_CAMPAIGNS] Failed for ${segment.primary_category}:`, campaignError);
@@ -80,8 +80,8 @@ export async function POST(req: NextRequest) {
     }
 
     // 4. Calculate revenue impact
-    const totalBudget = createdCampaigns.reduce((sum, c) => sum + c.budget, 0);
-    const totalUsers = createdCampaigns.reduce((sum, c) => sum + c.users_targeted, 0);
+    const totalBudget = createdCampaigns.reduce((sum: number, c: any) => sum + c.budget, 0);
+    const totalUsers = createdCampaigns.reduce((sum: number, c: any) => sum + c.users_targeted, 0);
     const expectedRevenue = totalUsers * 0.02 * totalBudget; // 2% conversion rate estimate
 
     return NextResponse.json({
@@ -93,7 +93,7 @@ export async function POST(req: NextRequest) {
       campaigns: createdCampaigns
     });
 
-  } catch (error) {
+  } catch (error: any) {
     console.error('[AUTO_CAMPAIGNS] Error:', error);
     return NextResponse.json({ 
       error: 'Failed to create campaigns',
@@ -124,14 +124,14 @@ export async function GET(req: NextRequest) {
       .limit(30);
 
     return NextResponse.json({
-      active_campaigns: campaigns?.filter(c => c.status === 'active').length || 0,
+      active_campaigns: campaigns?.filter((c: any) => c.status === 'active').length || 0,
       total_campaigns: campaigns?.length || 0,
-      last_30_days_revenue: revenue?.reduce((sum, r) => sum + r.total_revenue, 0) || 0,
+      last_30_days_revenue: revenue?.reduce((sum: number, r: any) => sum + r.total_revenue, 0) || 0,
       campaigns: campaigns,
       revenue_trend: revenue
     });
 
-  } catch (error) {
+  } catch (error: any) {
     console.error('[CAMPAIGNS_DASHBOARD] Error:', error);
     return NextResponse.json({ error: 'Failed to fetch data' }, { status: 500 });
   }

@@ -124,7 +124,7 @@ async function enrichEventData(req: NextRequest, eventData: any) {
   const { os, browser } = parseUserAgent(userAgent);
   
   // Get geolocation (usando un servicio como ip-api.com)
-  let geoData = {};
+  let geoData: any = {};
   try {
     const geoResponse = await fetch(`http://ip-api.com/json/${ip}`);
     geoData = await geoResponse.json();
@@ -137,10 +137,10 @@ async function enrichEventData(req: NextRequest, eventData: any) {
     device_type: deviceType,
     os,
     browser,
-    country_code: geoData.countryCode,
-    region: geoData.regionName,
-    city: geoData.city,
-    timezone: geoData.timezone
+    country_code: geoData.countryCode || 'unknown',
+    region: geoData.regionName || 'unknown',
+    city: geoData.city || 'unknown',
+    timezone: geoData.timezone || 'unknown'
   };
 }
 
@@ -182,7 +182,7 @@ async function updateSpiritualProfile(supabase: any, guestId: string, eventData:
 
   if (eventData.card_name) {
     // Mapear cartas a intereses espirituales
-    const cardToInterests = {
+    const cardToInterests: Record<string, string[]> = {
       'The Lovers': ['love', 'relationships'],
       'The Emperor': ['leadership', 'career'],
       'The High Priestess': ['intuition', 'spirituality'],
@@ -191,7 +191,7 @@ async function updateSpiritualProfile(supabase: any, guestId: string, eventData:
       // ... más mapeos
     };
 
-    const interests = cardToInterests[eventData.card_name] || [];
+    const interests = cardToInterests[eventData.card_name as string] || [];
     spiritualInterests.push(...interests);
   }
 

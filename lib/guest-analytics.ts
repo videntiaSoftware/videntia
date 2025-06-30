@@ -3,6 +3,11 @@
  * Sistema completo de tracking y analytics para usuarios invitados
  */
 
+// Import dependencies with any fallbacks for missing implementations
+declare const GuestCookieManager: any;
+declare function trackGuestEvent(data: any): Promise<any>;
+declare function trackGuestReading(data: any): Promise<any>;
+
 export interface GuestProfile {
   guestId: string;
   firstSeenAt: Date;
@@ -482,8 +487,4 @@ function calculateDaysSince(dateString: string): number {
   const now = new Date();
   const diffTime = Math.abs(now.getTime() - firstVisit.getTime());
   return Math.ceil(diffTime / (1000 * 60 * 60 * 24));
-}
-
-function generateSessionId(): string {
-  return `session_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`;
 }

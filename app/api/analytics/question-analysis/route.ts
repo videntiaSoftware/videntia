@@ -111,7 +111,7 @@ export async function POST(req: NextRequest) {
     console.error('Error in question analysis:', error);
     return NextResponse.json({ 
       error: 'Error interno del servidor',
-      details: error.message 
+      details: error instanceof Error ? error.message : 'Unknown error'
     }, { status: 500 });
   }
 }
@@ -291,7 +291,7 @@ function createFallbackAnalysis(questionText: string) {
   const lowerQuestion = questionText.toLowerCase();
   
   // Palabras clave por categoría
-  const categoryKeywords = {
+  const categoryKeywords: Record<string, string[]> = {
     travel: ['viaj', 'vacation', 'hotel', 'vuelo', 'europa', 'playa', 'mudar', 'extranjero'],
     money: ['dinero', 'trabajo', 'negocio', 'inversion', 'deuda', 'economia', 'plata', 'ganar'],
     relationships: ['amor', 'pareja', 'matrimonio', 'novio', 'novia', 'ex', 'romance', 'solter'],
