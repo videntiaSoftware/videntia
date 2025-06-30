@@ -8,8 +8,16 @@ import { getUserTier, TIER_BENEFITS, PREMIUM_PRICING } from "@/lib/user-tiers";
 import DiscreteHomeLink from "@/components/ui/DiscreteHomeLink";
 
 export const metadata: Metadata = {
-  title: "Premium - Videntia Tarot",
-  description: "Upgrade to Premium for unlimited readings and exclusive features",
+  title: "Premium - Lecturas de Tarot Ilimitadas | Videntia",
+  description: "Upgrade a Premium para lecturas ilimitadas, análisis avanzados y acceso a todas las tiradas especiales del tarot. Sin anuncios, máxima precisión.",
+  keywords: [
+    "tarot premium", "lecturas ilimitadas", "tarot sin anuncios", "cruz celta premium", 
+    "análisis avanzado tarot", "suscripción tarot", "plan premium videntia"
+  ],
+  openGraph: {
+    title: "Premium - Lecturas de Tarot Ilimitadas | Videntia",
+    description: "Acceso completo a todas las funciones de tarot premium. Lecturas ilimitadas y análisis profundos.",
+  },
 };
 
 export default async function PremiumPage() {

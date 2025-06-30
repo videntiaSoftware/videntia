@@ -1,4 +1,18 @@
 import React from "react";
+import { Metadata } from "next";
+
+export const metadata: Metadata = {
+  title: "Contacto - Videntia Tarot | Atención al Cliente",
+  description: "Contáctanos para resolver dudas sobre lecturas de tarot, soporte técnico o consultas sobre nuestros servicios. Estamos aquí para ayudarte.",
+  keywords: [
+    "contacto videntia", "soporte tarot", "ayuda lecturas", "atención cliente", 
+    "consultas tarot", "problemas técnicos", "feedback videntia"
+  ],
+  openGraph: {
+    title: "Contacto - Videntia Tarot",
+    description: "¿Necesitas ayuda? Contáctanos para resolver cualquier duda sobre nuestras lecturas de tarot.",
+  },
+};
 
 export default function Contacto() {
   return (

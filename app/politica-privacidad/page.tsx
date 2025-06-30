@@ -1,4 +1,18 @@
 import React from "react";
+import { Metadata } from "next";
+
+export const metadata: Metadata = {
+  title: "Política de Privacidad - Videntia Tarot | Protección de Datos",
+  description: "Conoce cómo protegemos tu privacidad en Videntia Tarot. Política de privacidad, tratamiento de datos personales y cookies.",
+  keywords: [
+    "política privacidad", "protección datos", "privacidad videntia", "GDPR tarot", 
+    "cookies política", "datos personales", "confidencialidad lecturas"
+  ],
+  openGraph: {
+    title: "Política de Privacidad - Videntia Tarot",
+    description: "Tu privacidad es importante. Conoce cómo protegemos tus datos en nuestras lecturas de tarot.",
+  },
+};
 
 export default function PoliticaPrivacidad() {
   return (

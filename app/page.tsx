@@ -1,6 +1,27 @@
 import { AuthButton } from "@/components/auth-button";
 import TarotExperienceSteps from "@/components/tarot-experience-steps";
+import SEONavigationSection from "@/components/SEONavigationSection";
 import { createClient } from "@/app/_helpers/supabase-server";
+import { serviceSchema, faqSchema } from "@/lib/schema";
+import { Metadata } from "next";
+
+export const metadata: Metadata = {
+  title: "Videntia - Lecturas de Tarot Gratis Online 24/7",
+  description: "Descubre tu destino con lecturas de tarot gratis online. Consultas personalizadas de amor, trabajo, dinero y crecimiento espiritual. Disponible 24 horas.",
+  keywords: [
+    "tarot gratis online", "lecturas tarot", "consulta tarot", "cartas tarot gratis",
+    "tarot amor", "tarot trabajo", "tarot dinero", "videncia online",
+    "tirada 3 cartas", "cruz celta", "arcanos mayores", "arcanos menores"
+  ],
+  openGraph: {
+    title: "Videntia - Lecturas de Tarot Gratis Online 24/7",
+    description: "Consultas de tarot personalizadas y gratuitas. Descubre tu futuro en amor, trabajo y crecimiento personal.",
+  },
+  twitter: {
+    title: "Videntia - Tarot Gratis Online",
+    description: "Lecturas de tarot auténticas y personalizadas disponibles 24/7.",
+  }
+};
 
 export default async function Home() {
   const supabase = await createClient();
@@ -8,9 +29,24 @@ export default async function Home() {
   const isAuthenticated = !!data?.user;
 
   return (
-    <main className="min-h-screen flex flex-col items-center justify-start font-sans">
-      <div className="absolute inset-0 bg-[url('/tarot-bg.jpg')] bg-cover bg-center opacity-20 z-0" />
-      <div className="relative z-10 w-full max-w-4xl mx-auto">
+    <>
+      {/* Structured Data para la página principal */}
+      <script
+        type="application/ld+json"
+        dangerouslySetInnerHTML={{
+          __html: JSON.stringify(serviceSchema),
+        }}
+      />
+      <script
+        type="application/ld+json"
+        dangerouslySetInnerHTML={{
+          __html: JSON.stringify(faqSchema),
+        }}
+      />
+      
+      <main className="min-h-screen flex flex-col items-center justify-start font-sans">
+        <div className="absolute inset-0 bg-[url('/tarot-bg.jpg')] bg-cover bg-center opacity-20 z-0" />
+        <div className="relative z-10 w-full max-w-4xl mx-auto">
         
         {/* Header solo para usuarios autenticados */}
         {isAuthenticated && (
@@ -34,7 +70,11 @@ export default async function Home() {
         <div className={isAuthenticated ? "mt-4" : ""}>
           <TarotExperienceSteps />
         </div>
-      </div>
-    </main>
+        </div>
+        
+        {/* Sección de navegación SEO */}
+        <SEONavigationSection />
+      </main>
+    </>
   );
 }

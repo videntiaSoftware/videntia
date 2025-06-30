@@ -1,4 +1,18 @@
 import React from "react";
+import { Metadata } from "next";
+
+export const metadata: Metadata = {
+  title: "Términos y Condiciones - Videntia Tarot | Condiciones de Uso",
+  description: "Lee nuestros términos y condiciones de uso para Videntia Tarot. Condiciones del servicio, responsabilidades y derechos de usuario.",
+  keywords: [
+    "términos condiciones", "condiciones uso videntia", "términos servicio tarot", 
+    "responsabilidades usuario", "derechos videntia", "condiciones lecturas"
+  ],
+  openGraph: {
+    title: "Términos y Condiciones - Videntia Tarot",
+    description: "Conoce las condiciones de uso de nuestros servicios de tarot online.",
+  },
+};
 
 export default function TerminosCondiciones() {
   return (
