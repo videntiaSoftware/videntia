@@ -2,6 +2,7 @@ import { NextRequest, NextResponse } from 'next/server';
 import { createClient } from '@/lib/supabase/client';
 import { getUserTier, getTierLimits, canAccessReadingType, hasReachedDailyLimit, getTotalDailyReadings } from '@/lib/user-tiers';
 import { analyzeUserBehavior, checkRateLimit, validateDeviceFingerprint, analyzeQuestionContent, calculatePunishment } from '@/lib/anti-abuse';
+import { trackReadingUnified, prepareTrackingData } from '@/lib/supabase/unified-tracking';
 
 // export type ReadingType = 'single' | 'three_card' | 'love' | 'career' | 'celtic_cross';
 type ReadingType = 'single' | 'three_card' | 'love' | 'career' | 'celtic_cross';
@@ -375,44 +376,38 @@ ${config.instructions}\nRedacta una conclusión general para esta tirada, integr
   }
 
   // --- Enhanced reading storage with tier-appropriate data ---
-  if (userId && userTier !== 'guest') {
-    try {
-      const insertObj = {
-        user_id: userId,
+  // 🔥 USAR SISTEMA UNIFICADO DE TRACKING PARA TODO
+  console.log('[UNIFIED_TRACKING] Iniciando guardado unificado...');
+  
+  try {
+    const trackingData = prepareTrackingData(
+      {
+        type,
         question: questionFromBody,
-        reading_type: type,
-        cards_drawn: cards,
-        interpretation: interpretation,
-        user_tier: userTier,
-        created_at: new Date().toISOString(),
-      };
-      
-      // Check storage limits for free tier
-      if (userTier === 'free') {
-        const tierLimits = getTierLimits(userTier);
-        if (tierLimits.maxStoredReadings > 0) {
-          const { data: existingReadings } = await supabase
-            .from('readings')
-            .select('id')
-            .eq('user_id', userId)
-            .order('created_at', { ascending: false });
-          
-          if (existingReadings && existingReadings.length >= tierLimits.maxStoredReadings) {
-            // Delete oldest readings to make room
-            const toDelete = existingReadings.slice(tierLimits.maxStoredReadings - 1);
-            await supabase
-              .from('readings')
-              .delete()
-              .in('id', toDelete.map(r => r.id));
-          }
-        }
-      }
-      
-      await supabase.from("readings").insert([insertObj]);
-    } catch (saveError) {
-      console.error('Error saving reading:', saveError);
-      // Don't fail the request if saving fails
-    }
+        cards: cardsInfo,
+        interpretation,
+        questionAnalysis: llmQuestionAnalysis
+      },
+      {
+        userId,
+        readingType: type,
+        fingerprintId: body.fingerprintId,
+        sessionId: body.session_id,
+        ip_address: userActivity.ipAddress,
+        user_agent: userActivity.userAgent,
+        page_url: body.page_url,
+        is_returning_guest: body.is_returning_guest,
+        visit_count: body.visit_count
+      },
+      guestId
+    );
+    
+    await trackReadingUnified(trackingData);
+    console.log('[UNIFIED_TRACKING] Guardado completado exitosamente');
+    
+  } catch (trackingError) {
+    console.error('[UNIFIED_TRACKING] Error en guardado:', trackingError);
+    // No fallar la request si el tracking falla
   }
 
   return NextResponse.json({

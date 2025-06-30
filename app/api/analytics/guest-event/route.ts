@@ -1,13 +1,22 @@
+// OBSOLETO: Este endpoint ha sido reemplazado por el sistema unificado
+// en /lib/supabase/unified-tracking.ts
+// Causa DUPLICACIÓN de datos - TODO: Eliminar después de migración
+
 import { NextRequest, NextResponse } from 'next/server';
-import { createClient } from '@/lib/supabase/client';
 
 /**
- * Receive and store guest events with cookie enhancement
+ * ENDPOINT OBSOLETO - Reemplazado por sistema unificado
  */
 export async function POST(request: NextRequest) {
-  try {
-    const supabase = createClient();
-    const eventData = await request.json();
+  return NextResponse.json(
+    { 
+      error: 'ENDPOINT_OBSOLETO',
+      message: 'Este endpoint ha sido reemplazado por el sistema unificado en /api/reading/generate',
+      redirect_to: '/api/reading/generate'
+    },
+    { status: 410 } // Gone - recurso ya no disponible
+  );
+}
     
     // Extract IP and User-Agent from request
     const ip = request.headers.get('x-forwarded-for')?.split(',')[0] || 'unknown';
