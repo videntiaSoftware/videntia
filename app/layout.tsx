@@ -3,6 +3,7 @@ import { Geist, Cinzel_Decorative, Cormorant_Garamond } from "next/font/google";
 import Script from "next/script";
 import "./globals.css";
 import Footer from "@/components/ui/footer";
+import CookieNotice from "@/components/CookieNotice";
 
 const defaultUrl = process.env.VERCEL_URL
   ? `https://${process.env.VERCEL_URL}`
@@ -64,6 +65,7 @@ export default function RootLayout({
           {children}
         </div>
         <Footer />
+        <CookieNotice />
       </body>
     </html>
   );

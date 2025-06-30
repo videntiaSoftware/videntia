@@ -14,6 +14,7 @@ import FingerprintJS from '@fingerprintjs/fingerprintjs';
 import { AnimatePresence, motion } from 'framer-motion';
 import Script from "next/script";
 import SubtleAuthPrompt from "@/components/SubtleAuthPrompt";
+import { GuestCookieManager, CookieConsent } from "@/lib/cookies";
 
 interface Card {
   id: string;
@@ -102,13 +103,57 @@ export default function StepTarotExperience({ readingType }: { readingType: stri
   }, [readingType]);
 
   useEffect(() => {
-    if (typeof window !== 'undefined' && !localStorage.getItem('guest_id')) {
-      FingerprintJS.load().then(fp => {
-        fp.get().then(result => {
-          localStorage.setItem('guest_id', result.visitorId);
+    // Enhanced guest identification with cookies + fingerprinting
+    const initializeGuestIdentity = async () => {
+      if (typeof window === 'undefined') return;
+
+      // Check if we need cookie consent (GDPR compliance)
+      if (CookieConsent.needsConsent()) {
+        // For now, we'll assume consent. In production, show consent banner
+        CookieConsent.setConsent(true);
+      }
+
+      // Only proceed if user has given consent
+      if (!CookieConsent.hasConsent()) return;
+
+      try {
+        // Get or create cookie-based identity
+        let guestIdentity = GuestCookieManager.getGuestCookie();
+        
+        // Generate fingerprint
+        const fp = await FingerprintJS.load();
+        const result = await fp.get();
+        const fingerprintId = result.visitorId;
+
+        if (!guestIdentity) {
+          // Create new guest identity with both cookie and fingerprint
+          guestIdentity = GuestCookieManager.createGuestSession(fingerprintId);
+          localStorage.setItem('guest_id', guestIdentity.guest_id);
+        } else {
+          // Update existing identity
+          GuestCookieManager.updateGuestCookie({
+            fingerprint_id: fingerprintId
+          });
+          localStorage.setItem('guest_id', guestIdentity.guest_id);
+        }
+
+        console.log('[GUEST_IDENTITY] Initialized:', {
+          guest_id: guestIdentity.guest_id,
+          fingerprint_id: fingerprintId,
+          is_returning: GuestCookieManager.isReturningGuest(),
+          visit_count: guestIdentity.visit_count
         });
-      });
-    }
+
+      } catch (error) {
+        console.error('[GUEST_IDENTITY] Error:', error);
+        // Fallback to localStorage only
+        if (!localStorage.getItem('guest_id')) {
+          localStorage.setItem('guest_id', `fallback_${Date.now()}`);
+        }
+      }
+    };
+
+    initializeGuestIdentity();
   }, []);
 
   useEffect(() => {
