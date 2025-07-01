@@ -138,19 +138,58 @@ async function debugSupabaseTables() {
 
     // 6. Verificar estructura de columnas en readings
     console.log('\n🏗️  6. ESTRUCTURA TABLA READINGS:');
-    const { data: columns, error: columnsError } = await supabase
-      .from('information_schema.columns')
-      .select('column_name, data_type')
-      .eq('table_name', 'readings')
-      .order('ordinal_position');
+    try {
+      // Query directo para obtener columnas
+      const { data: tableInfo, error: tableError } = await supabase
+        .rpc('get_table_columns', { table_name: 'readings' })
+        .maybeSingle();
 
-    if (columnsError) {
-      console.error('❌ Error obteniendo columnas:', columnsError);
-    } else {
-      console.log('   Columnas disponibles:');
-      columns?.forEach(col => {
-        console.log(`     - ${col.column_name} (${col.data_type})`);
-      });
+      if (tableError) {
+        // Fallback: intentar describir la tabla de otra manera
+        console.log('   Intentando método alternativo...');
+        
+        // Hacer un select simple para ver qué columnas existen
+        const { data: sampleData, error: sampleError } = await supabase
+          .from('readings')
+          .select('*')
+          .limit(1);
+          
+        if (sampleError) {
+          console.error('❌ Error obteniendo estructura:', sampleError);
+        } else {
+          if (sampleData && sampleData.length > 0) {
+            console.log('   Columnas detectadas en datos existentes:');
+            Object.keys(sampleData[0]).forEach(col => {
+              console.log(`     - ${col}`);
+            });
+          } else {
+            console.log('   No hay datos para detectar estructura');
+            
+            // Intentar insertar un registro de prueba para ver qué falla
+            console.log('   Probando insertar registro básico...');
+            const testRecord = {
+              reading_type: 'test',
+              user_tier: 'guest'
+            };
+            
+            const { error: testError } = await supabase
+              .from('readings')
+              .insert(testRecord)
+              .select();
+              
+            if (testError) {
+              console.error('❌ Error en insert de prueba:', testError);
+              console.error('   Esto nos dice qué columnas faltan');
+            } else {
+              console.log('✅ Insert básico funciona');
+            }
+          }
+        }
+      } else {
+        console.log('   Columnas desde RPC:', tableInfo);
+      }
+    } catch (error) {
+      console.error('❌ Error general verificando estructura:', error);
     }
 
   } catch (error) {

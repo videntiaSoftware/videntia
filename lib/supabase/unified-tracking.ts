@@ -43,43 +43,51 @@ export async function trackReadingUnified(data: ReadingTrackingData): Promise<vo
   const supabase = createClient();
   
   try {
-    console.log('[UNIFIED_TRACKING] Iniciando tracking unificado con datos:', {
+    // 🚨 LOGS PARA DEBUGGING EN PRODUCCIÓN
+    console.log('🔥 [UNIFIED_TRACKING] INICIANDO - Datos recibidos:', {
       reading_type: data.reading_type,
       user_id: data.user_id,
       guest_id: data.guest_id,
       has_question: !!data.question,
-      has_cards: !!data.cards_selected,
-      has_interpretation: !!data.interpretation
+      has_cards: !!data.cards_selected?.length,
+      has_interpretation: !!data.interpretation,
+      timestamp: new Date().toISOString()
     });
     
     // 1. GUARDAR EN TABLA PRINCIPAL DE LECTURAS
-    console.log('[UNIFIED_TRACKING] Paso 1: Guardando en tabla readings...');
+    console.log('🔥 [UNIFIED_TRACKING] PASO 1: Intentando guardar en tabla readings...');
     await saveToReadingsTable(supabase, data);
+    console.log('✅ [UNIFIED_TRACKING] PASO 1: Guardado en readings COMPLETADO');
     
     // 2. GUARDAR ANALYTICS DE GUEST (siempre)
-    console.log('[UNIFIED_TRACKING] Paso 2: Guardando analytics de guest...');
+    console.log('🔥 [UNIFIED_TRACKING] PASO 2: Guardando analytics de guest...');
     await saveGuestAnalytics(supabase, data);
+    console.log('✅ [UNIFIED_TRACKING] PASO 2: Analytics de guest COMPLETADO');
     
     // 3. GUARDAR PERFIL DE INTERÉS (para monetización)
     if (data.question) {
-      console.log('[UNIFIED_TRACKING] Paso 3: Guardando perfil de interés...');
+      console.log('🔥 [UNIFIED_TRACKING] PASO 3: Guardando perfil de interés (con pregunta)...');
       await saveInterestProfile(supabase, data);
+      console.log('✅ [UNIFIED_TRACKING] PASO 3: Perfil de interés COMPLETADO');
     } else {
-      console.log('[UNIFIED_TRACKING] Paso 3: Saltando perfil de interés (sin pregunta)');
+      console.log('⏭️ [UNIFIED_TRACKING] PASO 3: SALTADO (sin pregunta)');
     }
     
     // 4. GUARDAR EVENTOS DE COMPORTAMIENTO
-    console.log('[UNIFIED_TRACKING] Paso 4: Guardando eventos de comportamiento...');
+    console.log('🔥 [UNIFIED_TRACKING] PASO 4: Guardando eventos de comportamiento...');
     await saveBehaviorEvent(supabase, data);
+    console.log('✅ [UNIFIED_TRACKING] PASO 4: Eventos de comportamiento COMPLETADO');
     
     // 5. ACTUALIZAR GUEST INSIGHTS
-    console.log('[UNIFIED_TRACKING] Paso 5: Actualizando insights de guest...');
+    console.log('🔥 [UNIFIED_TRACKING] PASO 5: Actualizando insights de guest...');
     await updateGuestInsights(supabase, data.guest_id || data.user_id || '');
+    console.log('✅ [UNIFIED_TRACKING] PASO 5: Insights de guest COMPLETADO');
     
-    console.log('[UNIFIED_TRACKING] Tracking completado exitosamente');
+    console.log('🎉 [UNIFIED_TRACKING] *** TRACKING COMPLETADO EXITOSAMENTE ***');
     
   } catch (error) {
-    console.error('[UNIFIED_TRACKING] Error:', error);
+    console.error('💥 [UNIFIED_TRACKING] ERROR FATAL:', error);
+    console.error('💥 [UNIFIED_TRACKING] Datos que causaron el error:', data);
     throw error;
   }
 }
@@ -90,34 +98,39 @@ export async function trackReadingUnified(data: ReadingTrackingData): Promise<vo
 async function saveToReadingsTable(supabase: any, data: ReadingTrackingData): Promise<void> {
   const readingRecord = {
     user_id: data.user_id || null,
-    guest_id: data.guest_id || null,
+    guest_id: data.guest_id,
     reading_type: data.reading_type,
     question: data.question || null,
     cards_drawn: data.cards_selected,
     interpretation: data.interpretation || null,
-    user_tier: data.user_id ? 'free' : 'guest', // Determinar tier
-    ip_address: data.ip_address || null,
+    user_tier: data.user_id ? 'free' : 'guest',
+    ip_address: data.ip_address,
+    fingerprint_id: data.fingerprint_id,
+    session_id: data.session_id,
+    user_agent: data.user_agent,
     created_at: new Date().toISOString()
   };
   
-  console.log('[UNIFIED_TRACKING] Intentando insertar en readings:', {
+  console.log('🔥 [READINGS_TABLE] Insertando lectura con datos completos:', {
     user_id: readingRecord.user_id,
     guest_id: readingRecord.guest_id,
     reading_type: readingRecord.reading_type,
+    user_tier: readingRecord.user_tier,
     has_question: !!readingRecord.question,
-    user_tier: readingRecord.user_tier
+    has_cards: !!readingRecord.cards_drawn?.length
   });
   
-  const { error } = await supabase
+  const { data: insertResult, error } = await supabase
     .from('readings')
-    .insert(readingRecord);
+    .insert(readingRecord)
+    .select('id');
     
   if (error) {
-    console.error('[UNIFIED_TRACKING] Error saving to readings:', error);
-    throw error; // Propagar el error para detener el flujo
-  } else {
-    console.log('[UNIFIED_TRACKING] ✅ Saved to readings table successfully');
+    console.error('💥 [READINGS_TABLE] ERROR en insert:', error);
+    throw error;
   }
+  
+  console.log('✅ [READINGS_TABLE] Insert exitoso! ID:', insertResult?.[0]?.id);
 }
 
 /**
@@ -170,7 +183,10 @@ async function saveInterestProfile(supabase: any, data: ReadingTrackingData): Pr
   
   // Llamar a la API de análisis de preguntas para obtener datos LLM
   try {
-    const response = await fetch('/api/analytics/question-analysis', {
+    const baseUrl = process.env.NEXT_PUBLIC_BASE_URL || process.env.VERCEL_URL || 'http://localhost:3000';
+    const fullUrl = `${baseUrl}/api/analytics/question-analysis`;
+    
+    const response = await fetch(fullUrl, {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({

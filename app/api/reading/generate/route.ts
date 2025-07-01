@@ -175,35 +175,42 @@ export async function POST(req: NextRequest) {
   // --- Enhanced reCAPTCHA Validation (for non-premium users) ---
   if (userTier !== 'premium') {
     const recaptchaToken = body.recaptchaToken;
-    console.log("[reCAPTCHA] Token recibido en backend:", recaptchaToken);
+    const skipRecaptcha = process.env.SKIP_RECAPTCHA === 'true';
     
-    if (!recaptchaToken) {
+    console.log("[reCAPTCHA] Token recibido:", recaptchaToken);
+    console.log("[reCAPTCHA] Skip habilitado:", skipRecaptcha);
+    
+    if (!recaptchaToken && !skipRecaptcha) {
       console.warn(`[SUSPECT] Intento sin reCAPTCHA | IP: ${userActivity.ipAddress} | guest_id: ${guestId}`);
       return NextResponse.json({ error: 'Falta el token de reCAPTCHA. Por favor, recarga la página e intenta de nuevo.' }, { status: 400 });
     }
     
-    // Validate reCAPTCHA with Google
-    const secret = process.env.RECAPTCHA_SECRET_KEY;
-    
-    try {
-      const verifyRes = await fetch('https://www.google.com/recaptcha/api/siteverify', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
-        body: `secret=${secret}&response=${recaptchaToken}`,
-      });
-      const verifyData = await verifyRes.json();
-      console.log("[reCAPTCHA] Respuesta de Google:", verifyData);
+    // Validate reCAPTCHA with Google (solo si no está deshabilitado)
+    if (!skipRecaptcha) {
+      const secret = process.env.RECAPTCHA_SECRET_KEY;
       
-      if (!verifyData.success || (verifyData.score !== undefined && verifyData.score < 0.5)) {
-        console.warn(`[SUSPECT] Fallo reCAPTCHA | IP: ${userActivity.ipAddress} | guest_id: ${guestId} | score: ${verifyData.score}`);
-        return NextResponse.json({ 
-          error: 'No se pudo verificar reCAPTCHA. Por favor, recarga la página e intenta de nuevo.' 
-        }, { status: 403 });
+      try {
+        const verifyRes = await fetch('https://www.google.com/recaptcha/api/siteverify', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
+          body: `secret=${secret}&response=${recaptchaToken}`,
+        });
+        const verifyData = await verifyRes.json();
+        console.log("[reCAPTCHA] Respuesta de Google:", verifyData);
+        
+        if (!verifyData.success || (verifyData.score !== undefined && verifyData.score < 0.5)) {
+          console.warn(`[SUSPECT] Fallo reCAPTCHA | IP: ${userActivity.ipAddress} | guest_id: ${guestId} | score: ${verifyData.score}`);
+          return NextResponse.json({ 
+            error: 'No se pudo verificar reCAPTCHA. Por favor, recarga la página e intenta de nuevo.' 
+          }, { status: 403 });
+        }
+      } catch (recaptchaError) {
+        console.error(`[reCAPTCHA] Error de conectividad:`, recaptchaError);
+        // En caso de error de conectividad con Google, permitir la lectura pero logear el evento
+        console.warn(`[reCAPTCHA] Fallback activado por error de conectividad | IP: ${userActivity.ipAddress} | guest_id: ${guestId}`);
       }
-    } catch (recaptchaError) {
-      console.error(`[reCAPTCHA] Error de conectividad:`, recaptchaError);
-      // En caso de error de conectividad con Google, permitir la lectura pero logear el evento
-      console.warn(`[reCAPTCHA] Fallback activado por error de conectividad | IP: ${userActivity.ipAddress} | guest_id: ${guestId}`);
+    } else {
+      console.log("[reCAPTCHA] ⚠️ SALTADO para testing");
     }
   }
 
@@ -377,7 +384,17 @@ ${config.instructions}\nRedacta una conclusión general para esta tirada, integr
 
   // --- Enhanced reading storage with tier-appropriate data ---
   // 🔥 USAR SISTEMA UNIFICADO DE TRACKING PARA TODO
-  console.log('[UNIFIED_TRACKING] Iniciando guardado unificado...');
+  console.log('\n🚀🚀🚀 [API_READING] INICIANDO SISTEMA UNIFICADO 🚀🚀🚀');
+  console.log('📊 [API_READING] Variables disponibles:', {
+    userId,
+    guestId,
+    userTier,
+    type,
+    hasQuestion: !!questionFromBody,
+    hasCards: !!cardsInfo?.length,
+    hasInterpretation: !!interpretation,
+    hasAnalysis: !!llmQuestionAnalysis
+  });
   
   try {
     const trackingData = prepareTrackingData(
@@ -402,11 +419,22 @@ ${config.instructions}\nRedacta una conclusión general para esta tirada, integr
       guestId
     );
     
+    console.log('🎯 [API_READING] Datos preparados para tracking:', {
+      reading_type: trackingData.reading_type,
+      user_id: trackingData.user_id,
+      guest_id: trackingData.guest_id,
+      question_length: trackingData.question?.length || 0,
+      cards_count: trackingData.cards_selected?.length || 0
+    });
+    
     await trackReadingUnified(trackingData);
-    console.log('[UNIFIED_TRACKING] Guardado completado exitosamente');
+    console.log('✅✅✅ [API_READING] SISTEMA UNIFICADO COMPLETADO ✅✅✅\n');
     
   } catch (trackingError) {
-    console.error('[UNIFIED_TRACKING] Error en guardado:', trackingError);
+    console.log('💥💥💥 [API_READING] ERROR EN SISTEMA UNIFICADO 💥💥💥');
+    console.error('❌ [API_READING] ERROR:', trackingError);
+    console.error('❌ [API_READING] Stack trace:', trackingError.stack);
+    console.log('💥💥💥 FIN DEL ERROR 💥💥💥\n');
     // No fallar la request si el tracking falla
   }
 
