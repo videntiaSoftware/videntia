@@ -47,12 +47,21 @@ const READING_TYPES = [
   },
 ];
 
-export default function TarotExperienceSteps() {
+interface TarotExperienceStepsProps {
+  onStepChange?: (step: number) => void;
+}
+
+export default function TarotExperienceSteps({ onStepChange }: TarotExperienceStepsProps) {
   const [step, setStep] = useState(0);
   const [selectedType, setSelectedType] = useState("three_card");
   const [userTier, setUserTier] = useState<'guest' | 'free' | 'premium'>('guest');
   const [readingsToday, setReadingsToday] = useState(0);
   const [adsWatched, setAdsWatched] = useState(0);
+
+  // Notificar cambio de step al padre
+  useEffect(() => {
+    onStepChange?.(step);
+  }, [step, onStepChange]);
 
   useEffect(() => {
     const checkUserTier = async () => {

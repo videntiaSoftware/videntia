@@ -129,6 +129,21 @@ export default function RootLayout({
         <meta name="msapplication-TileColor" content="#7c3aed" />
         <meta name="apple-mobile-web-app-capable" content="yes" />
         <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent" />
+        
+        {/* SEO Critical Tags */}
+        <meta name="rating" content="general" />
+        <meta name="content-language" content="es-AR" />
+        <meta name="geo.region" content="AR" />
+        <meta name="geo.country" content="Argentina" />
+        <meta name="distribution" content="global" />
+        <meta name="revisit-after" content="1 days" />
+        
+        {/* Preconnect to critical domains */}
+        <link rel="preconnect" href="https://www.googletagmanager.com" />
+        <link rel="preconnect" href="https://www.google-analytics.com" />
+        <link rel="preconnect" href="https://fonts.googleapis.com" />
+        <link rel="preconnect" href="https://fonts.gstatic.com" crossOrigin="anonymous" />
+        
         <link rel="canonical" href={process.env.NEXT_PUBLIC_BASE_URL || "http://localhost:3000"} />
       </head>
       <body

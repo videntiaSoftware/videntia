@@ -73,7 +73,7 @@ export default function StepCardReveal({ cards, readings, layoutLabels, currentI
   // El flip debe empezar de ESPALDA (rotateY(180deg)), y al voltear quedar de FRENTE (rotateY(0deg))
   // Animación lenta (2.2s)
   return (
-    <div className="fixed inset-0 z-40 flex flex-col items-center justify-center min-h-screen w-full" style={{
+    <div className="fixed inset-0 z-40 flex flex-col items-center justify-center h-screen max-h-screen overflow-hidden w-full" style={{
       backgroundImage: `url('https://jhtjdapbeiybxpqvyqqs.supabase.co/storage/v1/object/public/assets//fondo.png')`,
       backgroundBlendMode: 'normal',
       backgroundSize: 'cover',
@@ -89,7 +89,7 @@ export default function StepCardReveal({ cards, readings, layoutLabels, currentI
         pointerEvents: 'none',
         background: 'linear-gradient(to top, #000 0%, rgba(0,0,0,0) 60%)',
       }} />
-      <div className="relative flex flex-col items-center justify-center w-full max-w-lg min-h-[70vh] p-0 bg-transparent shadow-none z-10">
+      <div className="relative flex flex-col items-center justify-center w-full max-w-lg h-full max-h-full p-0 bg-transparent shadow-none z-10">
         <div className="w-full flex flex-col items-center justify-center">
           <AnimatePresence mode="wait">
             <motion.div
@@ -98,7 +98,7 @@ export default function StepCardReveal({ cards, readings, layoutLabels, currentI
               animate={{ opacity: 1 }}
               exit={{ opacity: 0 }}
               transition={{ duration: 0.6, type: 'tween' }}
-              className="relative w-44 h-72 md:w-52 md:h-80 mb-8 cursor-pointer"
+              className="relative w-36 h-60 md:w-44 md:h-72 mb-6 cursor-pointer"
               style={{ perspective: '1200px' }}
               onClick={handleCardClick}
               tabIndex={0}
@@ -143,16 +143,16 @@ export default function StepCardReveal({ cards, readings, layoutLabels, currentI
               </div>
             </motion.div>
           </AnimatePresence>
-          <h2 className="font-cinzel text-4xl text-purple-100 mb-6 text-center drop-shadow-lg tracking-widest select-none min-h-[2.5em] flex items-center justify-center w-full">
+          <h2 className="font-cinzel text-3xl text-purple-100 mb-4 text-center drop-shadow-lg tracking-widest select-none min-h-[2em] flex items-center justify-center w-full">
             {card?.name}
           </h2>
           <div className="text-center text-purple-300 text-lg mb-2 font-cormorant bg-transparent tracking-wider uppercase select-none min-h-[2em] flex items-center justify-center w-full">
             {layoutLabels && layoutLabels[currentIndex] ? layoutLabels[currentIndex] : ''}
           </div>
-          <p className="text-amber-200 mb-5 text-base text-center font-cormorant tracking-widest select-none min-h-[2em] flex items-center justify-center w-full">
+          <p className="text-amber-200 mb-3 text-base text-center font-cormorant tracking-widest select-none min-h-[1.5em] flex items-center justify-center w-full">
             {card?.type === 'major' ? 'Arcano Mayor' : 'Arcano Menor'} · {orientation === 'reversed' ? 'Invertida' : 'Al derecho'}
           </p>
-          <div className="w-full max-w-xl mx-auto mt-2 px-4 min-h-[5.5em] flex items-center justify-center">
+          <div className="w-full max-w-xl mx-auto mt-2 px-4 min-h-[4em] flex items-center justify-center">
             <div className="font-cormorant text-lg text-white/95 text-center leading-relaxed tracking-wide w-full bg-transparent shadow-none px-2 min-h-[4em] flex items-center justify-center">
               {showInterpretation && (
                 <TypewriterText text={reading || 'Sin interpretación.'} speed={28} className="font-cormorant" />
@@ -160,7 +160,7 @@ export default function StepCardReveal({ cards, readings, layoutLabels, currentI
             </div>
           </div>
         </div>
-        <div className="p-0 mt-8 flex justify-between w-full gap-8 min-h-[4em]">
+        <div className="p-0 mt-4 flex justify-between w-full gap-8 min-h-[3em]">
           <Button
             variant="ghost"
             onClick={onPrev}

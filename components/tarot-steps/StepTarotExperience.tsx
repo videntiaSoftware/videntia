@@ -549,7 +549,7 @@ export default function StepTarotExperience({ readingType }: { readingType: stri
         </div>
       )}
       
-      <div className="w-full flex flex-col items-center justify-center mt-12 min-h-screen relative">
+      <div className="w-full flex flex-col items-center justify-center mt-12 h-screen max-h-screen overflow-hidden relative">
         <AnimatePresence mode="wait">
           {/* Limit Reached Screen */}
           {currentStep === 'limit' && (
@@ -629,7 +629,7 @@ export default function StepTarotExperience({ readingType }: { readingType: stri
               animate={{ opacity: 1 }}
               exit={{ opacity: 0 }}
               transition={{ duration: 0.7, ease: 'easeInOut' }}
-              className="w-full flex flex-col items-center justify-center absolute left-0 top-0"
+              className="w-full flex flex-col items-center justify-center absolute left-0 top-0 h-full max-h-screen overflow-y-auto"
             >
               <h2 className="font-cinzel text-3xl md:text-4xl text-amber-200 mb-2 text-center">
                 {readingTitle}
@@ -660,7 +660,7 @@ export default function StepTarotExperience({ readingType }: { readingType: stri
               animate={{ opacity: 1 }}
               exit={{ opacity: 0 }}
               transition={{ duration: 0.7, ease: 'easeInOut' }}
-              className="absolute left-0 top-0 w-full min-h-screen flex flex-col items-center justify-center"
+              className="absolute left-0 top-0 w-full h-full max-h-screen overflow-hidden flex flex-col items-center justify-center"
             >
               <StepCardReveal
                 cards={selectedCards as any}
@@ -696,9 +696,9 @@ export default function StepTarotExperience({ readingType }: { readingType: stri
               animate={{ opacity: 1 }}
               exit={{ opacity: 0 }}
               transition={{ duration: 0.7, ease: 'easeInOut' }}
-              className="absolute left-0 top-0 w-full min-h-screen flex flex-col items-center justify-center"
+              className="absolute left-0 top-0 w-full h-full max-h-screen overflow-y-auto flex flex-col items-center justify-start p-4"
             >
-              <div className="mt-8 bg-slate-900/90 rounded-lg p-6 border border-purple-500/30 shadow-xl text-white">
+              <div className="mt-4 bg-slate-900/90 rounded-lg p-6 border border-purple-500/30 shadow-xl text-white max-w-4xl w-full max-h-[80vh] overflow-y-auto">
                 <h2 className="text-2xl md:text-3xl font-bold text-amber-300 mb-4 font-cinzel text-center">Interpretación final</h2>
                 <div className="mb-4">
                   <p className="text-purple-200 mb-2 font-semibold font-cinzel">Pregunta:</p>
