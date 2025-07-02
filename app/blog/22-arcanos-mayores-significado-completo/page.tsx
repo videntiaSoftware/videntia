@@ -207,7 +207,7 @@ export default function ArcanosMayoresSignificado() {
           <div className="grid md:grid-cols-2 gap-8">
             <div>
               <p className="text-violet-200 mb-4">
-                Los Arcanos Mayores representan el "Viaje del Loco", un camino espiritual 
+                Los Arcanos Mayores representan el &quot;Viaje del Loco&quot;, un camino espiritual 
                 que va desde la inocencia inicial (El Loco) hasta la realización completa (El Mundo). 
                 Cada carta simboliza una etapa importante en el desarrollo personal y espiritual.
               </p>
@@ -435,7 +435,7 @@ export default function ArcanosMayoresSignificado() {
             </div>
             
             <div className="bg-slate-800/50 p-6 rounded-lg border border-violet-600">
-              <h3 className="text-xl font-bold text-violet-300 mb-3">¿Hay cartas "buenas" y "malas" en los Arcanos Mayores?</h3>
+              <h3 className="text-xl font-bold text-violet-300 mb-3">¿Hay cartas &quot;buenas&quot; y &quot;malas&quot; en los Arcanos Mayores?</h3>
               <p className="text-violet-200">
                 Cada Arcano Mayor tiene aspectos positivos y desafiantes. Incluso cartas como 
                 La Muerte o El Diablo traen oportunidades de crecimiento y liberación. 
