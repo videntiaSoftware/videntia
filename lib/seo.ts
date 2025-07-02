@@ -197,6 +197,38 @@ export const structuredDataTemplates = {
       "name": step.name,
       "text": step.text
     }))
+  }),
+
+  service: (service: {
+    name: string;
+    description: string;
+    provider: string;
+    areaServed?: string;
+    url: string;
+  }) => ({
+    "@context": "https://schema.org",
+    "@type": "Service",
+    "name": service.name,
+    "description": service.description,
+    "provider": {
+      "@type": "Organization",
+      "name": service.provider
+    },
+    "areaServed": service.areaServed || "Argentina",
+    "url": `${seoConfig.siteUrl}${service.url}`
+  }),
+
+  faq: (faqData: Array<{question: string, answer: string}>) => ({
+    "@context": "https://schema.org",
+    "@type": "FAQPage",
+    "mainEntity": faqData.map((item) => ({
+      "@type": "Question",
+      "name": item.question,
+      "acceptedAnswer": {
+        "@type": "Answer",
+        "text": item.answer
+      }
+    }))
   })
 };
 

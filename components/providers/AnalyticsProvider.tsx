@@ -1,68 +1,13 @@
 "use client";
 
-import { useEffect } from 'react';
+import { useEffect, Suspense } from 'react';
 import { usePathname, useSearchParams } from 'next/navigation';
 import analytics, { trackPageView, trackTarotReading, trackPremiumAdEvent } from '@/lib/analytics';
 import { GuestCookieManager, CookieConsent } from '@/lib/cookies';
 
-export default function AnalyticsProvider({ children }: { children: React.ReactNode }) {
-  const pathname = usePathname();
+// Component that uses useSearchParams wrapped in Suspense
+function AnalyticsTracker({ pathname }: { pathname: string }) {
   const searchParams = useSearchParams();
-
-  useEffect(() => {
-    // Initialize analytics on mount
-    analytics.initializeGA4();
-    analytics.setupAutomaticTracking();
-
-    // 🔥 INITIALIZE GUEST TRACKING FOR SUPABASE
-    const initializeGuestTracking = async () => {
-      try {
-        // Check if we need cookie consent (GDPR compliance)
-        if (CookieConsent.needsConsent()) {
-          CookieConsent.setConsent(true); // For now, assume consent
-        }
-
-        // Only proceed if user has given consent
-        if (!CookieConsent.hasConsent()) return;
-
-        // Get or create guest identity
-        const guestIdentity = GuestCookieManager.getOrCreateGuestIdentity();
-        
-        console.log('[ANALYTICS_PROVIDER] Initializing guest tracking:', {
-          guest_id: guestIdentity.guest_id,
-          visit_count: guestIdentity.visit_count,
-          is_returning: GuestCookieManager.isReturningGuest()
-        });
-
-        // Track session start to Supabase
-        await fetch('/api/analytics/advanced-tracking', {
-          method: 'POST',
-          headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({
-            guest_id: guestIdentity.guest_id,
-            event_type: 'session_start',
-            event_data: {
-              entry_page: pathname,
-              referrer: typeof document !== 'undefined' ? document.referrer : '',
-              user_agent: typeof navigator !== 'undefined' ? navigator.userAgent : '',
-              visit_count: guestIdentity.visit_count,
-              is_returning_guest: GuestCookieManager.isReturningGuest(),
-              session_id: guestIdentity.session_id,
-              fingerprint_id: guestIdentity.fingerprint_id
-            },
-            page_url: typeof window !== 'undefined' ? window.location.href : ''
-          })
-        }).catch(error => {
-          console.error('[ANALYTICS_PROVIDER] Error tracking session start:', error);
-        });
-
-      } catch (error) {
-        console.error('[ANALYTICS_PROVIDER] Error initializing guest tracking:', error);
-      }
-    };
-
-    initializeGuestTracking();
-  }, [pathname]);
 
   useEffect(() => {
     // Track page views
@@ -142,7 +87,75 @@ export default function AnalyticsProvider({ children }: { children: React.ReactN
 
   }, [pathname, searchParams]);
 
-  return <>{children}</>;
+  return null;
+}
+
+export default function AnalyticsProvider({ children }: { children: React.ReactNode }) {
+  const pathname = usePathname();
+
+  useEffect(() => {
+    // Initialize analytics on mount
+    analytics.initializeGA4();
+    analytics.setupAutomaticTracking();
+
+    // 🔥 INITIALIZE GUEST TRACKING FOR SUPABASE
+    const initializeGuestTracking = async () => {
+      try {
+        // Check if we need cookie consent (GDPR compliance)
+        if (CookieConsent.needsConsent()) {
+          CookieConsent.setConsent(true); // For now, assume consent
+        }
+
+        // Only proceed if user has given consent
+        if (!CookieConsent.hasConsent()) return;
+
+        // Get or create guest identity
+        const guestIdentity = GuestCookieManager.getOrCreateGuestIdentity();
+        
+        console.log('[ANALYTICS_PROVIDER] Initializing guest tracking:', {
+          guest_id: guestIdentity.guest_id,
+          visit_count: guestIdentity.visit_count,
+          is_returning: GuestCookieManager.isReturningGuest()
+        });
+
+        // Track session start to Supabase
+        await fetch('/api/analytics/advanced-tracking', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({
+            guest_id: guestIdentity.guest_id,
+            event_type: 'session_start',
+            event_data: {
+              entry_page: pathname,
+              referrer: typeof document !== 'undefined' ? document.referrer : '',
+              user_agent: typeof navigator !== 'undefined' ? navigator.userAgent : '',
+              visit_count: guestIdentity.visit_count,
+              is_returning_guest: GuestCookieManager.isReturningGuest(),
+              session_id: guestIdentity.session_id,
+              fingerprint_id: guestIdentity.fingerprint_id
+            },
+            page_url: typeof window !== 'undefined' ? window.location.href : ''
+          })
+        }).catch(error => {
+          console.error('[ANALYTICS_PROVIDER] Error tracking session start:', error);
+        });
+
+      } catch (error) {
+        console.error('[ANALYTICS_PROVIDER] Error initializing guest tracking:', error);
+      }
+    };
+
+    initializeGuestTracking();
+  }, [pathname]);
+
+  return (
+    <>
+      <Suspense fallback={null}>
+        <AnalyticsTracker pathname={pathname} />
+      </Suspense>
+      {children}
+    </>
+  );
 }
 
 // Custom hooks for tracking specific events
