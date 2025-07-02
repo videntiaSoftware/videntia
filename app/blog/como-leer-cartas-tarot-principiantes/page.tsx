@@ -126,7 +126,7 @@ export default function ComoLeerCartasTarot() {
           <div className="bg-indigo-900/50 p-6 rounded-lg border border-indigo-600">
             <h3 className="text-lg font-bold text-indigo-300 mb-3">💡 Consejo del Experto</h3>
             <p className="text-indigo-200 text-sm">
-              <strong>Tu primera baraja debe "hablarte".</strong> Visita una tienda esotérica si es posible 
+              <strong>Tu primera baraja debe &quot;hablarte&quot;.</strong> Visita una tienda esotérica si es posible 
               y toca diferentes barajas. La que genere una sensación especial será tu compañera ideal. 
               La conexión energética es más importante que las recomendaciones teóricas.
             </p>
@@ -227,7 +227,7 @@ export default function ComoLeerCartasTarot() {
           
           <div className="space-y-8">
             <div className="bg-slate-800/50 p-6 rounded-lg border border-purple-600">
-              <h3 className="text-xl font-bold text-purple-300 mb-4">🃏 Tirada de 1 Carta - "Carta del Día"</h3>
+              <h3 className="text-xl font-bold text-purple-300 mb-4">🃏 Tirada de 1 Carta - &quot;Carta del Día&quot;</h3>
               <div className="grid md:grid-cols-2 gap-6">
                 <div>
                   <h4 className="font-bold text-purple-300 mb-2">Propósito:</h4>
@@ -237,9 +237,9 @@ export default function ComoLeerCartasTarot() {
                   </p>
                   <h4 className="font-bold text-purple-300 mb-2">Preguntas Ideales:</h4>
                   <ul className="text-purple-200 space-y-1 text-sm">
-                    <li>• "¿Qué energía necesito hoy?"</li>
-                    <li>• "¿En qué debo enfocarme?"</li>
-                    <li>• "¿Qué mensaje tengo para hoy?"</li>
+                    <li>• &quot;¿Qué energía necesito hoy?&quot;</li>
+                    <li>• &quot;¿En qué debo enfocarme?&quot;</li>
+                    <li>• &quot;¿Qué mensaje tengo para hoy?&quot;</li>
                   </ul>
                 </div>
                 <div className="bg-purple-900/30 p-4 rounded">
@@ -256,7 +256,7 @@ export default function ComoLeerCartasTarot() {
             </div>
 
             <div className="bg-slate-800/50 p-6 rounded-lg border border-purple-600">
-              <h3 className="text-xl font-bold text-purple-300 mb-4">🃏🃏🃏 Tirada de 3 Cartas - "Pasado, Presente, Futuro"</h3>
+              <h3 className="text-xl font-bold text-purple-300 mb-4">🃏🃏🃏 Tirada de 3 Cartas - &quot;Pasado, Presente, Futuro&quot;</h3>
               <div className="grid md:grid-cols-3 gap-4 mb-4">
                 <div className="text-center bg-purple-900/30 p-4 rounded">
                   <h4 className="font-bold text-purple-300 mb-2">Posición 1: PASADO</h4>
@@ -327,7 +327,7 @@ export default function ComoLeerCartasTarot() {
                 <li>✅ Las interpretaciones fluyen más naturalmente</li>
                 <li>✅ Conectas símbolos sin consultar manuales</li>
                 <li>✅ Sientes cuando una interpretación es correcta</li>
-                <li>✅ Las cartas parecen "hablar" contigo</li>
+                <li>✅ Las cartas parecen &quot;hablar&quot; contigo</li>
                 <li>✅ Tus lecturas resuenan con los consultantes</li>
                 <li>✅ Confías más en tus primeras impresiones</li>
               </ul>
@@ -359,7 +359,7 @@ export default function ComoLeerCartasTarot() {
                     <li>• Leer solo para uno mismo al inicio</li>
                     <li>• Ignorar la intuición por el manual</li>
                     <li>• Esperar predicciones exactas</li>
-                    <li>• Temer a las cartas "negativas"</li>
+                    <li>• Temer a las cartas &quot;negativas&quot;</li>
                   </ul>
                 </div>
                 <div>

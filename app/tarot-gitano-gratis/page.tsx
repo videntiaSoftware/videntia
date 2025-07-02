@@ -261,15 +261,15 @@ export default function TarotGitanoGratis() {
             <div className="grid md:grid-cols-2 gap-6">
               <div className="bg-slate-800/50 p-6 rounded-lg border border-amber-600">
                 <p className="text-amber-200 italic mb-4">
-                  "Las lecturas gitanas me conectaron con una sabiduría profunda que no encontré 
-                  en otros tipos de tarot. Los mensajes son claros y transformadores."
+                  &quot;Las lecturas gitanas me conectaron con una sabiduría profunda que no encontré 
+                  en otros tipos de tarot. Los mensajes son claros y transformadores.&quot;
                 </p>
                 <div className="text-amber-300 font-semibold">- María Elena, Buenos Aires</div>
               </div>
               <div className="bg-slate-800/50 p-6 rounded-lg border border-amber-600">
                 <p className="text-amber-200 italic mb-4">
-                  "La tradición gitana aporta una perspectiva única. Siento que las cartas 
-                  hablan directamente a mi alma y me muestran caminos que no había considerado."
+                  &quot;La tradición gitana aporta una perspectiva única. Siento que las cartas 
+                  hablan directamente a mi alma y me muestran caminos que no había considerado.&quot;
                 </p>
                 <div className="text-amber-300 font-semibold">- Carlos Roberto, Córdoba</div>
               </div>

@@ -234,23 +234,23 @@ export default function TarotDelSiONo() {
                 <div>
                   <h3 className="text-xl font-bold text-green-400 mb-4">✅ Preguntas Efectivas</h3>
                   <ul className="space-y-2 text-green-300">
-                    <li>• "¿Debo aceptar esta oferta de trabajo?"</li>
-                    <li>• "¿Es Juan la persona indicada para mí?"</li>
-                    <li>• "¿Tendré éxito si inicio este negocio?"</li>
-                    <li>• "¿Debo mudarme a otra ciudad?"</li>
-                    <li>• "¿Es buen momento para invertir?"</li>
-                    <li>• "¿Debo hablar con mi ex pareja?"</li>
+                    <li>• &quot;¿Debo aceptar esta oferta de trabajo?&quot;</li>
+                    <li>• &quot;¿Es Juan la persona indicada para mí?&quot;</li>
+                    <li>• &quot;¿Tendré éxito si inicio este negocio?&quot;</li>
+                    <li>• &quot;¿Debo mudarme a otra ciudad?&quot;</li>
+                    <li>• &quot;¿Es buen momento para invertir?&quot;</li>
+                    <li>• &quot;¿Debo hablar con mi ex pareja?&quot;</li>
                   </ul>
                 </div>
                 <div>
                   <h3 className="text-xl font-bold text-red-400 mb-4">❌ Evita estas preguntas</h3>
                   <ul className="space-y-2 text-red-300">
-                    <li>• "¿Cuándo voy a encontrar el amor?" (no es sí/no)</li>
-                    <li>• "¿Por qué me pasa esto?" (muy amplia)</li>
-                    <li>• "¿Qué debo hacer?" (no específica)</li>
-                    <li>• "¿Soy feliz?" (muy subjetiva)</li>
-                    <li>• "¿Cómo será mi futuro?" (muy general)</li>
-                    <li>• "¿Me ama?" (sin contexto específico)</li>
+                    <li>• &quot;¿Cuándo voy a encontrar el amor?&quot; (no es sí/no)</li>
+                    <li>• &quot;¿Por qué me pasa esto?&quot; (muy amplia)</li>
+                    <li>• &quot;¿Qué debo hacer?&quot; (no específica)</li>
+                    <li>• &quot;¿Soy feliz?&quot; (muy subjetiva)</li>
+                    <li>• &quot;¿Cómo será mi futuro?&quot; (muy general)</li>
+                    <li>• &quot;¿Me ama?&quot; (sin contexto específico)</li>
                   </ul>
                 </div>
               </div>

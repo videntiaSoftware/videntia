@@ -183,10 +183,10 @@ export default function TiradasTarotCompletas() {
                   
                   <h4 className="text-lg font-bold text-emerald-300 mb-4 mt-6">Preguntas Ideales</h4>
                   <ul className="text-emerald-200 space-y-1 text-sm">
-                    <li>• "¿Qué energía necesito hoy?"</li>
-                    <li>• "¿En qué debo enfocarme?"</li>
-                    <li>• "¿Cuál es mi mensaje para hoy?"</li>
-                    <li>• "¿Qué actitud me conviene adoptar?"</li>
+                    <li>• &quot;¿Qué energía necesito hoy?&quot;</li>
+                    <li>• &quot;¿En qué debo enfocarme?&quot;</li>
+                    <li>• &quot;¿Cuál es mi mensaje para hoy?&quot;</li>
+                    <li>• &quot;¿Qué actitud me conviene adoptar?&quot;</li>
                   </ul>
                 </div>
                 
@@ -195,7 +195,7 @@ export default function TiradasTarotCompletas() {
                   <ol className="text-emerald-200 space-y-2 text-sm">
                     <li>1. <strong>Preparación:</strong> Medita 2-3 minutos sobre tu pregunta</li>
                     <li>2. <strong>Mezcla:</strong> Baraja las cartas concentrándote en tu intención</li>
-                    <li>3. <strong>Selección:</strong> Saca la carta de arriba o la que te "llame"</li>
+                    <li>3. <strong>Selección:</strong> Saca la carta de arriba o la que te &quot;llame&quot;</li>
                     <li>4. <strong>Reflexión:</strong> Observa la carta 30 segundos antes de interpretarla</li>
                     <li>5. <strong>Interpretación:</strong> Conecta el significado con tu pregunta</li>
                     <li>6. <strong>Aplicación:</strong> Piensa cómo aplicar el mensaje durante el día</li>
@@ -399,10 +399,10 @@ export default function TiradasTarotCompletas() {
                 <div>
                   <h4 className="text-lg font-bold text-emerald-300 mb-4">Ideal Para Preguntas Como:</h4>
                   <ul className="text-emerald-200 space-y-2 text-sm">
-                    <li>• "¿Debo cambiar de trabajo?"</li>
-                    <li>• "¿Cómo evolucionará mi relación?"</li>
-                    <li>• "¿Es buen momento para mudarme?"</li>
-                    <li>• "¿Qué me depara este nuevo proyecto?"</li>
+                    <li>• &quot;¿Debo cambiar de trabajo?&quot;</li>
+                    <li>• &quot;¿Cómo evolucionará mi relación?&quot;</li>
+                    <li>• &quot;¿Es buen momento para mudarme?&quot;</li>
+                    <li>• &quot;¿Qué me depara este nuevo proyecto?&quot;</li>
                   </ul>
                   
                   <div className="mt-6 bg-emerald-900/30 p-4 rounded">
@@ -612,7 +612,7 @@ export default function TiradasTarotCompletas() {
                   <li><strong>Primera impresión:</strong> Anota tu reacción inmediata antes de analizar</li>
                   <li><strong>Carta dominante:</strong> Identifica cuál carta tiene más presencia visual</li>
                   <li><strong>Carta sombra:</strong> La que te genera más resistencia o rechazo</li>
-                  <li><strong>Diálogo interno:</strong> "Pregunta" mentalmente a cada carta su mensaje</li>
+                  <li><strong>Diálogo interno:</strong> &quot;Pregunta&quot; mentalmente a cada carta su mensaje</li>
                   <li><strong>Síntesis final:</strong> Una frase que resuma toda la tirada</li>
                 </ul>
               </div>

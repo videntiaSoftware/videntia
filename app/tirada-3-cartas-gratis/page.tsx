@@ -202,11 +202,11 @@ export default function Tirada3CartasGratis() {
                 <div>
                   <h3 className="text-xl font-bold text-indigo-300 mb-4">Preguntas Efectivas</h3>
                   <ul className="space-y-3 text-indigo-200">
-                    <li>💕 "¿Cómo evoluciona mi relación?"</li>
-                    <li>💼 "¿Qué me espera en mi trabajo?"</li>
-                    <li>🏠 "¿Es buen momento para este cambio?"</li>
-                    <li>💰 "¿Cómo mejora mi situación financiera?"</li>
-                    <li>🌟 "¿Qué necesito saber hoy?"</li>
+                    <li>💕 &quot;¿Cómo evoluciona mi relación?&quot;</li>
+                    <li>💼 &quot;¿Qué me espera en mi trabajo?&quot;</li>
+                    <li>🏠 &quot;¿Es buen momento para este cambio?&quot;</li>
+                    <li>💰 &quot;¿Cómo mejora mi situación financiera?&quot;</li>
+                    <li>🌟 &quot;¿Qué necesito saber hoy?&quot;</li>
                   </ul>
                 </div>
               </div>
