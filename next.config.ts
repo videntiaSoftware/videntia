@@ -21,7 +21,7 @@ const nextConfig: NextConfig = {
   generateEtags: false,
   // Optimización adicional
   experimental: {
-    optimizeCss: true,
+    // optimizeCss: true, // Disabled temporarily - requires critters dependency
     gzipSize: true,
   },
 };
