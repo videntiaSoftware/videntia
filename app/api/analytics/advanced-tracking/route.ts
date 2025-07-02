@@ -41,6 +41,37 @@ export async function POST(req: NextRequest) {
     // 2. Enriquecer datos con geolocation y device info
     const enrichedData = await enrichEventData(req, event_data);
 
+    // 🔥 Save geolocation data to guest_geolocation table
+    if (enrichedData.country_code && enrichedData.country_code !== 'unknown') {
+      const { error: geoError } = await supabase
+        .from('guest_geolocation')
+        .upsert({
+          guest_id,
+          ip_address: enrichedData.ip_address || getClientIP(req),
+          country_code: enrichedData.country_code,
+          country_name: enrichedData.country || 'Unknown',
+          region_code: enrichedData.region_code || 'Unknown',
+          region_name: enrichedData.region || 'Unknown',
+          city: enrichedData.city || 'Unknown',
+          timezone: enrichedData.timezone || 'Unknown',
+          isp_name: 'Unknown', // Would need additional API call
+          connection_type: 'Unknown',
+          threat_level: 'low',
+          first_seen: new Date().toISOString(),
+          last_seen: new Date().toISOString(),
+          times_seen: 1
+        }, {
+          onConflict: 'guest_id,ip_address',
+          ignoreDuplicates: false
+        });
+
+      if (geoError) {
+        console.error('Error saving geolocation:', geoError);
+      } else {
+        console.log('[ADVANCED_TRACKING] Geolocation saved for guest:', guest_id);
+      }
+    }
+
     // 3. Actualizar insights del usuario (esto se hace automáticamente con el trigger)
     // Pero podemos agregar datos específicos aquí
     if (event_type === 'card_selection' || event_type === 'reading_complete') {

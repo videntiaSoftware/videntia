@@ -4,6 +4,7 @@ import Script from "next/script";
 import "./globals.css";
 import Footer from "@/components/ui/footer";
 import CookieNotice from "@/components/CookieNotice";
+import AnalyticsProvider from "@/components/providers/AnalyticsProvider";
 import { organizationSchema, websiteSchema } from "@/lib/schema";
 import { GSC_CONFIG } from "@/lib/analytics";
 
@@ -189,9 +190,11 @@ export default function RootLayout({
           strategy="lazyOnload"
         />
         
-        <div className="flex-1 flex flex-col w-full max-w-screen overflow-x-auto">
-          {children}
-        </div>
+        <AnalyticsProvider>
+          <div className="flex-1 flex flex-col w-full max-w-screen overflow-x-auto">
+            {children}
+          </div>
+        </AnalyticsProvider>
         <Footer />
         <CookieNotice />
       </body>

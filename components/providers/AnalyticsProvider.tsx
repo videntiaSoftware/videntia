@@ -3,6 +3,7 @@
 import { useEffect } from 'react';
 import { usePathname, useSearchParams } from 'next/navigation';
 import analytics, { trackPageView, trackTarotReading, trackPremiumAdEvent } from '@/lib/analytics';
+import { GuestCookieManager, CookieConsent } from '@/lib/cookies';
 
 export default function AnalyticsProvider({ children }: { children: React.ReactNode }) {
   const pathname = usePathname();
@@ -12,7 +13,56 @@ export default function AnalyticsProvider({ children }: { children: React.ReactN
     // Initialize analytics on mount
     analytics.initializeGA4();
     analytics.setupAutomaticTracking();
-  }, []);
+
+    // 🔥 INITIALIZE GUEST TRACKING FOR SUPABASE
+    const initializeGuestTracking = async () => {
+      try {
+        // Check if we need cookie consent (GDPR compliance)
+        if (CookieConsent.needsConsent()) {
+          CookieConsent.setConsent(true); // For now, assume consent
+        }
+
+        // Only proceed if user has given consent
+        if (!CookieConsent.hasConsent()) return;
+
+        // Get or create guest identity
+        const guestIdentity = GuestCookieManager.getOrCreateGuestIdentity();
+        
+        console.log('[ANALYTICS_PROVIDER] Initializing guest tracking:', {
+          guest_id: guestIdentity.guest_id,
+          visit_count: guestIdentity.visit_count,
+          is_returning: GuestCookieManager.isReturningGuest()
+        });
+
+        // Track session start to Supabase
+        await fetch('/api/analytics/advanced-tracking', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({
+            guest_id: guestIdentity.guest_id,
+            event_type: 'session_start',
+            event_data: {
+              entry_page: pathname,
+              referrer: typeof document !== 'undefined' ? document.referrer : '',
+              user_agent: typeof navigator !== 'undefined' ? navigator.userAgent : '',
+              visit_count: guestIdentity.visit_count,
+              is_returning_guest: GuestCookieManager.isReturningGuest(),
+              session_id: guestIdentity.session_id,
+              fingerprint_id: guestIdentity.fingerprint_id
+            },
+            page_url: typeof window !== 'undefined' ? window.location.href : ''
+          })
+        }).catch(error => {
+          console.error('[ANALYTICS_PROVIDER] Error tracking session start:', error);
+        });
+
+      } catch (error) {
+        console.error('[ANALYTICS_PROVIDER] Error initializing guest tracking:', error);
+      }
+    };
+
+    initializeGuestTracking();
+  }, [pathname]);
 
   useEffect(() => {
     // Track page views
@@ -32,13 +82,53 @@ export default function AnalyticsProvider({ children }: { children: React.ReactN
       contentGroup2 = 'main';
     }
 
+    // Track to Google Analytics
     trackPageView({
-      title: document.title,
-      url: window.location.href,
-      referrer: document.referrer,
+      title: typeof document !== 'undefined' ? document.title : '',
+      url: typeof window !== 'undefined' ? window.location.href : '',
+      referrer: typeof document !== 'undefined' ? document.referrer : '',
       content_group1: contentGroup1,
       content_group2: contentGroup2
     });
+
+    // 🔥 TRACK PAGE VIEWS TO SUPABASE
+    const trackPageViewToSupabase = async () => {
+      try {
+        // Only proceed if user has given consent
+        if (!CookieConsent.hasConsent()) return;
+
+        const guestIdentity = GuestCookieManager.getOrCreateGuestIdentity();
+        
+        console.log('[ANALYTICS_PROVIDER] Tracking page view:', {
+          page: pathname,
+          guest_id: guestIdentity.guest_id
+        });
+
+        await fetch('/api/analytics/advanced-tracking', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({
+            guest_id: guestIdentity.guest_id,
+            event_type: 'page_view',
+            event_data: {
+              page: pathname,
+              content_group1: contentGroup1,
+              content_group2: contentGroup2,
+              url_params: searchParams.toString(),
+              session_id: guestIdentity.session_id,
+              visit_count: guestIdentity.visit_count
+            },
+            page_url: typeof window !== 'undefined' ? window.location.href : ''
+          })
+        }).catch(error => {
+          console.error('[ANALYTICS_PROVIDER] Error tracking page view:', error);
+        });
+      } catch (error) {
+        console.error('[ANALYTICS_PROVIDER] Error in page view tracking:', error);
+      }
+    };
+
+    trackPageViewToSupabase();
 
     // Track SEO page visits for analytics
     if (pathname.startsWith('/seo/')) {
