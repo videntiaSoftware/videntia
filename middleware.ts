@@ -7,7 +7,15 @@ export async function middleware(request: NextRequest) {
 
 export const config = {
   matcher: [
-    // Excluye rutas de API, assets estáticos y archivos comunes
-    '/((?!api/|_next/|favicon.ico|manifest.json|opengraph-image.png|twitter-image.png|robots.txt|sitemap.xml|site.webmanifest|browserconfig.xml|apple-touch-icon|android-chrome|mstile).*)',
+    /*
+     * Match all request paths except:
+     * - _next/static (static files)
+     * - _next/image (image optimization files)
+     * - favicon.ico (favicon file)
+     * - sitemap.xml, robots.txt, manifest.json, opengraph-image.png, twitter-image.png (SEO/static root files)
+     * - images - .svg, .png, .jpg, .jpeg, .gif, .webp
+     * Feel free to modify this pattern to include more paths.
+     */
+    '/((?!_next/static|_next/image|favicon.ico|sitemap.xml|robots.txt|manifest.json|opengraph-image.png|twitter-image.png|.*\\.(?:svg|png|jpg|jpeg|gif|webp)$|api/reading/generate|api/notifications|api/test-email|api/setup-gmail|api/setup-mailgun|api/analytics|api/guest|api/ads).*)',
   ],
 };
