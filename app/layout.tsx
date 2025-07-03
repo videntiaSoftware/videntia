@@ -70,6 +70,9 @@ export const metadata: Metadata = {
     canonical: defaultUrl,
   },
   category: "Entertainment",
+  other: {
+    'google-adsense-account': 'ca-pub-4987669803086382'
+  }
 };
 
 const geistSans = Geist({
@@ -100,6 +103,9 @@ export default function RootLayout({
   return (
     <html lang="es">
       <head>
+        {/* Google AdSense Account Verification */}
+        <meta name="google-adsense-account" content="ca-pub-4987669803086382" />
+        
         {/* Google Search Console Verification */}
         {GSC_CONFIG.verificationMeta && (
           <meta name="google-site-verification" content={GSC_CONFIG.verificationMeta} />

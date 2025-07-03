@@ -347,7 +347,8 @@ ${config.instructions}\nRedacta una conclusión general para esta tirada, integr
     try {
       console.log('[QUESTION_ANALYSIS] Analyzing question for commercial targeting:', questionFromBody);
       
-      const analysisResponse = await fetch(`${process.env.NEXT_PUBLIC_BASE_URL || 'http://localhost:3000'}/api/analytics/question-analysis`, {
+      const baseUrl = process.env.NEXT_PUBLIC_BASE_URL || process.env.NEXT_PUBLIC_SITE_URL || 'http://localhost:3000';
+      const analysisResponse = await fetch(`${baseUrl}/api/analytics/question-analysis`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({

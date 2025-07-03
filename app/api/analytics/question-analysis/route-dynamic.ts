@@ -2,20 +2,7 @@ import { NextRequest, NextResponse } from 'next/server';
 import { createClient } from '@/lib/supabase/client';
 
 /**
- * API para Devuelve SOLO un JSON válido con esta estructura:
-{
-  "primary_category": "una categoría comercial específica (sin limitaciones)",
-  "secondary_categories": ["categoría2", "categoría3"],
-  "generated_tags": ["tag1", "tag2", "tag3", "tag4", "tag5", "tag6", "tag7"],
-  "confidence_score": 8.5,
-  "ad_keywords": ["keyword1", "keyword2", "keyword3", "keyword4", "keyword5"],
-  "demographic_hints": ["age_range", "life_stage", "income_level", "location_type"],
-  "commercial_intent": "high|medium|low",
-  "urgency_level": "immediate|short_term|long_term",
-  "spending_capacity": "high|medium|low",
-  "industry_vertical": "sector específico para targeting",
-  "purchase_intent_score": 8.5
-} preguntas con GEMINI AI y generación de tags comerciales
+ * API para análisis de preguntas con GEMINI AI y generación de tags comerciales
  * CORE del sistema de monetización - Revenue de $0.30 a $5-15 CPM
  */
 
@@ -130,7 +117,7 @@ export async function POST(req: NextRequest) {
 }
 
 /**
- * ANÁLISIS REAL CON GEMINI AI
+ * ANÁLISIS REAL CON GEMINI AI - SISTEMA DINÁMICO
  */
 async function analyzeQuestionWithGeminiAI(questionText: string) {
   try {
@@ -236,7 +223,7 @@ Analiza la pregunta y devuelve SOLO el JSON sin explicaciones adicionales.
         generationConfig: {
           temperature: 0.1, // Muy baja para consistencia máxima
           topK: 1,
-          maxOutputTokens: 800
+          maxOutputTokens: 1000
         }
       })
     });
@@ -296,23 +283,28 @@ Analiza la pregunta y devuelve SOLO el JSON sin explicaciones adicionales.
 }
 
 /**
- * Análisis fallback cuando Gemini AI falla
+ * Análisis fallback cuando Gemini AI falla - SISTEMA DINÁMICO
  */
 function createFallbackAnalysis(questionText: string) {
   const lowerQuestion = questionText.toLowerCase();
   
-  // Palabras clave por categoría
+  // Palabras clave dinámicas por categoría de alto valor
   const categoryKeywords: Record<string, string[]> = {
-    travel: ['viaj', 'vacation', 'hotel', 'vuelo', 'europa', 'playa', 'mudar', 'extranjero'],
-    money: ['dinero', 'trabajo', 'negocio', 'inversion', 'deuda', 'economia', 'plata', 'ganar'],
-    relationships: ['amor', 'pareja', 'matrimonio', 'novio', 'novia', 'ex', 'romance', 'solter'],
-    career: ['trabajo', 'carrera', 'empleo', 'jefe', 'profesional', 'estudios', 'ascenso'],
-    health: ['salud', 'enfermedad', 'doctor', 'medicina', 'bienestar', 'dolor', 'operar'],
-    family: ['familia', 'hijo', 'padre', 'madre', 'hermano', 'bebe', 'embaraz'],
-    spiritual: ['espiritual', 'alma', 'energia', 'proposito', 'crecer', 'karma', 'destino']
+    retirement_planning: ['jubil', 'pension', 'retir', 'ahorr', 'inversion'],
+    real_estate_investment: ['casa', 'propiedad', 'inmueble', 'comprar', 'vender', 'hipoteca'],
+    business_growth: ['negocio', 'empresa', 'emprendimiento', 'comercio', 'sociedad'],
+    medical_procedures: ['operar', 'cirugia', 'tratamiento', 'salud', 'medico'],
+    education_financing: ['estudi', 'universidad', 'curso', 'capacita', 'educacion'],
+    luxury_travel: ['viaj', 'vacation', 'europa', 'crucero', 'lujo'],
+    career_development: ['trabajo', 'carrera', 'empleo', 'ascenso', 'profesional'],
+    relationships: ['amor', 'pareja', 'matrimonio', 'boda', 'divorcio'],
+    automotive: ['auto', 'carro', 'vehiculo', 'moto', 'comprar'],
+    insurance: ['seguro', 'proteccion', 'cobertura', 'poliza'],
+    legal_services: ['abogado', 'legal', 'juicio', 'demanda', 'testamento'],
+    spiritual_guidance: ['espiritual', 'alma', 'energia', 'proposito', 'destino']
   };
 
-  let bestCategory = 'spiritual';
+  let bestCategory = 'spiritual_guidance';
   let maxMatches = 0;
 
   // Encontrar categoría con más coincidencias
@@ -324,19 +316,26 @@ function createFallbackAnalysis(questionText: string) {
     }
   }
 
-  // Generar tags básicos
-  const tags = [`${bestCategory}_intent`];
-  if (maxMatches > 0) {
-    tags.push('clear_intent');
-  }
+  // Generar tags dinámicos
+  const tags = [
+    `${bestCategory}_intent`,
+    maxMatches > 0 ? 'clear_intent' : 'general_inquiry',
+    'spanish_market',
+    'adult_demographic'
+  ];
 
   return {
     primary_category: bestCategory,
+    secondary_categories: ['general_guidance'],
     generated_tags: tags,
     confidence_score: Math.min(10, 3 + maxMatches * 2),
-    ad_keywords: categoryKeywords[bestCategory].slice(0, 3),
-    demographic_hints: ['adult', 'general'],
-    commercial_intent: maxMatches > 1 ? 'medium' : 'low'
+    ad_keywords: categoryKeywords[bestCategory]?.slice(0, 4) || ['general', 'advice'],
+    demographic_hints: ['adult', 'spanish_speaking', 'argentina'],
+    commercial_intent: maxMatches > 1 ? 'medium' : 'low',
+    urgency_level: 'short_term',
+    spending_capacity: 'medium',
+    industry_vertical: bestCategory,
+    purchase_intent_score: Math.min(10, 2 + maxMatches * 2)
   };
 }
 
@@ -420,5 +419,3 @@ export async function GET(req: NextRequest) {
     return NextResponse.json({ error: 'Error interno del servidor' }, { status: 500 });
   }
 }
-
-
