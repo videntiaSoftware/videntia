@@ -45,12 +45,48 @@ export async function updateSession(request: NextRequest) {
     data: { user },
   } = await supabase.auth.getUser();
 
-  if (
-    request.nextUrl.pathname !== "/" &&
-    !user &&
-    !request.nextUrl.pathname.startsWith("/login") &&
-    !request.nextUrl.pathname.startsWith("/auth")
-  ) {
+  // Lista de rutas que NO requieren autenticación
+  const publicRoutes = [
+    "/",
+    "/sitemap.xml",
+    "/robots.txt",
+    "/favicon.ico",
+    "/manifest.json",
+    "/auth",
+    "/login",
+    "/api/reading/generate",
+    "/api/analytics",
+    "/api/guest",
+    "/api/ads",
+    "/api/notifications",
+    "/seo",
+    "/blog",
+    "/faq",
+    "/guias",
+    "/politica-privacidad",
+    "/terminos-condiciones",
+    "/contacto",
+    "/cartas",
+    "/lecturas",
+    "/premium",
+    "/consulta-tarot-gratis",
+    "/lectura-tarot-amor-gratis",
+    "/tarot-del-si-o-no",
+    "/tarot-gitano-gratis",
+    "/tirada-3-cartas-gratis",
+    "/tirada-cartas-amor-gratis",
+    "/videncia-online-gratis",
+    "/horoscopo-diario-gratis",
+    "/numerologia-gratis"
+  ];
+
+  // Verificar si la ruta actual es pública
+  const isPublicRoute = publicRoutes.some(route => 
+    request.nextUrl.pathname === route || 
+    request.nextUrl.pathname.startsWith(route + "/")
+  );
+
+  if (!user && !isPublicRoute) {
     // no user, potentially respond by redirecting the user to the login page
     const url = request.nextUrl.clone();
     url.pathname = "/auth/login";
