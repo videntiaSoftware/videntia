@@ -88,7 +88,7 @@ function generateEmailTemplate(data: DailyCardEmailData): string {
 
         <!-- CTA Button -->
         <div style="text-align: center;">
-          <a href="${process.env.NEXT_PUBLIC_SITE_URL}/protected" 
+          <a href="${process.env.NEXT_PUBLIC_SITE_URL}/" 
              style="display: inline-block; background: linear-gradient(135deg, #6366f1 0%, #8b5cf6 100%); color: white; text-decoration: none; padding: 12px 30px; border-radius: 8px; font-weight: bold; font-size: 16px;">
             🔮 Descubre más en Videntia
           </a>
@@ -121,7 +121,7 @@ ${data.interpretation}
 
 ${data.cardMeaning}
 
-🔮 Descubre más lecturas en: ${process.env.NEXT_PUBLIC_SITE_URL}/protected
+🔮 Descubre más lecturas en: ${process.env.NEXT_PUBLIC_SITE_URL}/
 
 ---
 © 2025 Videntia - Descubre tu camino a través del tarot

@@ -32,9 +32,8 @@ export function LoginForm({
     setIsLoading(true);
     setError(null);
     try {
-      const redirectTo =
-        (process.env.NEXT_PUBLIC_SITE_URL ||
-          window.location.origin) + "/protected";
+      // Redirigir al inicio donde están todas las lecturas gratuitas
+      const redirectTo = `${process.env.NEXT_PUBLIC_SITE_URL || 'https://videntia.vercel.app'}/`;
       const { error } = await supabase.auth.signInWithOAuth({
         provider: "google",
         options: {
@@ -61,7 +60,7 @@ export function LoginForm({
         password,
       });
       if (error) throw error;
-      router.push("/protected");
+      router.push("/");
     } catch (error: unknown) {
       setError(error instanceof Error ? error.message : "Ocurrió un error");
     } finally {

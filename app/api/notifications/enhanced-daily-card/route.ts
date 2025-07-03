@@ -204,7 +204,7 @@ class PersonalizedDailyCardService {
                     ¿Qué mensaje especial esconde para ti? 🤔
                 </p>
                 
-                <a href="${process.env.NEXT_PUBLIC_SITE_URL || 'https://videntia.com'}/protected" 
+                <a href="${process.env.NEXT_PUBLIC_SITE_URL || 'https://videntia.com'}/" 
                    style="display: inline-block; background: linear-gradient(135deg, #d4af37 0%, #b8860b 100%); color: white; text-decoration: none; padding: 15px 35px; border-radius: 30px; font-weight: bold; font-size: 16px; box-shadow: 0 8px 25px rgba(212, 175, 55, 0.3); transition: all 0.3s ease;">
                     Descubrir mi mensaje →
                 </a>
@@ -480,7 +480,7 @@ function generatePersonalizedEmailTemplate(userName: string, reading: any) {
             
             <!-- CTA Button -->
             <div style="margin: 25px 0;">
-                <a href="${process.env.NEXT_PUBLIC_SITE_URL || 'https://videntia.com'}/protected" 
+                <a href="${process.env.NEXT_PUBLIC_SITE_URL || 'https://videntia.com'}/" 
                    style="display: inline-block; background: linear-gradient(135deg, #d69e2e 0%, #b7791f 100%); color: white; text-decoration: none; padding: 12px 30px; border-radius: 25px; font-weight: bold; font-size: 16px; box-shadow: 0 4px 15px rgba(214, 158, 46, 0.3);">
                     Ver mi lectura completa →
                 </a>

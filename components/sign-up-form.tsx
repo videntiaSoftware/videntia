@@ -36,9 +36,8 @@ export function SignUpForm({
     setIsLoading(true);
     setError(null);
     try {
-      const redirectTo =
-        (process.env.NEXT_PUBLIC_SITE_URL ||
-          window.location.origin) + "/protected";
+      // Redirigir al inicio donde están todas las lecturas gratuitas
+      const redirectTo = `${process.env.NEXT_PUBLIC_SITE_URL || 'https://videntia.vercel.app'}/`;
       const { error } = await supabase.auth.signInWithOAuth({
         provider: "google",
         options: {
@@ -76,7 +75,7 @@ export function SignUpForm({
         email,
         password,
         options: {
-          emailRedirectTo: `${window.location.origin}/protected`,
+          emailRedirectTo: `${process.env.NEXT_PUBLIC_SITE_URL || 'https://videntia.vercel.app'}/`,
           data: {
             phone: phone || null,
             daily_notifications_enabled: acceptNotifications
