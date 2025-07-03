@@ -12,10 +12,11 @@ export const config = {
      * - _next/static (static files)
      * - _next/image (image optimization files)
      * - favicon.ico (favicon file)
-     * - sitemap.xml, robots.txt, manifest.json, opengraph-image.png, twitter-image.png (SEO/static root files)
+     * - sitemap.xml, robots.txt, manifest.json (SEO files)
      * - images - .svg, .png, .jpg, .jpeg, .gif, .webp
-     * Feel free to modify this pattern to include more paths.
+     * - public API routes
+     * All public routes are handled in the middleware logic, not here
      */
-    '/((?!_next/static|_next/image|favicon.ico|sitemap.xml|robots.txt|manifest.json|opengraph-image.png|twitter-image.png|.*\\.(?:svg|png|jpg|jpeg|gif|webp)$|api/reading/generate|api/notifications|api/test-email|api/setup-gmail|api/setup-mailgun|api/analytics|api/guest|api/ads).*)',
+    '/((?!_next/static|_next/image|favicon.ico|sitemap.xml|robots.txt|manifest.json|opengraph-image.png|twitter-image.png|.*\\.(?:svg|png|jpg|jpeg|gif|webp)$).*)',
   ],
 };
