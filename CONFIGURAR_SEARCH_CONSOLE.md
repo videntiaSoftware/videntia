@@ -5,10 +5,13 @@
 ### Google Search Console:
 1. Ve a: https://search.google.com/search-console/
 2. Haz clic en "Añadir propiedad"
-3. Selecciona "Prefijo de URL"
+3. ✅ **Selecciona "Prefijo de URL"** (NO "Dominio")
 4. Ingresa: **https://videntia.vercel.app** (¡El subdominio de Vercel funciona perfectamente!)
-5. Elige método: "Etiqueta HTML"
-6. Copia el código que aparece en `content="XXXXXXX"`
+5. Haz clic en "Continuar"
+6. ✅ **Selecciona método "Etiqueta HTML"** (es el más confiable)
+7. Copia el código que aparece en `content="XXXXXXX"`
+
+> 🚨 **IMPORTANTE:** NO elijas "Dominio" porque requiere configuración DNS que no puedes hacer en Vercel.
 
 > 💡 **NOTA IMPORTANTE:** Google Search Console acepta subdominios `.vercel.app` sin problemas. NO necesitas comprar un dominio propio para empezar.
 
