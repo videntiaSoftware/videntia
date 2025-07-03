@@ -13,8 +13,9 @@ export const config = {
      * - _next/image (image optimization files)
      * - favicon.ico (favicon file)
      * - images - .svg, .png, .jpg, .jpeg, .gif, .webp
+     * - sitemap.xml and robots.txt (SEO files)
      * Feel free to modify this pattern to include more paths.
      */
-    '/((?!_next/static|_next/image|favicon.ico|.*\\.(?:svg|png|jpg|jpeg|gif|webp)$|api/reading/generate|api/notifications|api/test-email|api/setup-gmail|api/setup-mailgun|api/analytics|api/guest|api/ads).*)',
+    '/((?!_next/static|_next/image|favicon.ico|sitemap.xml|robots.txt|.*\\.(?:svg|png|jpg|jpeg|gif|webp)$|api/reading/generate|api/notifications|api/test-email|api/setup-gmail|api/setup-mailgun|api/analytics|api/guest|api/ads).*)',
   ],
 };
