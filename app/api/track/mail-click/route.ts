@@ -9,7 +9,7 @@ export async function GET(request: NextRequest) {
     const card = searchParams.get('card');
     const date = searchParams.get('date');
     const referer = request.headers.get('referer') || null;
-    const ip = request.headers.get('x-forwarded-for') || request.ip || null;
+    const ip = request.headers.get('x-forwarded-for') || request.headers.get('x-real-ip') || null;
     const userAgent = request.headers.get('user-agent') || null;
 
     // Basic validation
