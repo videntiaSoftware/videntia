@@ -15,6 +15,7 @@ interface DailyCardEmailData {
   interpretation: string;
   cardMeaning: string;
   imageUrl?: string;
+  trackingUrl?: string;
 }
 
 export async function sendDailyCardEmail(data: DailyCardEmailData): Promise<boolean> {
@@ -88,9 +89,9 @@ function generateEmailTemplate(data: DailyCardEmailData): string {
 
         <!-- CTA Button -->
         <div style="text-align: center;">
-          <a href="${process.env.NEXT_PUBLIC_SITE_URL}/" 
+          <a href="${data.trackingUrl || process.env.NEXT_PUBLIC_SITE_URL || 'https://videntia.com'}" 
              style="display: inline-block; background: linear-gradient(135deg, #6366f1 0%, #8b5cf6 100%); color: white; text-decoration: none; padding: 12px 30px; border-radius: 8px; font-weight: bold; font-size: 16px;">
-            🔮 Descubre más en Videntia
+            🔮 Descubre tu lectura completa
           </a>
         </div>
       </div>

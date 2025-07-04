@@ -73,16 +73,20 @@ export async function POST(request: NextRequest) {
 
           const cardReading = reading[0];
           
-          // 4. Enviar email REAL con Gmail SMTP
+          // 4. Generate tracking URL for email analytics
+          const trackingUrl = `https://videntia.vercel.app/api/track/mail-click?uid=${user.user_id}&card=${encodeURIComponent(cardReading.card_name)}&date=${new Date().toISOString().split('T')[0]}`;
+          
+          // 5. Enviar email REAL con Gmail SMTP
           const emailSent = await sendDailyCardEmail({
             email: user.email,
             cardName: cardReading.card_name,
             interpretation: cardReading.interpretation,
             cardMeaning: cardReading.card_meaning,
-            imageUrl: cardReading.image_url
+            imageUrl: cardReading.image_url,
+            trackingUrl: trackingUrl
           });
           
-          // 5. Registrar envío en la base de datos
+          // 6. Registrar envío en la base de datos
           if (emailSent) {
             await supabaseAdmin
               .from('daily_email_logs')
@@ -199,7 +203,8 @@ async function sendToTestUsers() {
           cardName: cardReading.card_name,
           interpretation: cardReading.interpretation,
           cardMeaning: cardReading.card_meaning,
-          imageUrl: cardReading.image_url
+          imageUrl: cardReading.image_url,
+          trackingUrl: `https://videntia.vercel.app/api/track/mail-click?uid=${user.id}&card=${encodeURIComponent(cardReading.card_name)}&date=${new Date().toISOString().split('T')[0]}`
         });
         
         results.push({
@@ -236,81 +241,139 @@ async function sendToTestUsers() {
 // GET - Disparar envío masivo manualmente (mismo proceso que cron job)
 export async function GET() {
   try {
-    const supabase = await createClient();
+    console.log('🌅 [ENVÍO MASIVO] Iniciando envío diario a TODOS los usuarios registrados...');
     
-    console.log('🌅 [ENVÍO MASIVO MANUAL] Iniciando envío diario...');
+    // Verificar si tenemos service role key
+    const serviceRoleKey = process.env.SUPABASE_SERVICE_ROLE_KEY;
     
-    // 1. Para desarrollo, usar usuarios de prueba
-    // En producción, necesitarás configurar service role key
-    const testUsers = [
-      { email: 'test1@videntia.com', id: '1' },
-      { email: 'test2@videntia.com', id: '2' },
-      { email: 'test3@videntia.com', id: '3' },
-      { email: 'usuario@ejemplo.com', id: '4' },
-      { email: 'demo@videntia.com', id: '5' }
-    ];
+    if (!serviceRoleKey) {
+      console.warn('⚠️ SUPABASE_SERVICE_ROLE_KEY no configurada, usando usuarios de prueba');
+      return await sendToTestUsers();
+    }
+    
+    const supabaseAdmin = createSupabaseAdmin();
+    
+    // Obtener usuarios pendientes usando la función SQL
+    console.log('👥 Obteniendo usuarios pendientes de email...');
+    const { data: users, error: usersError } = await supabaseAdmin
+      .rpc('get_users_pending_daily_email');
 
+    if (usersError) {
+      console.error('❌ Error obteniendo usuarios:', usersError);
+      return NextResponse.json({ 
+        success: false, 
+        error: 'Error obteniendo usuarios pendientes' 
+      }, { status: 500 });
+    }
+
+    if (!users || users.length === 0) {
+      console.log('📭 No hay usuarios pendientes de email diario');
+      return NextResponse.json({ 
+        success: true, 
+        message: 'No hay usuarios pendientes de email',
+        sent: 0 
+      });
+    }
+
+    console.log(`📊 Encontrados ${users.length} usuarios pendientes de email`);
+
+    let successCount = 0;
+    let errorCount = 0;
+    const errors: string[] = [];
     const results = [];
-    
-    // 2. Iterar por cada usuario de prueba
-    for (const user of testUsers) {
+
+    // Procesar cada usuario
+    for (const user of users) {
       try {
-        // 3. Obtener carta e interpretación aleatoria
+        console.log(`📧 Procesando: ${user.email}`);
+        
+        // Obtener carta aleatoria usando la función existente
+        const supabase = await createClient();
         const { data: reading, error: readingError } = await supabase.rpc('get_random_daily_reading');
         
         if (readingError || !reading || reading.length === 0) {
-          console.error(`Error generando lectura para ${user.email}:`, readingError);
+          console.error(`❌ Error generando lectura para ${user.email}:`, readingError);
+          errors.push(`Error generando lectura para ${user.email}`);
+          errorCount++;
           continue;
         }
 
         const cardReading = reading[0];
-        
-        // 4. Enviar email REAL con Resend
+
+        // Crear URL con parámetros de tracking
+        const trackingUrl = `https://videntia.vercel.app/api/track/mail-click?uid=${user.user_id}&card=${encodeURIComponent(cardReading.card_name)}&date=${new Date().toISOString().split('T')[0]}`;
+
+        // Enviar email con tracking
         const emailSent = await sendDailyCardEmail({
           email: user.email,
           cardName: cardReading.card_name,
           interpretation: cardReading.interpretation,
           cardMeaning: cardReading.card_meaning,
-          imageUrl: cardReading.image_url
+          imageUrl: cardReading.image_url,
+          trackingUrl: trackingUrl
         });
-        
+
+        if (emailSent) {
+          console.log(`✅ Email enviado exitosamente a ${user.email}: ${cardReading.card_name}`);
+          
+          // Registrar en daily_email_logs
+          await supabaseAdmin
+            .from('daily_email_logs')
+            .insert({
+              user_id: user.user_id,
+              email: user.email,
+              card_name: cardReading.card_name,
+              email_status: 'sent'
+            });
+
+          successCount++;
+        } else {
+          console.error(`❌ Error enviando email a ${user.email}`);
+          errors.push(`Error enviando email a ${user.email}`);
+          errorCount++;
+        }
+
         results.push({
           email: user.email,
           card: cardReading.card_name,
           interpretation: cardReading.interpretation.substring(0, 50) + '...',
-          emailSent
+          emailSent,
+          timestamp: new Date().toISOString()
         });
-        
-        console.log(`📧 Enviado a ${user.email}: ${cardReading.card_name}`);
-        
+
       } catch (error) {
-        console.error(`Error procesando usuario ${user.email}:`, error);
-        results.push({
-          email: user.email,
-          error: error instanceof Error ? error.message : 'Error desconocido',
-          emailSent: false
-        });
+        console.error(`❌ Error procesando ${user.email}:`, error);
+        errors.push(`Error procesando ${user.email}: ${error}`);
+        errorCount++;
       }
     }
-    
-    const emailsSent = results.filter(r => r.emailSent).length;
-    
-    console.log(`✅ Proceso completado: ${emailsSent}/${testUsers.length} emails enviados`);
-    
+
+    // Mostrar resumen
+    console.log('\n📈 RESUMEN DEL ENVÍO MASIVO:');
+    console.log(`👥 Total usuarios: ${users.length}`);
+    console.log(`✅ Usuarios con email confirmado: ${users.filter(u => u.email_confirmed).length}`);
+    console.log(`📧 Emails enviados exitosamente: ${successCount}`);
+    console.log(`❌ Errores: ${errorCount}`);
+    console.log(`📊 Tasa de éxito: ${((successCount / users.length) * 100).toFixed(1)}%`);
+
     return NextResponse.json({
       success: true,
-      message: `[MANUAL] Cartas enviadas a ${emailsSent} de ${testUsers.length} usuarios de prueba`,
-      totalUsers: testUsers.length,
-      emailsSent,
+      message: 'Envío masivo completado',
+      stats: {
+        total: users.length,
+        sent: successCount,
+        errors: errorCount,
+        successRate: ((successCount / users.length) * 100).toFixed(1) + '%'
+      },
       results,
-      note: "Usando usuarios de prueba. Para producción, configura service role key."
+      errors: errors.length > 0 ? errors : undefined
     });
 
   } catch (error) {
-    console.error('Error en envío masivo manual:', error);
+    console.error('❌ Error en el endpoint de envío masivo:', error);
     return NextResponse.json({ 
-      error: 'Error interno', 
-      details: error instanceof Error ? error.message : 'Error desconocido'
+      success: false, 
+      error: 'Error interno del servidor' 
     }, { status: 500 });
   }
 }
