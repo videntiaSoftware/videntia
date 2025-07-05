@@ -11,9 +11,9 @@ export const metadata: Metadata = {
   openGraph: {
     title: 'Significados de los Arcanos Mayores | Blog Videntia Tarot',
     description: 'Aprende a interpretar los Arcanos Mayores del tarot con nuestra guía completa.',
-    url: 'https://videntia-tarot.vercel.app/blog/significados-arcanos-mayores'
+    url: 'https://videntiatarot.com/blog/significados-arcanos-mayores'
   },
-  alternates: { canonical: 'https://videntia-tarot.vercel.app/blog/significados-arcanos-mayores' }
+  alternates: { canonical: 'https://videntiatarot.com/blog/significados-arcanos-mayores' }
 }
 
 export default function SignificadosArcanosMayoresPost() {

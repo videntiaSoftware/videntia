@@ -32,7 +32,7 @@ export async function GET(request: NextRequest) {
     ]);
 
     // Redirect to the main site (or a specific page)
-    const redirectUrl = 'https://videntia.vercel.app';
+    const redirectUrl = 'https://videntiatarot.com';
     return NextResponse.redirect(redirectUrl, { status: 302 });
   } catch (error) {
     return NextResponse.json({ error: 'Internal error', details: (error as Error).message }, { status: 500 });

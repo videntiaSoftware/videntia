@@ -39,7 +39,7 @@ export async function POST(req: NextRequest) {
     }
 
     const auth = getAuthClient();
-    const siteUrl = process.env.NEXT_PUBLIC_BASE_URL || 'https://videntia.vercel.app';
+    const siteUrl = process.env.NEXT_PUBLIC_BASE_URL || 'https://videntiatarot.com';
 
     const requestBody = {
       startDate,
@@ -101,7 +101,7 @@ export async function GET(req: NextRequest) {
     const startDate = new Date(Date.now() - days * 24 * 60 * 60 * 1000).toISOString().split('T')[0];
 
     const auth = getAuthClient();
-    const siteUrl = process.env.NEXT_PUBLIC_BASE_URL || 'https://videntia.vercel.app';
+    const siteUrl = process.env.NEXT_PUBLIC_BASE_URL || 'https://videntiatarot.com';
 
     // Get overview data
     const overviewResponse = await searchConsole.searchanalytics.query({

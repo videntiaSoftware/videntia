@@ -74,7 +74,7 @@ export async function POST(request: NextRequest) {
           const cardReading = reading[0];
           
           // 4. Generate tracking URL for email analytics
-          const trackingUrl = `https://videntia.vercel.app/api/track/mail-click?uid=${user.user_id}&card=${encodeURIComponent(cardReading.card_name)}&date=${new Date().toISOString().split('T')[0]}`;
+          const trackingUrl = `https://videntiatarot.com/api/track/mail-click?uid=${user.user_id}&card=${encodeURIComponent(cardReading.card_name)}&date=${new Date().toISOString().split('T')[0]}`;
           
           // 5. Enviar email REAL con Gmail SMTP
           const emailSent = await sendDailyCardEmail({
@@ -171,72 +171,6 @@ export async function POST(request: NextRequest) {
 }
 
 // Función auxiliar para enviar a usuarios de prueba cuando no hay service key
-async function sendToTestUsers() {
-  try {
-    const supabase = await createClient();
-    
-    console.log('🌅 [ENVÍO MASIVO] Usando usuarios de prueba...');
-    
-    const testUsers = [
-      { email: 'test1@videntia.com', id: '1' },
-      { email: 'test2@videntia.com', id: '2' },
-      { email: 'test3@videntia.com', id: '3' },
-      { email: 'usuario@ejemplo.com', id: '4' },
-      { email: 'demo@videntia.com', id: '5' }
-    ];
-
-    const results = [];
-    
-    for (const user of testUsers) {
-      try {
-        const { data: reading, error: readingError } = await supabase.rpc('get_random_daily_reading');
-        
-        if (readingError || !reading || reading.length === 0) {
-          console.error(`Error generando lectura para ${user.email}:`, readingError);
-          continue;
-        }
-
-        const cardReading = reading[0];
-        
-        const emailSent = await sendDailyCardEmail({
-          email: user.email,
-          cardName: cardReading.card_name,
-          interpretation: cardReading.interpretation,
-          cardMeaning: cardReading.card_meaning,
-          imageUrl: cardReading.image_url,
-          trackingUrl: `https://videntia.vercel.app/api/track/mail-click?uid=${user.id}&card=${encodeURIComponent(cardReading.card_name)}&date=${new Date().toISOString().split('T')[0]}`
-        });
-        
-        results.push({
-          email: user.email,
-          card: cardReading.card_name,
-          interpretation: cardReading.interpretation.substring(0, 50) + '...',
-          emailSent
-        });
-        
-        console.log(`📧 Enviado a ${user.email}: ${cardReading.card_name}`);
-        
-      } catch (error) {
-        console.error(`Error procesando usuario ${user.email}:`, error);
-      }
-    }
-    
-    const emailsSent = results.filter(r => r.emailSent).length;
-    
-    console.log(`✅ Proceso completado: ${emailsSent}/${testUsers.length} emails enviados`);
-    
-    return NextResponse.json({
-      success: true,
-      message: `[TEST] Cartas enviadas a ${emailsSent} de ${testUsers.length} usuarios de prueba`,
-      results,
-      note: "Usando usuarios de prueba. Configura SUPABASE_SERVICE_ROLE_KEY para usuarios reales."
-    });
-
-  } catch (error) {
-    console.error('Error en envío a usuarios de prueba:', error);
-    return NextResponse.json({ error: 'Error interno' }, { status: 500 });
-  }
-}
 
 // GET - Disparar envío masivo manualmente (mismo proceso que cron job)
 export async function GET() {
@@ -246,10 +180,6 @@ export async function GET() {
     // Verificar si tenemos service role key
     const serviceRoleKey = process.env.SUPABASE_SERVICE_ROLE_KEY;
     
-    if (!serviceRoleKey) {
-      console.warn('⚠️ SUPABASE_SERVICE_ROLE_KEY no configurada, usando usuarios de prueba');
-      return await sendToTestUsers();
-    }
     
     const supabaseAdmin = createSupabaseAdmin();
     
@@ -301,7 +231,7 @@ export async function GET() {
         const cardReading = reading[0];
 
         // Crear URL con parámetros de tracking
-        const trackingUrl = `https://videntia.vercel.app/api/track/mail-click?uid=${user.user_id}&card=${encodeURIComponent(cardReading.card_name)}&date=${new Date().toISOString().split('T')[0]}`;
+        const trackingUrl = `https://videntiatarot.com/api/track/mail-click?uid=${user.user_id}&card=${encodeURIComponent(cardReading.card_name)}&date=${new Date().toISOString().split('T')[0]}`;
 
         // Enviar email con tracking
         const emailSent = await sendDailyCardEmail({

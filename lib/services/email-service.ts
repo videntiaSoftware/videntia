@@ -1,13 +1,4 @@
-import nodemailer from 'nodemailer';
-
-// Configurar transporter de Gmail
-const transporter = nodemailer.createTransport({
-  service: 'gmail',
-  auth: {
-    user: process.env.GMAIL_EMAIL,
-    pass: process.env.GMAIL_APP_PASSWORD
-  }
-});
+import axios from 'axios';
 
 interface DailyCardEmailData {
   email: string;
@@ -20,22 +11,36 @@ interface DailyCardEmailData {
 
 export async function sendDailyCardEmail(data: DailyCardEmailData): Promise<boolean> {
   try {
-    console.log(`📧 Enviando email con Gmail SMTP a ${data.email}: ${data.cardName}`);
+    const apiSecret = process.env.KIT_API_SECRET;
+    const fromEmail = process.env.KIT_FROM_EMAIL;
+    const fromName = process.env.KIT_FROM_NAME;
 
-    const mailOptions = {
-      from: `Videntia 🔮 <${process.env.GMAIL_EMAIL}>`,
-      to: data.email,
-      subject: `🔮 Tu carta del día: ${data.cardName}`,
-      html: generateEmailTemplate(data),
-      text: generateTextEmail(data)
-    };
+    const html = generateEmailTemplate(data);
+    const text = generateTextEmail(data);
 
-    const result = await transporter.sendMail(mailOptions);
-    console.log(`✅ Email enviado exitosamente a ${data.email} (ID: ${result.messageId})`);
-    return true;
+    const response = await axios.post(
+      'https://api.kit.com/v1/transactional/emails/send',
+      {
+        message: {
+          to: [{ email: data.email }],
+          from_email: fromEmail,
+          from_name: fromName,
+          subject: `Tu carta del día: ${data.cardName}`,
+          html_body: html,
+          text_body: text
+        }
+      },
+      {
+        headers: {
+          'Content-Type': 'application/json',
+          'Authorization': `Bearer ${apiSecret}`
+        }
+      }
+    );
 
-  } catch (error) {
-    console.error('Error en servicio de email Gmail:', error);
+    return response.status === 200;
+  } catch (error: any) {
+    console.error('Error enviando email con Kit:', error?.response?.data || error);
     return false;
   }
 }
@@ -43,18 +48,18 @@ export async function sendDailyCardEmail(data: DailyCardEmailData): Promise<bool
 function generateEmailTemplate(data: DailyCardEmailData): string {
   return `
     <!DOCTYPE html>
-    <html>
+    <html lang="es">
     <head>
       <meta charset="utf-8">
       <meta name="viewport" content="width=device-width, initial-scale=1.0">
-      <title>Tu carta del día</title>
+      <title>Tu carta del día - Videntia</title>
     </head>
-    <body style="font-family: Arial, sans-serif; max-width: 600px; margin: 0 auto; padding: 20px; background-color: #f8fafc;">
+    <body style="font-family: Georgia, serif; max-width: 600px; margin: 0 auto; padding: 20px; background-color: #f8fafc; color: #333;">
       
       <!-- Header -->
-      <div style="text-align: center; margin-bottom: 30px;">
-        <h1 style="color: #6366f1; font-size: 28px; margin: 0;">🔮 Videntia</h1>
-        <p style="color: #64748b; font-size: 16px; margin: 10px 0 0 0;">Tu carta del día ha llegado</p>
+      <div style="text-align: center; margin-bottom: 30px; padding: 20px; background: linear-gradient(135deg, #6366f1 0%, #8b5cf6 100%); border-radius: 12px; color: white;">
+        <h1 style="font-size: 28px; margin: 0;">Videntia</h1>
+        <p style="font-size: 16px; margin: 10px 0 0 0; opacity: 0.9;">Tu lectura diaria de tarot</p>
       </div>
 
       <!-- Card Section -->
@@ -74,7 +79,7 @@ function generateEmailTemplate(data: DailyCardEmailData): string {
 
         <!-- Daily Message -->
         <div style="background: linear-gradient(135deg, #f1f5f9 0%, #e2e8f0 100%); border-radius: 8px; padding: 20px; margin-bottom: 20px;">
-          <h3 style="color: #6366f1; font-size: 18px; margin: 0 0 10px 0;">💫 Mensaje para ti:</h3>
+          <h3 style="color: #6366f1; font-size: 18px; margin: 0 0 10px 0;">Mensaje para ti:</h3>
           <p style="color: #334155; font-size: 16px; line-height: 1.6; margin: 0;">
             ${data.interpretation}
           </p>
@@ -83,26 +88,30 @@ function generateEmailTemplate(data: DailyCardEmailData): string {
         <!-- Card Meaning -->
         <div style="border-left: 4px solid #6366f1; padding-left: 15px; margin-bottom: 25px;">
           <p style="color: #64748b; font-size: 14px; font-style: italic; margin: 0;">
-            ${data.cardMeaning}
+            <strong>Significado:</strong> ${data.cardMeaning}
           </p>
         </div>
 
         <!-- CTA Button -->
         <div style="text-align: center;">
-          <a href="${data.trackingUrl || process.env.NEXT_PUBLIC_SITE_URL || 'https://videntia.com'}" 
+          <a href="${data.trackingUrl || 'https://videntia.vercel.app'}" 
              style="display: inline-block; background: linear-gradient(135deg, #6366f1 0%, #8b5cf6 100%); color: white; text-decoration: none; padding: 12px 30px; border-radius: 8px; font-weight: bold; font-size: 16px;">
-            🔮 Descubre tu lectura completa
+            Descubre tu lectura completa
           </a>
         </div>
       </div>
 
       <!-- Footer -->
-      <div style="text-align: center; color: #94a3b8; font-size: 12px;">
+      <div style="text-align: center; color: #94a3b8; font-size: 12px; margin-top: 30px;">
         <p style="margin: 0 0 10px 0;">
           Has recibido este email porque estás suscrito a las cartas diarias de Videntia.
         </p>
+        <p style="margin: 0 0 10px 0;">
+          <a href="https://videntiatarot.com/profile" style="color: #6366f1; text-decoration: none;">Gestionar suscripción</a>
+        </p>
         <p style="margin: 0;">
-          © 2025 Videntia - Descubre tu camino a través del tarot
+          © 2025 Videntia - Lectura de tarot profesional<br>
+          <a href="https://videntiatarot.com" style="color: #6366f1; text-decoration: none;">videntia.vercel.app</a>
         </p>
       </div>
 
@@ -113,23 +122,24 @@ function generateEmailTemplate(data: DailyCardEmailData): string {
 
 function generateTextEmail(data: DailyCardEmailData): string {
   return `
-🔮 VIDENTIA - Tu carta del día
+VIDENTIA - Tu carta del día
 
 ${data.cardName}
 
-💫 Mensaje para ti:
+Mensaje para ti:
 ${data.interpretation}
 
-${data.cardMeaning}
+Significado: ${data.cardMeaning}
 
-🔮 Descubre más lecturas en: ${process.env.NEXT_PUBLIC_SITE_URL}/
+Descubre más lecturas en: https://videntia.vercel.app/
 
 ---
-© 2025 Videntia - Descubre tu camino a través del tarot
+© 2025 Videntia - Lectura de tarot profesional
+Para gestionar tu suscripción: https://videntia.vercel.app/profile
   `.trim();
 }
 
-// Función de prueba para enviar email con Mailgun
+// Función de prueba para enviar email
 export async function sendTestEmail(testEmail: string): Promise<boolean> {
   return sendDailyCardEmail({
     email: testEmail,

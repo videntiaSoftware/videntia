@@ -1,7 +1,7 @@
 import { MetadataRoute } from 'next'
 
 export default function sitemap(): MetadataRoute.Sitemap {
-  const baseUrl = process.env.NEXT_PUBLIC_BASE_URL || 'https://videntia.vercel.app'
+  const baseUrl = process.env.NEXT_PUBLIC_BASE_URL || 'https://videntiatarot.com'
   
   return [
     {

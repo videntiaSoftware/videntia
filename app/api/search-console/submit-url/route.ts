@@ -32,7 +32,7 @@ export async function POST(req: NextRequest) {
     }
 
     // Validate URL belongs to our domain
-    const siteUrl = process.env.NEXT_PUBLIC_BASE_URL || 'https://videntia.vercel.app';
+    const siteUrl = process.env.NEXT_PUBLIC_BASE_URL || 'https://videntiatarot.com';
     if (!url.startsWith(siteUrl)) {
       return NextResponse.json(
         { error: 'URL must belong to the configured domain' },
@@ -118,7 +118,7 @@ export async function PUT(req: NextRequest) {
       );
     }
 
-    const siteUrl = process.env.NEXT_PUBLIC_BASE_URL || 'https://videntia.vercel.app';
+    const siteUrl = process.env.NEXT_PUBLIC_BASE_URL || 'https://videntiatarot.com';
     const validUrls = urls.filter(url => url.startsWith(siteUrl));
 
     if (validUrls.length === 0) {
