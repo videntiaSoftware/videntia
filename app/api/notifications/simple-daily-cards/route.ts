@@ -23,6 +23,130 @@ function createSupabaseAdmin() {
   );
 }
 
+// Función auxiliar para enviar a usuarios de prueba cuando no hay service key
+async function sendToTestUsers(): Promise<NextResponse> {
+  console.log('🧪 [TEST MODE] Service key no configurada, intentando con cliente básico...');
+  
+  try {
+    const supabase = await createClient();
+    
+    // Intentar obtener algunos usuarios usando el cliente básico (limitado)
+    // Nota: Esto podría fallar si no tenemos permisos suficientes
+    const { data: users, error: usersError } = await supabase
+      .from('auth.users')
+      .select('id, email, email_confirmed_at')
+      .not('email', 'is', null)
+      .not('email_confirmed_at', 'is', null)
+      .limit(5); // Solo unos pocos para pruebas
+
+    if (usersError) {
+      console.error('❌ No se pueden obtener usuarios sin service key:', usersError);
+      return NextResponse.json({
+        success: false,
+        error: 'SUPABASE_SERVICE_ROLE_KEY no configurada y no se pueden obtener usuarios con permisos básicos',
+        message: 'Configura SUPABASE_SERVICE_ROLE_KEY en las variables de entorno para envío real'
+      }, { status: 403 });
+    }
+
+    if (!users || users.length === 0) {
+      return NextResponse.json({
+        success: false,
+        error: 'No hay usuarios disponibles para pruebas',
+        message: 'Configura SUPABASE_SERVICE_ROLE_KEY para acceso completo a usuarios'
+      }, { status: 404 });
+    }
+
+    console.log(`👥 Usando ${users.length} usuarios reales para pruebas`);
+
+    const results = [];
+    let emailsSent = 0;
+    let errorsCount = 0;
+
+    for (const user of users) {
+      try {
+        console.log(`📧 Procesando usuario real: ${user.email}`);
+        
+        const { data: reading, error: readingError } = await supabase.rpc('get_random_daily_reading');
+        
+        if (readingError || !reading || reading.length === 0) {
+          console.error(`❌ Error generando lectura para ${user.email}:`, readingError);
+          errorsCount++;
+          continue;
+        }
+
+        const cardReading = reading[0];
+        
+        const trackingUrl = `https://videntiatarot.com/api/track/mail-click?uid=${user.id}&card=${encodeURIComponent(cardReading.card_name)}&date=${new Date().toISOString().split('T')[0]}`;
+        
+        const emailSent = await sendDailyCardEmail({
+          email: user.email,
+          cardName: cardReading.card_name,
+          interpretation: cardReading.interpretation,
+          cardMeaning: cardReading.card_meaning,
+          imageUrl: cardReading.image_url,
+          trackingUrl: trackingUrl
+        });
+        
+        if (emailSent) {
+          emailsSent++;
+          console.log(`✅ Email enviado exitosamente a ${user.email}: ${cardReading.card_name}`);
+        } else {
+          errorsCount++;
+          console.log(`❌ Error enviando email a ${user.email}`);
+        }
+        
+        results.push({
+          email: user.email,
+          card: cardReading.card_name,
+          interpretation: cardReading.interpretation.substring(0, 50) + '...',
+          emailSent,
+          timestamp: new Date().toISOString()
+        });
+        
+      } catch (error) {
+        console.error(`❌ Error procesando usuario ${user.email}:`, error);
+        errorsCount++;
+        results.push({
+          email: user.email,
+          error: error instanceof Error ? error.message : 'Error desconocido',
+          emailSent: false,
+          timestamp: new Date().toISOString()
+        });
+      }
+    }
+
+    console.log(`\n📈 RESUMEN DEL ENVÍO DE PRUEBA:`);
+    console.log(`👥 Total usuarios reales procesados: ${users.length}`);
+    console.log(`📧 Emails enviados exitosamente: ${emailsSent}`);
+    console.log(`❌ Errores: ${errorsCount}`);
+    console.log(`📊 Tasa de éxito: ${((emailsSent/users.length)*100).toFixed(1)}%`);
+
+    return NextResponse.json({
+      success: true,
+      message: `Envío de prueba completado: ${emailsSent}/${users.length} emails enviados a usuarios reales`,
+      warning: 'Usando modo de prueba. Configura SUPABASE_SERVICE_ROLE_KEY para envío completo',
+      stats: {
+        totalUsers: users.length,
+        confirmedUsers: users.length,
+        emailsSent,
+        errorsCount,
+        successRate: `${((emailsSent/users.length)*100).toFixed(1)}%`
+      },
+      results,
+      timestamp: new Date().toISOString()
+    });
+
+  } catch (error) {
+    console.error('💥 Error en modo de prueba:', error);
+    return NextResponse.json({
+      success: false,
+      error: 'Error accediendo a la base de datos sin service key',
+      details: error instanceof Error ? error.message : 'Error desconocido',
+      message: 'Configura SUPABASE_SERVICE_ROLE_KEY para envío real'
+    }, { status: 500 });
+  }
+}
+
 // Servicio FINAL para envío masivo de cartas diarias
 export async function POST(request: NextRequest) {
   try {
@@ -76,7 +200,7 @@ export async function POST(request: NextRequest) {
           // 4. Generate tracking URL for email analytics
           const trackingUrl = `https://videntiatarot.com/api/track/mail-click?uid=${user.user_id}&card=${encodeURIComponent(cardReading.card_name)}&date=${new Date().toISOString().split('T')[0]}`;
           
-          // 5. Enviar email REAL con Gmail SMTP
+          // 5. Enviar email con Brevo
           const emailSent = await sendDailyCardEmail({
             email: user.email,
             cardName: cardReading.card_name,
@@ -170,8 +294,6 @@ export async function POST(request: NextRequest) {
   }
 }
 
-// Función auxiliar para enviar a usuarios de prueba cuando no hay service key
-
 // GET - Disparar envío masivo manualmente (mismo proceso que cron job)
 export async function GET() {
   try {
@@ -233,7 +355,7 @@ export async function GET() {
         // Crear URL con parámetros de tracking
         const trackingUrl = `https://videntiatarot.com/api/track/mail-click?uid=${user.user_id}&card=${encodeURIComponent(cardReading.card_name)}&date=${new Date().toISOString().split('T')[0]}`;
 
-        // Enviar email con tracking
+        // Enviar email con Brevo
         const emailSent = await sendDailyCardEmail({
           email: user.email,
           cardName: cardReading.card_name,

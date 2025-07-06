@@ -11,36 +11,41 @@ interface DailyCardEmailData {
 
 export async function sendDailyCardEmail(data: DailyCardEmailData): Promise<boolean> {
   try {
-    const apiSecret = process.env.KIT_API_SECRET;
-    const fromEmail = process.env.KIT_FROM_EMAIL;
-    const fromName = process.env.KIT_FROM_NAME;
+    const apiKey = process.env.BREVO_API_KEY;
+    const fromEmail = process.env.BREVO_FROM_EMAIL;
+    const fromName = process.env.BREVO_FROM_NAME;
 
     const html = generateEmailTemplate(data);
     const text = generateTextEmail(data);
 
     const response = await axios.post(
-      'https://api.kit.com/v1/transactional/emails/send',
+      'https://api.brevo.com/v3/smtp/email',
       {
-        message: {
-          to: [{ email: data.email }],
-          from_email: fromEmail,
-          from_name: fromName,
-          subject: `Tu carta del día: ${data.cardName}`,
-          html_body: html,
-          text_body: text
-        }
+        sender: {
+          email: fromEmail,
+          name: fromName
+        },
+        to: [
+          {
+            email: data.email,
+            name: data.email
+          }
+        ],
+        subject: `Tu carta del día: ${data.cardName}`,
+        htmlContent: html,
+        textContent: text
       },
       {
         headers: {
           'Content-Type': 'application/json',
-          'Authorization': `Bearer ${apiSecret}`
+          'api-key': apiKey
         }
       }
     );
 
-    return response.status === 200;
+    return response.status === 201;
   } catch (error: any) {
-    console.error('Error enviando email con Kit:', error?.response?.data || error);
+    console.error('Error enviando email con Brevo:', error?.response?.data || error);
     return false;
   }
 }
@@ -94,7 +99,7 @@ function generateEmailTemplate(data: DailyCardEmailData): string {
 
         <!-- CTA Button -->
         <div style="text-align: center;">
-          <a href="${data.trackingUrl || 'https://videntia.vercel.app'}" 
+          <a href="${data.trackingUrl || 'https://videntiatarot.com'}" 
              style="display: inline-block; background: linear-gradient(135deg, #6366f1 0%, #8b5cf6 100%); color: white; text-decoration: none; padding: 12px 30px; border-radius: 8px; font-weight: bold; font-size: 16px;">
             Descubre tu lectura completa
           </a>
@@ -111,7 +116,7 @@ function generateEmailTemplate(data: DailyCardEmailData): string {
         </p>
         <p style="margin: 0;">
           © 2025 Videntia - Lectura de tarot profesional<br>
-          <a href="https://videntiatarot.com" style="color: #6366f1; text-decoration: none;">videntia.vercel.app</a>
+          <a href="https://videntiatarot.com" style="color: #6366f1; text-decoration: none;">videntiatarot.com</a>
         </p>
       </div>
 
@@ -131,11 +136,11 @@ ${data.interpretation}
 
 Significado: ${data.cardMeaning}
 
-Descubre más lecturas en: https://videntia.vercel.app/
+Descubre más lecturas en: https://videntiatarot.com/
 
 ---
 © 2025 Videntia - Lectura de tarot profesional
-Para gestionar tu suscripción: https://videntia.vercel.app/profile
+Para gestionar tu suscripción: https://videntiatarot.com/profile
   `.trim();
 }
 
