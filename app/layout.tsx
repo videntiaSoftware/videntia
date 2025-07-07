@@ -190,12 +190,6 @@ export default function RootLayout({
           strategy="afterInteractive"
         />
         
-        {/* Cargar reCAPTCHA v3 */}
-        <Script
-          src={`https://www.google.com/recaptcha/api.js?render=${process.env.NEXT_PUBLIC_RECAPTCHA_SITE_KEY}`}
-          strategy="lazyOnload"
-        />
-        
         <AnalyticsProvider>
           <div className="flex-1 flex flex-col w-full max-w-screen overflow-x-auto">
             {children}
