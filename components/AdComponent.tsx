@@ -11,6 +11,10 @@ interface AdComponentProps {
   disabled?: boolean;
 }
 
+
+
+
+
 export default function AdComponent({ 
   userTier, 
   onAdWatched, 
