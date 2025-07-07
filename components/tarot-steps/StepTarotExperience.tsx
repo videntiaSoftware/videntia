@@ -13,7 +13,7 @@ import ReactMarkdown from 'react-markdown';
 import FingerprintJS from '@fingerprintjs/fingerprintjs';
 import { AnimatePresence, motion } from 'framer-motion';
 import Script from "next/script";
-import SubtleAuthPrompt from "@/components/SubtleAuthPrompt";
+import { SubtleAuthPrompt } from "@/components/SubtleAuthPrompt";
 import PremiumAdComponent from "@/components/PremiumAdComponent";
 import { GuestCookieManager, CookieConsent } from "@/lib/cookies";
 

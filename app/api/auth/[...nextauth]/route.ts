@@ -32,6 +32,11 @@ const authOptions: NextAuthOptions = {
       },
     }),
   ],
+  pages: {
+    signIn: "/auth/login",       // Ruta de tu página de login personalizada
+    error: "/auth/login?error",   // Muestra errores de autenticación en login
+    newUser: "/auth/sign-up-success" // Página tras registro exitoso
+  },
   session: { strategy: "database" },
   secret: process.env.NEXTAUTH_SECRET,
 };

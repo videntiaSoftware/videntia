@@ -1,19 +1,10 @@
 "use client";
-import { useState, useEffect } from "react";
+import { useState } from "react";
 import Link from "next/link";
 import { Menu, X } from "lucide-react";
-import { createClient } from "@/lib/supabase/client";
 
-export default function Header({ authButton }: { authButton: React.ReactNode }) {
+export default function Header() {
   const [menuOpen, setMenuOpen] = useState(false);
-  const [isLoggedIn, setIsLoggedIn] = useState(false);
-
-  useEffect(() => {
-    const supabase = createClient();
-    supabase.auth.getUser().then(({ data }) => {
-      setIsLoggedIn(!!data?.user);
-    });
-  }, []);
 
   return (
     <header className="sticky top-0 z-50 w-full max-w-full bg-slate-900/90 backdrop-blur border-b border-amber-500/30 shadow-lg flex items-center justify-between px-2 md:px-4 py-3">
@@ -28,11 +19,8 @@ export default function Header({ authButton }: { authButton: React.ReactNode }) 
         {/* Navegación desktop */}
         <nav className="hidden md:flex items-center gap-6 text-sm">
           <Link href="/" className="font-cormorant text-amber-200 hover:text-amber-100 transition-colors">Inicio</Link>
-          {isLoggedIn && (
-            <Link href="/profile/historia-personal" className="font-cormorant text-amber-200 hover:text-amber-100 transition-colors">Mis Lecturas</Link>
-          )}
           <div className="ml-4">
-            {authButton}
+            {/* Aquí iría el botón de autenticación */}
           </div>
         </nav>
       </div>
@@ -41,10 +29,9 @@ export default function Header({ authButton }: { authButton: React.ReactNode }) 
         <div className="fixed inset-0 z-50 bg-black/80 flex flex-col items-center justify-start pt-20">
           <nav className="flex flex-col gap-6 text-lg w-full max-w-xs mx-auto bg-slate-900/95 rounded-xl p-6 shadow-xl border border-amber-500/30">
             <Link href="/" className="font-cormorant text-amber-200 hover:text-amber-100 transition-colors" onClick={() => setMenuOpen(false)}>Inicio</Link>
-            {isLoggedIn && (
-              <Link href="/profile/historia-personal" className="font-cormorant text-amber-200 hover:text-amber-100 transition-colors" onClick={() => setMenuOpen(false)}>Mis Lecturas</Link>
-            )}
-            <div className="mt-4">{authButton}</div>
+            <div className="mt-4">
+              {/* Aquí iría el botón de autenticación */}
+            </div>
           </nav>
         </div>
       )}
