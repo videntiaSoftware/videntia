@@ -232,15 +232,81 @@ export async function generateStaticParams() {
 export default async function SEOPage({ params }: SEOPageProps) {
   const { slug } = await params;
   const content = SEO_CONTENT[slug as keyof typeof SEO_CONTENT];
-  
   if (!content) {
     notFound();
   }
-
   const readingType = slug.includes('amor') ? 'Amor' : 
                      slug.includes('trabajo') ? 'Trabajo' : 
                      slug.includes('dinero') ? 'Dinero' : 
                      slug.includes('salud') ? 'Salud' : 'General';
+
+  // Ejemplos y preguntas frecuentes enriquecidas
+  const ejemplos = {
+    "lecturas-tarot-amor": [
+      "¿Volveré con mi ex pareja?",
+      "¿Qué siente esa persona por mí?",
+      "¿Cómo mejorar mi relación actual?"
+    ],
+    "lecturas-tarot-trabajo": [
+      "¿Me conviene cambiar de trabajo este año?",
+      "¿Cómo mejorar mi relación con mi jefe?",
+      "¿Qué oportunidades laborales se acercan?"
+    ],
+    "lecturas-tarot-dinero": [
+      "¿Cómo atraer más abundancia a mi vida?",
+      "¿Es buen momento para invertir?",
+      "¿Qué bloqueos financieros debo superar?"
+    ],
+    "lecturas-tarot-salud": [
+      "¿Qué debo cuidar de mi salud este mes?",
+      "¿Cómo mejorar mi bienestar emocional?",
+      "¿Qué hábitos saludables puedo incorporar?"
+    ],
+    "tarot-gratis-online": [
+      "¿Qué me depara el destino hoy?",
+      "¿Qué energía predomina en mi vida?",
+      "¿Qué consejo tiene el tarot para mí?"
+    ],
+    "cartas-tarot-significado": [
+      "¿Qué significa el Loco en el tarot?",
+      "¿Cuál es el mensaje de la Reina de Copas?",
+      "¿Cómo interpretar la Torre en una tirada?"
+    ],
+    "tirada-cruz-celta": [
+      "¿Qué situación debo analizar en profundidad?",
+      "¿Qué influencias externas afectan mi vida?",
+      "¿Cuál es el desenlace probable de mi problema?"
+    ],
+    "arcanos-mayores": [
+      "¿Qué arcano mayor me representa hoy?",
+      "¿Qué lección espiritual debo aprender?",
+      "¿Cómo aprovechar la energía del Mago?"
+    ],
+    "arcanos-menores": [
+      "¿Qué palo predomina en mi tirada?",
+      "¿Qué significa el 5 de Espadas?",
+      "¿Cómo interpretar las figuras de la corte?"
+    ]
+  };
+
+  const faqs = [
+    {
+      q: "¿Las lecturas de tarot online son confiables?",
+      a: "Sí, siempre que utilices plataformas serias y con interpretaciones profesionales como Videntia Tarot."
+    },
+    {
+      q: "¿Puedo consultar el tarot gratis todas las veces que quiera?",
+      a: "¡Por supuesto! Nuestras lecturas gratuitas no tienen límite diario."
+    },
+    {
+      q: "¿Qué tipo de tiradas ofrecen?",
+      a: "Desde tiradas simples de 3 cartas hasta la Cruz Celta, lecturas de amor, trabajo, dinero y más."
+    },
+    {
+      q: "¿Necesito registrarme para usar el tarot?",
+      a: "No, puedes acceder a todas las lecturas sin registro ni datos personales."
+    }
+  ];
 
   return (
     <>
@@ -265,14 +331,12 @@ export default async function SEOPage({ params }: SEOPageProps) {
           __html: JSON.stringify(faqSchema),
         }}
       />
-      
-      {/* Contenido SEO oculto - Solo para crawlers */}
-      <div style={{ display: 'none' }}>
-        <h1>{content.title}</h1>
-        <p>{content.description}</p>
-        
-        {/* Contenido extendido para SEO */}
-        <div>
+
+      {/* Contenido SEO visible y enriquecido */}
+      <section className="max-w-3xl mx-auto bg-white/90 rounded-xl shadow-lg p-8 mt-8 mb-8 border border-purple-200">
+        <h1 className="text-3xl font-extrabold text-purple-800 mb-4">{content.title}</h1>
+        <p className="text-lg text-gray-700 mb-6">{content.description}</p>
+        <div className="prose prose-violet max-w-none mb-6">
           {content.content.split('\n').map((paragraph, index) => {
             if (paragraph.trim().startsWith('•')) {
               return <li key={index}>{paragraph.trim().substring(1)}</li>;
@@ -280,47 +344,48 @@ export default async function SEOPage({ params }: SEOPageProps) {
             return paragraph.trim() ? <p key={index}>{paragraph.trim()}</p> : null;
           })}
         </div>
-
-        {/* Keywords adicionales para SEO */}
-        <div>
+        {/* Ejemplos de preguntas */}
+        {ejemplos[slug] && (
+          <div className="mb-6">
+            <h2 className="text-xl font-bold text-violet-700 mb-2">Ejemplos de preguntas frecuentes</h2>
+            <ul className="list-disc list-inside text-gray-800">
+              {ejemplos[slug].map((ej, i) => <li key={i}>{ej}</li>)}
+            </ul>
+          </div>
+        )}
+        {/* Preguntas frecuentes */}
+        <div className="mb-6">
+          <h2 className="text-xl font-bold text-violet-700 mb-2">Preguntas frecuentes</h2>
+          <ul className="divide-y divide-purple-100">
+            {faqs.map((faq, i) => (
+              <li key={i} className="py-2">
+                <strong className="text-purple-800">{faq.q}</strong>
+                <br />
+                <span className="text-gray-700">{faq.a}</span>
+              </li>
+            ))}
+          </ul>
+        </div>
+        {/* Enlaces internos */}
+        <div className="mb-6 flex flex-wrap gap-2">
+          <Link href="/blog" className="text-amber-700 hover:underline font-semibold">Blog de Tarot</Link>
+          <Link href="/cartas/arcanos-mayores" className="text-amber-700 hover:underline font-semibold">Arcanos Mayores</Link>
+          <Link href="/cartas/arcanos-menores" className="text-amber-700 hover:underline font-semibold">Arcanos Menores</Link>
+          <Link href="/lecturas/amor" className="text-amber-700 hover:underline font-semibold">Lectura de Amor</Link>
+          <Link href="/lecturas/trabajo" className="text-amber-700 hover:underline font-semibold">Lectura de Trabajo</Link>
+          <Link href="/lecturas/dinero" className="text-amber-700 hover:underline font-semibold">Lectura de Dinero</Link>
+        </div>
+        {/* Palabras clave */}
+        <div className="mb-4 text-xs text-gray-500">
+          <span className="font-bold">Palabras clave: </span>
           {content.keywords.map((keyword) => (
-            <span key={keyword}>{keyword} </span>
+            <span key={keyword} className="mr-2">{keyword}</span>
           ))}
         </div>
-
-        {/* Texto adicional para SEO */}
-        <div>
-          <h2>Consulta de Tarot Online Gratis</h2>
-          <p>Videntia Tarot ofrece lecturas auténticas y personalizadas las 24 horas del día. 
-          Nuestro sistema utiliza las 78 cartas tradicionales del tarot para brindarte 
-          interpretaciones precisas y significativas.</p>
-          
-          <h3>¿Por qué elegir Videntia para tus consultas de tarot?</h3>
-          <ul>
-            <li>Lecturas gratuitas diarias sin límites</li>
-            <li>Interpretaciones detalladas y personalizadas</li>
-            <li>Múltiples tipos de tiradas disponibles</li>
-            <li>Interfaz intuitiva y fácil de usar</li>
-            <li>Disponible 24/7 desde cualquier dispositivo</li>
-            <li>Privacidad y confidencialidad garantizada</li>
-          </ul>
-
-          <h3>Tipos de lecturas disponibles</h3>
-          <p>Tenemos una amplia variedad de spreads y tiradas especializadas:</p>
-          <ul>
-            <li>Tirada de 3 cartas (Pasado, Presente, Futuro)</li>
-            <li>Cruz Celta completa (10 cartas)</li>
-            <li>Lectura Sí o No</li>
-            <li>Lecturas especializadas en Amor</li>
-            <li>Consultas de Trabajo y Carrera</li>
-            <li>Análisis Financiero y Abundancia</li>
-            <li>Lecturas de Crecimiento Espiritual</li>
-          </ul>
-        </div>
-      </div>
+      </section>
 
       {/* CTA para usar la aplicación principal */}
-      <div className="mt-8 text-center bg-gradient-to-r from-violet-800 to-purple-800 p-6 rounded-lg">
+      <div className="mt-8 text-center bg-gradient-to-r from-violet-800 to-purple-800 p-6 rounded-lg shadow-lg">
         <h3 className="text-xl font-bold text-amber-300 mb-4">¿Listo para tu lectura personalizada?</h3>
         <p className="text-amber-200 mb-4">Accede a todas nuestras lecturas de tarot interactivas y descubre tu destino</p>
         <Link 
