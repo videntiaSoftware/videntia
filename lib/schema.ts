@@ -4,8 +4,8 @@ export const organizationSchema = {
   "@type": "Organization",
   "name": "Videntia Tarot",
   "description": "Plataforma de lecturas de tarot online con análisis espirituales profundos y conexión con la intuición interior",
-  "url": process.env.NEXT_PUBLIC_BASE_URL || "https://videntia.vercel.app",
-  "logo": `${process.env.NEXT_PUBLIC_BASE_URL || "https://videntia.vercel.app"}/opengraph-image.png`,
+  "url": process.env.NEXT_PUBLIC_BASE_URL || "https://videntiatarot.com",
+  "logo": `${process.env.NEXT_PUBLIC_BASE_URL || "https://videntiatarot.com"}/opengraph-image.png`,
   "sameAs": [
     // Agregar redes sociales cuando estén disponibles
   ],

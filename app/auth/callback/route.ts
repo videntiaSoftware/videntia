@@ -19,7 +19,7 @@ export async function GET(request: Request) {
       } else if (forwardedHost) {
         return NextResponse.redirect(`https://${forwardedHost}${next}`)
       } else {
-        // FORZAR redirección a videntia.vercel.app - NUNCA usar supabase.co
+        // FORZAR redirección a videntiatarot.com - NUNCA usar supabase.co
         return NextResponse.redirect(`https://videntiatarot.com${next}`)
       }
     }

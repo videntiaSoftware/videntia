@@ -37,7 +37,7 @@ export function SignUpForm({
     setError(null);
     try {
       // Redirigir al inicio donde están todas las lecturas gratuitas
-      const redirectTo = `${process.env.NEXT_PUBLIC_SITE_URL || 'https://videntia.vercel.app'}/`;
+      const redirectTo = `${process.env.NEXT_PUBLIC_SITE_URL || 'https://videntiatarot.com'}/`;
       const { error } = await supabase.auth.signInWithOAuth({
         provider: "google",
         options: {

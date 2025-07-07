@@ -3,7 +3,7 @@ export const seoConfig = {
   defaultTitle: "Videntia - Tu Guía Espiritual de Tarot",
   titleTemplate: "%s | Videntia Tarot",
   defaultDescription: "Descubre tu destino con lecturas de tarot gratis online. Consultas personalizadas de amor, trabajo, dinero y crecimiento espiritual disponibles 24/7.",
-  siteUrl: process.env.NEXT_PUBLIC_BASE_URL || "https://videntia.vercel.app",
+  siteUrl: process.env.NEXT_PUBLIC_BASE_URL || "https://videntiatarot.com",
   defaultKeywords: [
     "tarot gratis", "lecturas tarot online", "cartas tarot", "consulta tarot",
     "tarot amor", "tarot trabajo", "tarot dinero", "videncia online",
