@@ -199,7 +199,53 @@ const blogPosts = [
     readTime: "9 min",
     featured: false,
     image: "⚖️"
-  }
+  },
+  // NUEVOS ARTÍCULOS COMPLETOS
+  {
+    title: "Cómo Elegir tu Primera Baraja de Tarot: Guía para Principiantes",
+    excerpt: "Consejos prácticos y criterios clave para seleccionar tu primer mazo de tarot. Diferencias entre barajas, materiales, simbología y conexión personal.",
+    slug: "elegir-baraja-tarot-principiantes",
+    category: "Guías",
+    readTime: "10 min",
+    featured: true,
+    image: "🃏"
+  },
+  {
+    title: "Tarot y Psicología: El Inconsciente en las Cartas",
+    excerpt: "Explora la relación entre el tarot y la psicología profunda. Cómo las cartas reflejan arquetipos, patrones inconscientes y procesos de autoconocimiento.",
+    slug: "tarot-psicologia-inconsciente",
+    category: "Psicología",
+    readTime: "13 min",
+    featured: false,
+    image: "🧠"
+  },
+  {
+    title: "Cómo Interpretar Combinaciones de Cartas en el Tarot",
+    excerpt: "Aprende a leer combinaciones de cartas para obtener mensajes más ricos y precisos. Ejemplos prácticos y consejos avanzados.",
+    slug: "interpretar-combinaciones-cartas-tarot",
+    category: "Técnicas",
+    readTime: "14 min",
+    featured: false,
+    image: "🔗"
+  },
+  {
+    title: "Tarot para la Toma de Decisiones Difíciles",
+    excerpt: "Utiliza el tarot como herramienta de apoyo en momentos de incertidumbre. Métodos para clarificar opciones y visualizar consecuencias.",
+    slug: "tarot-toma-decisiones",
+    category: "Guías",
+    readTime: "11 min",
+    featured: false,
+    image: "⚖️"
+  },
+  {
+    title: "El Tarot y la Meditación: Prácticas para la Intuición",
+    excerpt: "Descubre ejercicios de meditación con cartas para potenciar tu intuición y conexión espiritual. Guía paso a paso para integrar ambas prácticas.",
+    slug: "tarot-meditacion-intuicion",
+    category: "Espiritualidad",
+    readTime: "12 min",
+    featured: false,
+    image: "🧘‍♂️"
+  },
 ];
 
 const categories = ["Todos", "Cartas", "Guías", "Spreads", "Amor", "Historia", "Simbolismo", "Técnicas"];
@@ -211,45 +257,44 @@ export default function BlogIndex() {
   return (
     <div className="min-h-screen bg-gradient-to-br from-slate-900 to-purple-900 text-amber-100 py-12">
       <div className="max-w-6xl mx-auto px-6">
-        
         {/* Header */}
         <div className="text-center mb-12">
-          <h1 className="text-5xl font-bold text-amber-300 mb-6 font-cinzel">
+          <h1 className="text-5xl font-bold text-amber-300 mb-6 font-cinzel drop-shadow-lg">
             Blog de Tarot
           </h1>
-          <p className="text-xl text-purple-200 mb-8 leading-relaxed">
-            Descubre la sabiduría del tarot con nuestras guías completas, análisis de cartas 
-            y técnicas avanzadas de interpretación.
+          <p className="text-xl text-purple-200 mb-8 leading-relaxed max-w-2xl mx-auto">
+            Descubre la sabiduría del tarot con nuestras guías completas, análisis de cartas y técnicas avanzadas de interpretación.
           </p>
         </div>
-
         {/* Featured Posts */}
         <div className="mb-16">
-          <h2 className="text-3xl font-bold text-amber-300 mb-8 text-center">
+          <h2 className="text-3xl font-bold text-amber-300 mb-8 text-center drop-shadow">
             ✨ Artículos Destacados
           </h2>
           <div className="grid md:grid-cols-3 gap-8">
             {featuredPosts.map((post, index) => (
-              <article key={index} className="bg-slate-800/50 rounded-lg border border-purple-600 hover:border-amber-400 transition-all group">
-                <div className="p-6">
-                  <div className="text-6xl mb-4 group-hover:scale-110 transition-transform text-center">
-                    {post.image}
+              <article key={index} className="bg-gradient-to-br from-purple-800/80 to-slate-900/80 rounded-2xl border-2 border-purple-600 hover:border-amber-400 shadow-xl transition-all group overflow-hidden">
+                <div className="p-8 flex flex-col h-full justify-between">
+                  <div>
+                    <div className="text-7xl mb-4 group-hover:scale-110 transition-transform text-center drop-shadow-xl">
+                      {post.image}
+                    </div>
+                    <div className="flex items-center gap-3 mb-3 justify-center">
+                      <span className="bg-amber-600 text-slate-900 px-3 py-1 rounded-full text-xs font-bold shadow">
+                        {post.category}
+                      </span>
+                      <span className="text-purple-200 text-sm">{post.readTime}</span>
+                    </div>
+                    <h3 className="text-2xl font-bold text-amber-200 mb-3 group-hover:text-amber-100 transition-colors text-center">
+                      {post.title}
+                    </h3>
+                    <p className="text-purple-100 text-base mb-4 line-clamp-4 text-center">
+                      {post.excerpt}
+                    </p>
                   </div>
-                  <div className="flex items-center gap-3 mb-3">
-                    <span className="bg-amber-600 text-slate-900 px-3 py-1 rounded-full text-xs font-bold">
-                      {post.category}
-                    </span>
-                    <span className="text-purple-300 text-sm">{post.readTime}</span>
-                  </div>
-                  <h3 className="text-xl font-bold text-amber-300 mb-3 group-hover:text-amber-200 transition-colors">
-                    {post.title}
-                  </h3>
-                  <p className="text-purple-200 text-sm mb-4 line-clamp-3">
-                    {post.excerpt}
-                  </p>
                   <Link 
                     href={`/blog/${post.slug}`}
-                    className="text-amber-400 hover:text-amber-300 font-semibold text-sm"
+                    className="mt-4 inline-block text-amber-400 hover:text-amber-200 font-semibold text-base text-center border border-amber-400 rounded-full px-6 py-2 transition-colors shadow hover:bg-amber-400/10"
                   >
                     Leer más →
                   </Link>
@@ -258,46 +303,46 @@ export default function BlogIndex() {
             ))}
           </div>
         </div>
-
         {/* Categories Filter */}
         <div className="mb-8">
           <div className="flex flex-wrap gap-3 justify-center">
             {categories.map((category, index) => (
               <button
                 key={index}
-                className="px-4 py-2 rounded-full border border-purple-600 hover:bg-purple-600 hover:text-white transition-colors text-sm"
+                className="px-4 py-2 rounded-full border-2 border-purple-600 hover:bg-purple-700 hover:text-white transition-colors text-sm font-semibold shadow"
               >
                 {category}
               </button>
             ))}
           </div>
         </div>
-
         {/* All Posts Grid */}
         <div className="mb-12">
-          <h2 className="text-3xl font-bold text-amber-300 mb-8 text-center">
+          <h2 className="text-3xl font-bold text-amber-300 mb-8 text-center drop-shadow">
             📚 Todos los Artículos
           </h2>
-          <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-6">
+          <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-8">
             {regularPosts.map((post, index) => (
-              <article key={index} className="bg-slate-800/50 rounded-lg border border-purple-600 hover:border-amber-400 transition-all group">
-                <div className="p-5">
-                  <div className="text-4xl mb-3 text-center">{post.image}</div>
-                  <div className="flex items-center gap-2 mb-3">
-                    <span className="bg-purple-600 text-white px-2 py-1 rounded text-xs font-semibold">
-                      {post.category}
-                    </span>
-                    <span className="text-purple-300 text-xs">{post.readTime}</span>
+              <article key={index} className="bg-gradient-to-br from-purple-800/80 to-slate-900/80 rounded-2xl border-2 border-purple-600 hover:border-amber-400 shadow-lg transition-all group overflow-hidden">
+                <div className="p-7 flex flex-col h-full justify-between">
+                  <div>
+                    <div className="text-5xl mb-3 text-center drop-shadow-xl">{post.image}</div>
+                    <div className="flex items-center gap-2 mb-3 justify-center">
+                      <span className="bg-purple-600 text-white px-2 py-1 rounded text-xs font-semibold shadow">
+                        {post.category}
+                      </span>
+                      <span className="text-purple-200 text-xs">{post.readTime}</span>
+                    </div>
+                    <h3 className="text-lg font-bold text-amber-200 mb-2 group-hover:text-amber-100 transition-colors text-center">
+                      {post.title}
+                    </h3>
+                    <p className="text-purple-100 text-sm mb-3 line-clamp-3 text-center">
+                      {post.excerpt}
+                    </p>
                   </div>
-                  <h3 className="text-lg font-bold text-amber-300 mb-2 group-hover:text-amber-200 transition-colors">
-                    {post.title}
-                  </h3>
-                  <p className="text-purple-200 text-sm mb-3 line-clamp-2">
-                    {post.excerpt}
-                  </p>
                   <Link 
                     href={`/blog/${post.slug}`}
-                    className="text-amber-400 hover:text-amber-300 font-semibold text-sm"
+                    className="mt-3 inline-block text-amber-400 hover:text-amber-200 font-semibold text-sm text-center border border-amber-400 rounded-full px-5 py-2 transition-colors shadow hover:bg-amber-400/10"
                   >
                     Leer artículo →
                   </Link>
@@ -306,21 +351,21 @@ export default function BlogIndex() {
             ))}
           </div>
         </div>
-
         {/* Newsletter CTA */}
-        <div className="text-center bg-gradient-to-r from-purple-800 to-amber-800 p-8 rounded-lg">
-          <h2 className="text-3xl font-bold text-amber-300 mb-4">
+        <div className="text-center bg-gradient-to-r from-purple-800 to-amber-800 p-10 rounded-2xl shadow-xl mt-12">
+          <h2 className="text-3xl font-bold text-amber-300 mb-4 drop-shadow">
             ¿Te gustó nuestro contenido?
           </h2>
-          <p className="text-xl text-purple-200 mb-6">
+          <p className="text-xl text-purple-100 mb-6">
             Explora nuestras lecturas gratuitas y descubre qué revelan las cartas para ti.
           </p>
           <Link 
             href="/" 
-            className="bg-amber-600 hover:bg-amber-700 text-slate-900 px-8 py-4 rounded-lg font-bold text-lg transition-colors inline-block"
+            className="bg-amber-600 hover:bg-amber-700 text-slate-900 px-10 py-5 rounded-full font-bold text-lg transition-colors inline-block shadow-lg"
           >
             🔮 Probar Lectura Gratis
-          </Link>        </div>
+          </Link>
+        </div>
       </div>
     </div>
   );
