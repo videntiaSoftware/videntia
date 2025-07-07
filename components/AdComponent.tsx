@@ -11,10 +11,6 @@ interface AdComponentProps {
   disabled?: boolean;
 }
 
-
-
-
-
 export default function AdComponent({ 
   userTier, 
   onAdWatched, 
@@ -26,7 +22,6 @@ export default function AdComponent({
   const [countdown, setCountdown] = useState(0);
   const [error, setError] = useState<string | null>(null);
 
-  // Don't show ads for premium users
   if (userTier === 'premium') {
     return null;
   }
@@ -212,3 +207,6 @@ export default function AdComponent({
     </Card>
   );
 }
+
+
+
