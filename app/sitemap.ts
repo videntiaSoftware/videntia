@@ -145,7 +145,13 @@ export default function sitemap(): MetadataRoute.Sitemap {
       changeFrequency: 'monthly',
       priority: 0.6,
     },
-    // SEO URLs - No accesibles para usuarios, solo para crawlers
+    {
+      url: `${baseUrl}/cartas/pentaculos`,
+      lastModified: new Date(),
+      changeFrequency: 'monthly',
+      priority: 0.6,
+    },
+    // SEO content pages
     {
       url: `${baseUrl}/seo/lecturas-tarot-amor`,
       lastModified: new Date(),
@@ -199,37 +205,6 @@ export default function sitemap(): MetadataRoute.Sitemap {
       lastModified: new Date(),
       changeFrequency: 'weekly',
       priority: 0.7,
-    },
-    // Nuevas páginas de cartas especializadas
-    {
-      url: `${baseUrl}/cartas/arcanos-mayores`,
-      lastModified: new Date(),
-      changeFrequency: 'monthly',
-      priority: 0.7,
-    },
-    {
-      url: `${baseUrl}/cartas/copas`,
-      lastModified: new Date(),
-      changeFrequency: 'monthly',
-      priority: 0.6,
-    },
-    {
-      url: `${baseUrl}/cartas/espadas`,
-      lastModified: new Date(),
-      changeFrequency: 'monthly',
-      priority: 0.6,
-    },
-    {
-      url: `${baseUrl}/cartas/pentaculos`,
-      lastModified: new Date(),
-      changeFrequency: 'monthly',
-      priority: 0.6,
-    },
-    {
-      url: `${baseUrl}/cartas/bastos`,
-      lastModified: new Date(),
-      changeFrequency: 'monthly',
-      priority: 0.6,
     },
     // Posts de blog específicos
     {
