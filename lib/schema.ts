@@ -70,12 +70,12 @@ export const websiteSchema = {
   "@type": "WebSite",
   "name": "Videntia Tarot",
   "alternateName": "Videntia",
-  "url": process.env.NEXT_PUBLIC_BASE_URL || "https://videntia.vercel.app",
+  "url": process.env.NEXT_PUBLIC_BASE_URL || "https://videntiatarot.com",
   "potentialAction": {
     "@type": "SearchAction",
     "target": {
       "@type": "EntryPoint",
-      "urlTemplate": `${process.env.NEXT_PUBLIC_BASE_URL || "https://videntia.vercel.app"}?q={search_term_string}`
+      "urlTemplate": `${process.env.NEXT_PUBLIC_BASE_URL || "https://videntiatarot.com"}?q={search_term_string}`
     },
     "query-input": "required name=search_term_string"
   }

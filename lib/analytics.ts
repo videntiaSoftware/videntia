@@ -500,7 +500,7 @@ export async function submitUrlForIndexing(url: string): Promise<boolean> {
   }
 }
 
-export default {
+const analytics = {
   initializeGA4,
   trackPageView,
   trackTarotReading,
@@ -516,3 +516,5 @@ export default {
   GA4_CONFIG,
   GSC_CONFIG
 };
+
+export default analytics;

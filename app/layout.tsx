@@ -174,13 +174,50 @@ export default function RootLayout({
           `}
         </Script>
 
-        {/* Analytics Initialization */}
+        {/* Analytics Initialization - Fixed for security */}
         <Script id="analytics-init" strategy="afterInteractive">
           {`
-            import('/lib/analytics').then(module => {
-              module.default.initializeGA4();
-              module.default.setupAutomaticTracking();
-            });
+            // Initialize tracking without dynamic imports
+            if (typeof window !== 'undefined' && window.gtag) {
+              // Setup automatic outbound link tracking
+              document.addEventListener('click', function(event) {
+                var target = event.target.closest('a');
+                if (target && target.hostname !== window.location.hostname) {
+                  window.gtag('event', 'click', {
+                    event_category: 'outbound_link',
+                    event_label: target.href,
+                    transport_type: 'beacon'
+                  });
+                }
+              });
+              
+              // Track scroll depth
+              var maxScroll = 0;
+              var milestones = [25, 50, 75, 90, 100];
+              var tracked = new Set();
+              
+              window.addEventListener('scroll', function() {
+                var scrollPercent = Math.round(
+                  ((window.scrollY + window.innerHeight) / document.documentElement.scrollHeight) * 100
+                );
+                
+                if (scrollPercent > maxScroll) {
+                  maxScroll = scrollPercent;
+                  
+                  for (var i = 0; i < milestones.length; i++) {
+                    var milestone = milestones[i];
+                    if (scrollPercent >= milestone && !tracked.has(milestone)) {
+                      tracked.add(milestone);
+                      window.gtag('event', 'scroll', {
+                        event_category: 'engagement',
+                        scroll_depth: milestone,
+                        page_location: window.location.href
+                      });
+                    }
+                  }
+                }
+              }, { passive: true });
+            }
           `}
         </Script>
 

@@ -1,4 +1,5 @@
 import { Metadata } from "next";
+import Link from "next/link";
 import { serviceSchema, tarotReadingSchema, faqSchema } from "@/lib/schema";
 import { notFound } from "next/navigation";
 
@@ -318,16 +319,17 @@ export default async function SEOPage({ params }: SEOPageProps) {
         </div>
       </div>
 
-      {/* Redirección automática a la página principal */}
-      <script
-        dangerouslySetInnerHTML={{
-          __html: `
-            if (typeof window !== 'undefined') {
-              window.location.replace('/');
-            }
-          `,
-        }}
-      />
+      {/* CTA para usar la aplicación principal */}
+      <div className="mt-8 text-center bg-gradient-to-r from-violet-800 to-purple-800 p-6 rounded-lg">
+        <h3 className="text-xl font-bold text-amber-300 mb-4">¿Listo para tu lectura personalizada?</h3>
+        <p className="text-amber-200 mb-4">Accede a todas nuestras lecturas de tarot interactivas y descubre tu destino</p>
+        <Link 
+          href="/" 
+          className="inline-block bg-amber-600 hover:bg-amber-700 text-white font-bold py-3 px-6 rounded-lg transition-colors"
+        >
+          Comenzar Lectura Gratis
+        </Link>
+      </div>
     </>
   );
 }

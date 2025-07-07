@@ -154,11 +154,14 @@ async function enrichEventData(req: NextRequest, eventData: any) {
   // Detectar OS y browser
   const { os, browser } = parseUserAgent(userAgent);
   
-  // Get geolocation (usando un servicio como ip-api.com)
+  // Get geolocation (usando un servicio confiable)
   let geoData: any = {};
   try {
-    const geoResponse = await fetch(`http://ip-api.com/json/${ip}`);
-    geoData = await geoResponse.json();
+    // Usar un servicio más confiable para geolocalización
+    const geoResponse = await fetch(`https://ipapi.co/${ip}/json/`);
+    if (geoResponse.ok) {
+      geoData = await geoResponse.json();
+    }
   } catch (error) {
     console.log('Geo lookup failed:', error);
   }

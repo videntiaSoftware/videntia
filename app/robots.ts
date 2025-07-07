@@ -17,41 +17,6 @@ export default function robots(): MetadataRoute.Robots {
           '/_next/',
           '/dashboard/',
           '*.json',
-          '/seo/*', // Páginas SEO no accesibles directamente para usuarios
-        ],
-      },
-      {
-        userAgent: 'Googlebot',
-        allow: [
-          '/',
-          '/premium',
-          '/contacto',
-          '/politica-privacidad',
-          '/terminos-condiciones',
-          '/seo/', // Permitir a Google indexar páginas SEO
-        ],
-        disallow: [
-          '/api/',
-          '/admin/',
-          '/auth/',
-          '/protected/',
-          '/profile/',
-        ],
-      },
-      {
-        userAgent: 'Bingbot',
-        allow: [
-          '/',
-          '/premium',
-          '/contacto',
-          '/seo/',
-        ],
-        disallow: [
-          '/api/',
-          '/admin/',
-          '/auth/',
-          '/protected/',
-          '/profile/',
         ],
       },
     ],
