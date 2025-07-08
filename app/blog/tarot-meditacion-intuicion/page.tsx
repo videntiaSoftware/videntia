@@ -65,7 +65,7 @@ export default function TarotMeditacionIntuicion() {
           <h2 className="text-xl font-bold text-purple-700 mb-2">Consejos para conectar con la intuición en el tarot</h2>
           <ul className="list-disc pl-6 mb-3">
             <li>Haz de la meditación un hábito antes de cada lectura.</li>
-            <li>No te obsesiones con el significado "correcto"; confía en tu percepción.</li>
+            <li>No te obsesiones con el significado {"correcto"}; confía en tu percepción.</li>
             <li>Registra tus experiencias y observa cómo evoluciona tu intuición.</li>
             <li>Combina la intuición con el estudio de los arquetipos y simbolismos.</li>
             <li>Permítete experimentar y jugar con las cartas.</li>

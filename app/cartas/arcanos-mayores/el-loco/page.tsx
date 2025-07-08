@@ -103,10 +103,10 @@ export default function ElLocoTarot() {
         <section className="mb-10">
           <h2 className="text-xl font-bold text-purple-700 mb-2">Ejemplos de Preguntas para El Loco</h2>
           <ul className="list-disc pl-6 mb-3">
-            <li>¿Qué nueva oportunidad debería aprovechar?</li>
-            <li>¿Estoy listo/a para un cambio importante?</li>
-            <li>¿Qué me impide dar el salto de fe?</li>
-            <li>¿Cómo puedo confiar más en la vida?</li>
+            <li>{"¿Qué nueva oportunidad debería aprovechar?"}</li>
+            <li>{"¿Estoy listo/a para un cambio importante?"}</li>
+            <li>{"¿Qué me impide dar el salto de fe?"}</li>
+            <li>{"¿Cómo puedo confiar más en la vida?"}</li>
           </ul>
         </section>
 
@@ -126,19 +126,19 @@ export default function ElLocoTarot() {
           <h2 className="text-xl font-bold text-purple-700 mb-2">Preguntas Frecuentes sobre El Loco</h2>
           <div className="space-y-4">
             <div>
-              <strong>¿El Loco es una carta positiva o negativa?</strong>
+              <strong>{"¿El Loco es una carta positiva o negativa?"}</strong>
               <p>Depende del contexto. Al derecho suele ser positiva, pero invertida advierte sobre riesgos y falta de madurez.</p>
             </div>
             <div>
-              <strong>¿Qué significa El Loco en el amor?</strong>
+              <strong>{"¿Qué significa El Loco en el amor?"}</strong>
               <p>Al derecho: nuevas experiencias amorosas, libertad. Invertido: relaciones inestables o inmaduras.</p>
             </div>
             <div>
-              <strong>¿Qué representa el perro en la carta de El Loco?</strong>
+              <strong>{"¿Qué representa el perro en la carta de El Loco?"}</strong>
               <p>El instinto, la lealtad y la advertencia de no caer en la imprudencia.</p>
             </div>
             <div>
-              <strong>¿El Loco siempre significa un viaje literal?</strong>
+              <strong>{"¿El Loco siempre significa un viaje literal?"}</strong>
               <p>No necesariamente. Puede ser un viaje interior, un cambio de mentalidad o una nueva etapa vital.</p>
             </div>
           </div>

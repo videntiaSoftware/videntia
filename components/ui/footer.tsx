@@ -19,7 +19,6 @@ export default function Footer() {
             <h3 className="text-purple-300 font-semibold mb-3 text-sm">Cartas</h3>
             <div className="space-y-2">
               <Link href="/cartas/arcanos-mayores" className="block hover:text-purple-300 transition-colors">Arcanos Mayores</Link>
-              <Link href="/cartas/copas" className="block hover:text-purple-300 transition-colors">Copas</Link>
               <Link href="/cartas/espadas" className="block hover:text-purple-300 transition-colors">Espadas</Link>
               <Link href="/cartas/pentaculos" className="block hover:text-purple-300 transition-colors">Pentáculos</Link>
             </div>

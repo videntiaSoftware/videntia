@@ -30,15 +30,6 @@ const arcanosCategories = [
     href: '/cartas/arcanos-mayores'
   },
   {
-    title: 'Copas',
-    description: 'Emociones, amor, relaciones y espiritualidad',
-    icon: Heart,
-    color: 'text-blue-400',
-    bgColor: 'bg-blue-600 hover:bg-blue-700',
-    count: '14 cartas',
-    href: '/cartas/copas'
-  },
-  {
     title: 'Espadas',
     description: 'Mente, comunicación, conflictos y desafíos',
     icon: Sword,

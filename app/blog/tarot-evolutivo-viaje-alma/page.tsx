@@ -67,7 +67,7 @@ export default function TarotEvolutivoViajeAlma() {
         <section className="mb-10">
           <h2 className="text-xl font-bold text-purple-700 mb-2">Consejos para aprovechar el tarot evolutivo</h2>
           <ul className="list-disc pl-6 mb-3">
-            <li>Enfoca la lectura en el "para qué" y no solo en el "qué" o "cuándo".</li>
+            <li>Enfoca la lectura en el {"para qué"} y no solo en el {"qué"} o {"cuándo"}.</li>
             <li>Utiliza preguntas abiertas que inviten a la reflexión y el autodescubrimiento.</li>
             <li>Registra tus tiradas y observa tu evolución a lo largo del tiempo.</li>
             <li>Combina el tarot con otras herramientas de autoconocimiento (escritura, meditación, terapia).</li>

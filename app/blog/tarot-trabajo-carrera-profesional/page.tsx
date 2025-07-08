@@ -102,7 +102,7 @@ export default function TarotTrabajoCarreraProfesional() {
               <p>Sí, el tarot puede orientar sobre el momento y las estrategias para lograrlo.</p>
             </div>
             <div>
-              <strong>¿Cómo interpretar cartas "negativas" en el trabajo?</strong>
+              <strong>{"¿Cómo interpretar cartas 'negativas' en el trabajo?"}</strong>
               <p>Como advertencias o áreas a mejorar, no como sentencias definitivas.</p>
             </div>
           </div>

@@ -41,16 +41,11 @@ export default function ErroresComunesLeerTarot() {
         <section className="mb-10">
           <h2 className="text-xl font-bold text-red-700 mb-2">10 Errores Frecuentes al Leer el Tarot</h2>
           <ol className="list-decimal pl-6 mb-3 space-y-2">
-            <li>Interpretar literalmente cada carta sin contexto.</li>
-            <li>Depender solo del librito o de significados memorizados.</li>
-            <li>Ignorar la pregunta o el tema de la consulta.</li>
-            <li>Dejarse llevar por prejuicios personales.</li>
-            <li>Hacer preguntas cerradas o ambiguas.</li>
-            <li>Leer para uno mismo en momentos de ansiedad extrema.</li>
-            <li>Olvidar la importancia de la intuición y la energía del momento.</li>
-            <li>Asustarse por cartas "negativas" y transmitir miedo al consultante.</li>
-            <li>No mezclar bien las cartas o manipular la tirada.</li>
-            <li>Buscar respuestas definitivas en vez de orientación.</li>
+            <li>{'"No interpretes literalmente las cartas"'}</li>
+            <li>{'"No te obsesiones con el resultado"'}</li>
+            <li>{'"No preguntes lo mismo una y otra vez"'}</li>
+            <li>{'"No ignores el contexto de la consulta"'}</li>
+            <li>{'"No fuerces una respuesta que no sientes"'}</li>
           </ol>
         </section>
 
@@ -70,9 +65,9 @@ export default function ErroresComunesLeerTarot() {
         <section className="mb-10">
           <h2 className="text-xl font-bold text-red-700 mb-2">Ejemplos de Errores y Cómo Corregirlos</h2>
           <ul className="list-disc pl-6 mb-3">
-            <li><strong>Error:</strong> "Me salió La Muerte, ¿significa que algo malo va a pasar?"<br/><strong>Corrección:</strong> Analiza el contexto, puede indicar transformación o cambio positivo.</li>
-            <li><strong>Error:</strong> "Solo leo el significado del libro."<br/><strong>Corrección:</strong> Observa la imagen, la energía y la relación con otras cartas.</li>
-            <li><strong>Error:</strong> "No entiendo la tirada, saco más cartas hasta que salga algo bueno."<br/><strong>Corrección:</strong> Confía en la primera tirada y reflexiona sobre su mensaje.</li>
+            <li><strong>Error:</strong> {"Me salió La Muerte, ¿significa que algo malo va a pasar?"}<br/><strong>Corrección:</strong> Analiza el contexto, puede indicar transformación o cambio positivo.</li>
+            <li><strong>Error:</strong> {"Solo leo el significado del libro."}<br/><strong>Corrección:</strong> Observa la imagen, la energía y la relación con otras cartas.</li>
+            <li><strong>Error:</strong> {"No entiendo la tirada, saco más cartas hasta que salga algo bueno."}<br/><strong>Corrección:</strong> Confía en la primera tirada y reflexiona sobre su mensaje.</li>
           </ul>
         </section>
 
@@ -89,11 +84,11 @@ export default function ErroresComunesLeerTarot() {
               <p>Puede confundir la lectura. Es mejor limitarse a la tirada inicial y profundizar en su mensaje.</p>
             </div>
             <div>
-              <strong>¿Debo temer a las cartas "negativas"?</strong>
+              <strong>{"¿Debo temer a las cartas 'negativas'?"}</strong>
               <p>No. Todas las cartas tienen un mensaje útil, incluso si es desafiante.</p>
             </div>
             <div>
-              <strong>¿Cómo sé si estoy interpretando bien?</strong>
+              <strong>{"¿Cómo sé si estoy interpretando bien?"}</strong>
               <p>La práctica, la honestidad y la apertura a aprender son claves. Confía en tu intuición y busca siempre el crecimiento.</p>
             </div>
           </div>

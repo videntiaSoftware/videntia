@@ -47,7 +47,7 @@ export default function ComoHacerPreguntasEfectivasTarot() {
           <h2 className="text-xl font-bold text-green-700 mb-2">Consejos para hacer preguntas efectivas al tarot</h2>
           <ul className="list-disc pl-6 mb-3 text-green-900">
             <li>Evita preguntas cerradas de sí o no (salvo tiradas específicas).</li>
-            <li>Prefiere preguntas abiertas que exploren el "cómo", "por qué", "para qué" o "qué puedo hacer".</li>
+            <li>Prefiere preguntas abiertas que exploren el {`"cómo"`}, {`"por qué"`}, {`"para qué"`} o {`"qué puedo hacer"`}.</li>
             <li>Enfoca la pregunta en ti, no en terceras personas.</li>
             <li>Sé claro y específico sobre la situación o área de tu vida.</li>
             <li>Evita preguntas repetitivas o hechas desde la ansiedad.</li>

@@ -83,7 +83,7 @@ export default function TarotMarsellaVsRiderWaite() {
                 <li>Fácil de aprender e interpretar</li>
                 <li>Escenas visuales en todas las cartas</li>
                 <li>Gran variedad de mazos derivados</li>
-                <li>Algunos puristas lo consideran "moderno"</li>
+                <li>Algunos puristas lo consideran {"moderno"}</li>
               </ul>
             </div>
           </div>
