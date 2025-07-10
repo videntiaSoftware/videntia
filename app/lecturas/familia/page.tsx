@@ -15,7 +15,7 @@ export const metadata: Metadata = {
     type: 'website',
     images: [{ url: '/opengraph-image.png', width: 1200, height: 630, alt: 'Lectura de Tarot Familiar - Videntia' }]
   },
-  alternates: { canonical: 'https://videntia-tarot.vercel.app/lecturas/familia' }
+  alternates: { canonical: "https://videntiatarot.com/lecturas/familia" }
 }
 
 export default function LecturaFamiliaPage() {

@@ -16,7 +16,7 @@ export const metadata: Metadata = {
     url: "/horoscopo-diario-gratis",
   },
   alternates: {
-    canonical: "/horoscopo-diario-gratis",
+    canonical: "https://videntiatarot.com/horoscopo-diario-gratis"
   },
 };
 

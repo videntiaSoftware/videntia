@@ -16,7 +16,7 @@ export const metadata: Metadata = {
     url: "/guias/como-interpretar-tarot",
   },
   alternates: {
-    canonical: "/guias/como-interpretar-tarot",
+    canonical: "https://videntiatarot.com/guias/como-interpretar-tarot"
   },
 };
 

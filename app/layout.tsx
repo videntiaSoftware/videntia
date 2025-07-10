@@ -8,12 +8,8 @@ import AnalyticsProvider from "@/components/providers/AnalyticsProvider";
 import { organizationSchema, websiteSchema } from "@/lib/schema";
 import { GSC_CONFIG } from "@/lib/analytics";
 
-const defaultUrl = process.env.VERCEL_URL
-  ? `https://${process.env.VERCEL_URL}`
-  : "http://localhost:3000";
-
 export const metadata: Metadata = {
-  metadataBase: new URL(defaultUrl),
+  metadataBase: new URL("https://videntiatarot.com"),
   title: {
     default: "Videntia - Tu Guía Espiritual de Tarot",
     template: "%s | Videntia Tarot"
@@ -36,13 +32,13 @@ export const metadata: Metadata = {
   openGraph: {
     title: "Videntia - Tu Guía Espiritual de Tarot",
     description: "Descubre tu destino con lecturas de tarot personalizadas, análisis espirituales profundos y conexión con tu intuición interior.",
-    url: defaultUrl,
+    url: "https://videntiatarot.com",
     siteName: "Videntia Tarot",
     locale: "es_AR",
     type: "website",
     images: [
       {
-        url: `${defaultUrl}/opengraph-image.png`,
+        url: "https://videntiatarot.com/opengraph-image.png",
         width: 1200,
         height: 630,
         alt: "Videntia - Lecturas de Tarot Online",
@@ -53,7 +49,7 @@ export const metadata: Metadata = {
     card: "summary_large_image",
     title: "Videntia - Tu Guía Espiritual de Tarot",
     description: "Lecturas de tarot online personalizadas. Descubre tu destino con análisis espirituales profundos.",
-    images: [`${defaultUrl}/twitter-image.png`],
+    images: [`https://videntiatarot.com/twitter-image.png`],
   },
   robots: {
     index: true,
@@ -67,7 +63,7 @@ export const metadata: Metadata = {
     },
   },
   alternates: {
-    canonical: defaultUrl,
+    canonical: "https://videntiatarot.com",
   },
   category: "Entertainment",
   other: {

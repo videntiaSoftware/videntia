@@ -1,4 +1,12 @@
 {
+  "redirects": [
+    {
+      "source": "/(.*)",
+      "has": [{ "type": "host", "value": "www.videntiatarot.com" }],
+      "destination": "https://videntiatarot.com/$1",
+      "permanent": true
+    }
+  ],
   "crons": [
     {
       "path": "/api/notifications/simple-daily-cards",

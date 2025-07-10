@@ -29,7 +29,7 @@ export const metadata: Metadata = {
     images: ['/twitter-image.png']
   },
   alternates: {
-    canonical: 'https://videntia-tarot.vercel.app/lecturas/dinero'
+    canonical: "https://videntiatarot.com/lecturas/dinero"
   }
 }
 

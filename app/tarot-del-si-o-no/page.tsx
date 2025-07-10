@@ -16,7 +16,7 @@ export const metadata: Metadata = {
     url: "/tarot-del-si-o-no",
   },
   alternates: {
-    canonical: "/tarot-del-si-o-no",
+    canonical: "https://videntiatarot.com/tarot-del-si-o-no"
   },
 };
 

@@ -16,7 +16,7 @@ export const metadata: Metadata = {
     url: "/numerologia-gratis",
   },
   alternates: {
-    canonical: "/numerologia-gratis",
+    canonical: "https://videntiatarot.com/numerologia-gratis"
   },
 };
 

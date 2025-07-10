@@ -15,7 +15,7 @@ export const metadata: Metadata = {
     type: 'website',
     images: [{ url: '/opengraph-image.png', width: 1200, height: 630, alt: 'FAQ Tarot - Videntia' }]
   },
-  alternates: { canonical: 'https://videntia-tarot.vercel.app/faq' }
+  alternates: { canonical: "https://videntiatarot.com/faq" }
 }
 
 const faqCategories = [

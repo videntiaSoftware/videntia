@@ -16,7 +16,7 @@ export const metadata: Metadata = {
     url: "/tirada-cartas-amor-gratis",
   },
   alternates: {
-    canonical: "/tirada-cartas-amor-gratis",
+    canonical: "https://videntiatarot.com/tirada-cartas-amor-gratis"
   },
 };
 

@@ -16,7 +16,7 @@ export const metadata: Metadata = {
     url: "/guias/tiradas-tarot-completas",
   },
   alternates: {
-    canonical: "/guias/tiradas-tarot-completas",
+    canonical: "https://videntiatarot.com/guias/tiradas-tarot-completas"
   },
 };
 

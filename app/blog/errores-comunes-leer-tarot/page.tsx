@@ -13,7 +13,7 @@ export const metadata: Metadata = {
     url: "/blog/errores-comunes-leer-tarot"
   },
   alternates: {
-    canonical: "/blog/errores-comunes-leer-tarot"
+    canonical: "https://videntiatarot.com/blog/errores-comunes-leer-tarot"
   }
 };
 
