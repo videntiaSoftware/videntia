@@ -31,6 +31,7 @@ const jsonLd = {
   '@type': 'Service',
   name: 'Lectura de Tarot del Dinero',
   description: 'Servicio especializado de lectura de tarot para temas financieros y abundancia',
+  image: 'https://videntiatarot.com/opengraph-image.png',
   provider: {
     '@type': 'Organization',
     name: 'Videntia Tarot',
