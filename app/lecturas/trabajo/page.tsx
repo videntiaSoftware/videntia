@@ -31,7 +31,6 @@ const jsonLd = {
   '@type': 'Service',
   name: 'Lectura de Tarot Laboral',
   description: 'Servicio especializado de lectura de tarot para temas laborales y desarrollo profesional',
-  image: 'https://videntiatarot.com/opengraph-image.png',
   provider: {
     '@type': 'Organization',
     name: 'Videntia Tarot',
