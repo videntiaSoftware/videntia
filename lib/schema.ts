@@ -126,6 +126,7 @@ export const tarotReadingSchema = (readingType: string) => ({
   "@type": "Product",
   "name": `Lectura de Tarot ${readingType}`,
   "description": `Consulta de tarot especializada en ${readingType.toLowerCase()} con interpretaciones personalizadas`,
+  "image": `${process.env.NEXT_PUBLIC_BASE_URL || "https://videntiatarot.com"}/opengraph-image.png`,
   "brand": {
     "@type": "Brand",
     "name": "Videntia Tarot"
