@@ -14,7 +14,7 @@ export const metadata: Metadata = {
     description: 'Explora el significado completo de todas las cartas del tarot con nuestro diccionario especializado.',
     url: 'https://videntia-tarot.vercel.app/cartas',
     type: 'website',
-    images: [{ url: '/opengraph-image.png', width: 1200, height: 630, alt: 'Cartas del Tarot - Videntia' }]
+    images: [{ url: 'https://videntiatarot.com/opengraph-image.png', width: 1200, height: 630, alt: 'Cartas del Tarot - Videntia' }]
   },
   alternates: { canonical: 'https://videntia-tarot.vercel.app/cartas' }
 }

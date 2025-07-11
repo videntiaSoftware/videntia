@@ -13,14 +13,7 @@ export const metadata: Metadata = {
     description: 'Descubre tu futuro profesional con lecturas de tarot especializadas en trabajo y carrera.',
     url: 'https://videntia-tarot.vercel.app/lecturas/trabajo',
     type: 'website',
-    images: [
-      {
-        url: '/opengraph-image.png',
-        width: 1200,
-        height: 630,
-        alt: 'Lectura de Tarot Laboral - Videntia'
-      }
-    ]
+    images: [{ url: 'https://videntiatarot.com/opengraph-image.png', width: 1200, height: 630, alt: 'Lectura de Tarot de Trabajo - Videntia' }],
   },
   twitter: {
     card: 'summary_large_image',

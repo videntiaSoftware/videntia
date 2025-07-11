@@ -13,7 +13,7 @@ export const metadata: Metadata = {
     description: 'Descubre tu destino y lo que te depara el futuro con lecturas de videncia.',
     url: 'https://videntia-tarot.vercel.app/lecturas/futuro',
     type: 'website',
-    images: [{ url: '/opengraph-image.png', width: 1200, height: 630, alt: 'Lectura de Tarot del Futuro - Videntia' }]
+    images: [{ url: 'https://videntiatarot.com/opengraph-image.png', width: 1200, height: 630, alt: 'Lectura de Tarot del Futuro - Videntia' }]
   },
   alternates: { canonical: "https://videntiatarot.com/lecturas/futuro" }
 }

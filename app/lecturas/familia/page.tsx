@@ -13,7 +13,7 @@ export const metadata: Metadata = {
     description: 'Descubre la armonía familiar y resuelve conflictos con lecturas especializadas.',
     url: 'https://videntia-tarot.vercel.app/lecturas/familia',
     type: 'website',
-    images: [{ url: '/opengraph-image.png', width: 1200, height: 630, alt: 'Lectura de Tarot Familiar - Videntia' }]
+    images: [{ url: 'https://videntiatarot.com/opengraph-image.png', width: 1200, height: 630, alt: 'Lectura de Tarot Familiar - Videntia' }]
   },
   alternates: { canonical: "https://videntiatarot.com/lecturas/familia" }
 }

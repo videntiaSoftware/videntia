@@ -13,7 +13,7 @@ export const metadata: Metadata = {
     description: 'Descubre aspectos sobre tu salud y bienestar con lecturas especializadas.',
     url: 'https://videntia-tarot.vercel.app/lecturas/salud',
     type: 'website',
-    images: [{ url: '/opengraph-image.png', width: 1200, height: 630, alt: 'Lectura de Tarot de Salud - Videntia' }]
+    images: [{ url: 'https://videntiatarot.com/opengraph-image.png', width: 1200, height: 630, alt: 'Lectura de Tarot de Salud - Videntia' }]
   },
   alternates: { canonical: "https://videntiatarot.com/lecturas/salud" }
 }

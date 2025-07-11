@@ -13,14 +13,7 @@ export const metadata: Metadata = {
     description: 'Descubre tu futuro financiero con lecturas de tarot especializadas en dinero y abundancia.',
     url: 'https://videntia-tarot.vercel.app/lecturas/dinero',
     type: 'website',
-    images: [
-      {
-        url: '/opengraph-image.png',
-        width: 1200,
-        height: 630,
-        alt: 'Lectura de Tarot del Dinero - Videntia'
-      }
-    ]
+    images: [{ url: 'https://videntiatarot.com/opengraph-image.png', width: 1200, height: 630, alt: 'Lectura de Tarot de Dinero - Videntia' }],
   },
   twitter: {
     card: 'summary_large_image',

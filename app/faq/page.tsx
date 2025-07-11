@@ -13,7 +13,7 @@ export const metadata: Metadata = {
     description: 'Encuentra respuestas a todas tus dudas sobre las lecturas de tarot y nuestro sistema.',
     url: 'https://videntia-tarot.vercel.app/faq',
     type: 'website',
-    images: [{ url: '/opengraph-image.png', width: 1200, height: 630, alt: 'FAQ Tarot - Videntia' }]
+    images: [{ url: 'https://videntiatarot.com/opengraph-image.png', width: 1200, height: 630, alt: 'FAQ Tarot - Videntia' }]
   },
   alternates: { canonical: "https://videntiatarot.com/faq" }
 }

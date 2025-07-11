@@ -13,7 +13,7 @@ export const metadata: Metadata = {
     description: 'Descubre lecturas especializadas para cada área de tu vida: amor, trabajo, dinero, salud y más.',
     url: 'https://videntia-tarot.vercel.app/lecturas',
     type: 'website',
-    images: [{ url: '/opengraph-image.png', width: 1200, height: 630, alt: 'Lecturas de Tarot Especializadas - Videntia' }]
+    images: [{ url: 'https://videntiatarot.com/opengraph-image.png', width: 1200, height: 630, alt: 'Lecturas de Tarot Especializadas - Videntia' }]
   },
   alternates: { canonical: "https://videntiatarot.com/lecturas" }
 }

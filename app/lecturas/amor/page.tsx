@@ -13,14 +13,7 @@ export const metadata: Metadata = {
     description: 'Descubre tu futuro amoroso con nuestras lecturas de tarot del amor. IA avanzada y sabiduría ancestral para revelar los secretos de tu corazón.',
     url: 'https://videntia-tarot.vercel.app/lecturas/amor',
     type: 'website',
-    images: [
-      {
-        url: '/opengraph-image.png',
-        width: 1200,
-        height: 630,
-        alt: 'Lectura de Tarot del Amor - Videntia'
-      }
-    ]
+    images: [{ url: 'https://videntiatarot.com/opengraph-image.png', width: 1200, height: 630, alt: 'Lectura de Tarot de Amor - Videntia' }]
   },
   twitter: {
     card: 'summary_large_image',
