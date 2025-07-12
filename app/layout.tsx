@@ -158,7 +158,18 @@ export default function RootLayout({
         <Script
           src={`https://www.google.com/recaptcha/api.js?render=${process.env.NEXT_PUBLIC_RECAPTCHA_SITE_KEY}`}
           strategy="beforeInteractive"
+          onLoad={() => console.log('[reCAPTCHA] script loaded, grecaptcha:', (window as any).grecaptcha)}
         />
+        {/* Verify reCAPTCHA ready state */}
+        <Script id="verify-recaptcha-ready" strategy="beforeInteractive">
+          {`
+            if (grecaptcha) {
+              grecaptcha.ready(() => console.log('[reCAPTCHA] ready to execute'));
+            } else {
+              console.warn('[reCAPTCHA] grecaptcha not found after load');
+            }
+          `}
+        </Script>
       </head>
       <body
         className={`min-h-screen flex flex-col max-w-screen bg-slate-950 text-amber-100 ${geistSans.variable} ${cinzelDecorative.variable} ${cormorantGaramond.variable}`}
