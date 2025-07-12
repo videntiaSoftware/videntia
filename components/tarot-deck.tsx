@@ -44,12 +44,25 @@ export default function TarotDeck({
   const [revealOrientation, setRevealOrientation] = useState<'upright' | 'reversed'>("upright")
   const [showOverlay, setShowOverlay] = useState(false)
   const [isStacked, setIsStacked] = useState(true);
+  // Instruction overlay for deck shuffle prompt
+  const [showDeckInstruction, setShowDeckInstruction] = useState(false);
   const containerRef = useRef<HTMLDivElement>(null)
+
+  // Show deck instruction overlay after delay in initial state
+  useEffect(() => {
+    let timer: NodeJS.Timeout;
+    if (flowState === 'initial') {
+      timer = setTimeout(() => setShowDeckInstruction(true), 7000);
+    } else {
+      setShowDeckInstruction(false);
+    }
+    return () => clearTimeout(timer);
+  }, [flowState]);
 
   // Mostrar las 22 cartas del mazo
   // Las primeras 10 son las seleccionadas, las otras 12 aparecen después de la mezcla
   const [showAllCards, setShowAllCards] = useState(false);
-  const displayedDeck = showAllCards ? deck.slice(0, 22) : deck.slice(0, 10);
+  const displayedDeck = showAllCards ? deck.slice(0, 22) : deck.slice(0, 6);
 
   // Un solo estado de animación: las cartas siempre están en su posición final (abanico/fila)
   // Mezcla: animación de "shuffle" (pequeño movimiento) al montar
@@ -239,9 +252,10 @@ export default function TarotDeck({
     topInstruction = `${selectionLabels[selectedCards.length]?.label || ''} ${selectionLabels[selectedCards.length]?.desc || ''}`;
   }
 
-  // Función para mezclar el mazo y pasar al siguiente paso
+  // Function to shuffle deck and advance state
   const handleShuffle = () => {
     if (canShuffle && flowState === 'initial') {
+      setShowDeckInstruction(false);
       setFlowState('shuffling');
       // Make sure parent has the latest question
       if (onQuestionChange) {
@@ -278,27 +292,23 @@ export default function TarotDeck({
                 onQuestionChange(newValue);
               }
             }}
+            onKeyDown={(e) => {
+              if (!isMobile && e.key === 'Enter' && canShuffle && flowState === 'initial') {
+                handleShuffle();
+              }
+            }}
             placeholder="Escribe tu pregunta al tarot..."
             className="w-full p-3 mb-4 rounded-lg bg-slate-800/70 border border-amber-500/30 text-amber-100 placeholder-amber-300/50 focus:outline-none focus:ring-2 focus:ring-amber-500/50 font-[Garamond] text-lg"
             style={{ fontFamily: 'Garamond, serif' }}
           />
-          {/* Solo mostrar el botón en desktop y si hay pregunta */}
-          {!isMobile && canShuffle && (
-            <button
-              onClick={() => setFlowState('shuffling')}
-              className="w-full py-3 rounded-lg bg-amber-600 hover:bg-amber-500 text-white font-semibold shadow-lg font-cinzel text-lg transition-colors duration-300"
-            >
-              Mezclar Cartas
-            </button>
-          )}
-        </motion.div>
+        </motion.div>                                                                                                                                         
       )}
       {/* Mazo apilado y animación de transición a abanico */}
       {(flowState === 'initial' || flowState === 'shuffling' || flowState === 'selection') && (
         <div
           ref={containerRef}
-          className="relative flex items-center justify-center w-full max-w-xs sm:max-w-sm md:max-w-2xl h-[340px] sm:h-[420px] md:h-[520px] mx-auto pointer-events-auto select-none"
-          style={{ minHeight: '260px', transform: typeof window !== 'undefined' && window.innerWidth < 640 ? 'translateX(-44px)' : undefined }}
+          className="relative flex items-center justify-center w-full h-[340px] sm:h-[420px] md:h-[520px] pointer-events-auto select-none transform -translate-x-10 -translate-y-4 md:-translate-x-8 md:-translate-y-32"
+          style={{ minHeight: '260px' }}
           onClick={handleShuffle}
         >
           {deck.slice(0, showAllCards ? 22 : 10).map((card, i) => {
@@ -344,7 +354,7 @@ export default function TarotDeck({
             return (
               <motion.div
                 key={card.id}
-                className={`absolute left-1/2 top-1/2 w-[96px] h-[154px] md:w-[140px] md:h-[224px] rounded-lg border-2 ${i === 0 ? 'border-amber-500/80' : 'border-amber-500/50'} bg-cover bg-center shadow-xl ${flowState === 'selection' ? 'cursor-pointer pointer-events-auto' : ''}`}
+                className={`absolute left-1/2 top-1/2 transform -translate-x-1/2 -translate-y-1/2 w-[96px] h-[154px] md:w-[140px] md:h-[224px] rounded-lg border-2 ${i === 0 ? 'border-amber-500/80' : 'border-amber-500/50'} bg-cover bg-center shadow-xl ${flowState === 'selection' ? 'cursor-pointer pointer-events-auto' : ''}`}
                 style={{
                   zIndex: 10 + i,
                   backgroundColor: '#4c1d95',
@@ -396,6 +406,7 @@ export default function TarotDeck({
               </motion.div>
             );
           })}
+          {/* End of deck container */}
         </div>
       )}
       {/* Instrucciones dinámicas durante la selección */}
@@ -480,6 +491,31 @@ export default function TarotDeck({
           </motion.div>
         </div>
       )} */}
+      {/* Overlay instruction pointing to deck (old) */}
+      {/* Removed old overlay - now using inline overlay beside deck */}
+      {/* Instruction overlay fixed at bottom for mobile, top for desktop */}
+      <AnimatePresence>
+        {showDeckInstruction && flowState === 'initial' && (
+          <motion.div
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            exit={{ opacity: 0 }}
+            transition={{ duration: 0.5 }}
+            className="fixed p-2 bg-blue-900 border-2 border-blue-700 text-white rounded-lg shadow-lg text-xs max-w-xs pointer-events-none z-50 bottom-4 right-4 md:top-28 md:right-8 md:bottom-auto animate-pulse"
+            style={{ fontFamily: 'Garamond, serif' }}
+          >
+            <div className="flex items-center justify-center space-x-2 mb-1">
+              <span className="text-2xl">🔮</span>
+              <span className="text-yellow-300">✨</span>
+              <span className="text-yellow-300">✨</span>
+            </div>
+            <p className="text-center lowercase">
+              toca el <strong>mazo</strong> para cargar las cartas con tu <strong>intención</strong> al mezclarlo y <strong>comenzar la lectura</strong>
+            </p>
+            <div className="absolute left-3/4 top-full w-0 h-0 border-l-[8px] border-r-[8px] border-t-[8px] border-transparent border-t-blue-700"></div>
+          </motion.div>
+        )}
+      </AnimatePresence>
     </div>
   )
 }

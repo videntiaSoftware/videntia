@@ -8,129 +8,159 @@ import StepTarotExperience from "./tarot-steps/StepTarotExperience";
 import UserTierBadge from "./UserTierBadge";
 import { createClient } from "@/lib/supabase/client";
 import { getUserTier, getTierLimits } from "@/lib/user-tiers";
+import { useRouter, useSearchParams } from 'next/navigation';
 
 const READING_TYPES = [
-  {
-    value: "three_card",
-    label: "Tirada de 3 cartas",
-    description: "Pasado, presente y futuro. Ideal para respuestas rápidas o situaciones simples.",
-  },
-  {
-    value: "celtic_cross",
-    label: "Cruz Celta",
-    description: "Análisis profundo de una situación compleja. 10 cartas.",
-  },
-  {
-    value: "yes_no",
-    label: "Lectura del sí o no",
-    description: "Responde a preguntas cerradas. 1 carta.",
-  },
-  {
-    value: "love_relationship",
-    label: "Relación de pareja",
-    description: "Sentimientos, intenciones, obstáculos, potencial. 4 cartas.",
-  },
-  {
-    value: "soulmate",
-    label: "Alma gemela",
-    description: "Conexión espiritual, bloqueos, caminos para sanar. 3 cartas.",
-  },
-  {
-    value: "life_purpose",
-    label: "Propósito de vida",
-    description: "Dones, misión, bloqueos, próximos pasos. 4 cartas.",
-  },
-  {
-    value: "shadow_work",
-    label: "Sombras",
-    description: "Inconsciente, miedo, sanación. 3 cartas.",
-  },
+	{
+		value: "three_card",
+		label: "Tirada de 3 cartas",
+		description:
+			"Pasado, presente y futuro. Ideal para respuestas rápidas o situaciones simples.",
+	},
+	{
+		value: "celtic_cross",
+		label: "Cruz Celta",
+		description:
+			"Análisis profundo de una situación compleja. 10 cartas.",
+	},
+	{
+		value: "yes_no",
+		label: "Lectura del sí o no",
+		description: "Responde a preguntas cerradas. 1 carta.",
+	},
+	{
+		value: "love_relationship",
+		label: "Relación de pareja",
+		description:
+			"Sentimientos, intenciones, obstáculos, potencial. 4 cartas.",
+	},
+	{
+		value: "soulmate",
+		label: "Alma gemela",
+		description:
+			"Conexión espiritual, bloqueos, caminos para sanar. 3 cartas.",
+	},
+	{
+		value: "life_purpose",
+		label: "Propósito de vida",
+		description:
+			"Dones, misión, bloqueos, próximos pasos. 4 cartas.",
+	},
+	{
+		value: "shadow_work",
+		label: "Sombras",
+		description: "Inconsciente, miedo, sanación. 3 cartas.",
+	},
 ];
 
 interface TarotExperienceStepsProps {
-  onStepChange?: (step: number) => void;
+	onStepChange?: (step: number) => void;
 }
 
-export default function TarotExperienceSteps({ onStepChange }: TarotExperienceStepsProps) {
-  const [step, setStep] = useState(0);
-  const [selectedType, setSelectedType] = useState("three_card");
-  const [userTier, setUserTier] = useState<'guest' | 'free' | 'premium'>('guest');
-  const [readingsToday, setReadingsToday] = useState(0);
-  const [adsWatched, setAdsWatched] = useState(0);
+export default function TarotExperienceSteps({
+	onStepChange,
+}: TarotExperienceStepsProps) {
+	const router = useRouter();
+	const searchParams = useSearchParams();
 
-  // Notificar cambio de step al padre
-  useEffect(() => {
-    onStepChange?.(step);
-  }, [step, onStepChange]);
+	const [step, setStep] = useState(0);
+	const [selectedType, setSelectedType] = useState("three_card");
+	const [userTier, setUserTier] = useState<"guest" | "free" | "premium">("guest");
+	const [readingsToday, setReadingsToday] = useState(0);
+	const [adsWatched, setAdsWatched] = useState(0);
 
-  useEffect(() => {
-    const checkUserTier = async () => {
-      const supabase = createClient();
-      const { data: userData } = await supabase.auth.getUser();
-      const tier = getUserTier(userData?.user || null);
-      setUserTier(tier);
+	// Initialize step from URL
+	useEffect(() => {
+		const urlStep = searchParams.get("step");
+		if (urlStep && !isNaN(+urlStep)) {
+			setStep(+urlStep);
+		}
+	}, []);
 
-      // Get today's reading count and ads watched
-      if (userData?.user) {
-        // Get readings count for today
-        const today = new Date();
-        today.setHours(0,0,0,0);
-        
-        const { data: readings } = await supabase
-          .from('readings')
-          .select('id')
-          .eq('user_id', userData.user.id)
-          .gte('created_at', today.toISOString());
-        
-        setReadingsToday(readings?.length || 0);
+	// When step changes, update URL without reload and notify parent
+	useEffect(() => {
+		onStepChange?.(step);
+		const params = new URLSearchParams(window.location.search);
+		params.set("step", String(step));
+		const newUrl = `${window.location.pathname}?${params.toString()}`;
+		window.history.pushState(null, "", newUrl);
+	}, [step, onStepChange]);
 
-        // Get ads watched today for free users
-        if (tier === 'free') {
-          const { data: ads } = await supabase
-            .from('ad_sessions')
-            .select('id')
-            .eq('user_id', userData.user.id)
-            .eq('verified', true)
-            .gte('created_at', today.toISOString());
-          
-          setAdsWatched(ads?.length || 0);
-        }
-      }
-    };
-    
-    checkUserTier();
-  }, []);
+	// Handle browser back/forward
+	useEffect(() => {
+		const onPopState = () => {
+			const urlParams = new URLSearchParams(window.location.search);
+			const popStep = urlParams.get("step");
+			if (popStep && !isNaN(+popStep)) setStep(+popStep);
+		};
+		window.addEventListener("popstate", onPopState);
+		return () => window.removeEventListener("popstate", onPopState);
+	}, []);
 
-  const tierLimits = getTierLimits(userTier);
-  const maxReadings = tierLimits.dailyReadings;
+	useEffect(() => {
+		const checkUserTier = async () => {
+			const supabase = createClient();
+			const { data: userData } = await supabase.auth.getUser();
+			const tier = getUserTier(userData?.user || null);
+			setUserTier(tier);
 
-  return (
-    <div className="w-full min-h-[60vh] flex flex-col items-center justify-center relative">
-      {/* User Tier Badge - subtle and elegant */}
-      <div className="fixed top-6 right-6 z-50">
-        <UserTierBadge
-          tier={userTier}
-          readingsToday={readingsToday}
-          maxReadings={maxReadings}
-          adsWatched={adsWatched}
-        />
-      </div>
+			// Get today's reading count and ads watched
+			if (userData?.user) {
+				// Get readings count for today
+				const today = new Date();
+				today.setHours(0, 0, 0, 0);
 
-      {step === 0 && (
-        <StepWelcome onFinish={() => setStep(1)} />
-      )}
-      {step === 1 && (
-        <StepTypeSelector
-          onSelectType={(type) => {
-            setSelectedType(type);
-            setStep(2);
-          }}
-          isPremiumUser={userTier === 'premium'}
-        />
-      )}
-      {step === 2 && (
-        <StepTarotExperience readingType={selectedType} />
-      )}
-    </div>
-  );
-} 
+				const { data: readings } = await supabase
+					.from("readings")
+					.select("id")
+					.eq("user_id", userData.user.id)
+					.gte("created_at", today.toISOString());
+
+				setReadingsToday(readings?.length || 0);
+
+				// Get ads watched today for free users
+				if (tier === "free") {
+					const { data: ads } = await supabase
+						.from("ad_sessions")
+						.select("id")
+						.eq("user_id", userData.user.id)
+						.eq("verified", true)
+						.gte("created_at", today.toISOString());
+
+					setAdsWatched(ads?.length || 0);
+				}
+			}
+		};
+
+		checkUserTier();
+	}, []);
+
+	const tierLimits = getTierLimits(userTier);
+	const maxReadings = tierLimits.dailyReadings;
+
+	return (
+		<div className="w-full h-screen flex flex-col items-center justify-center relative overflow-hidden">
+			{/* User Tier Badge - subtle and elegant */}
+			<div className="fixed top-6 right-6 z-50">
+				<UserTierBadge
+					tier={userTier}
+					readingsToday={readingsToday}
+					maxReadings={maxReadings}
+					adsWatched={adsWatched}
+				/>
+			</div>
+
+			{step === 0 && <StepWelcome onFinish={() => setStep(1)} />}
+			{step === 1 && (
+				<StepTypeSelector
+					onSelectType={(type) => {
+						setSelectedType(type);
+						setStep(2);
+					}}
+					isPremiumUser={userTier === "premium"}
+				/>
+			)}
+			{step === 2 && <StepTarotExperience readingType={selectedType} />}
+		</div>
+	);
+}

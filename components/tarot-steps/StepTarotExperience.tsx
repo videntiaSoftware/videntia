@@ -259,11 +259,11 @@ export default function StepTarotExperience({ readingType }: { readingType: stri
     setShowReading(false);
     setReadingData(null);
     setDeckRevealed(false);
-    // Mezclar solo las primeras 10 cartas, el resto queda igual
+    // Mezclar solo las primeras 6 cartas para reducir animación, el resto queda igual
     setDeck((prevDeck) => {
-      const first10 = prevDeck.slice(0, 10).sort(() => Math.random() - 0.5);
-      const rest = prevDeck.slice(10);
-      return [...first10, ...rest];
+      const first6 = prevDeck.slice(0, 6).sort(() => Math.random() - 0.5);
+      const rest = prevDeck.slice(6);
+      return [...first6, ...rest];
     });
     setTimeout(() => {
       setIsShuffling(false);
@@ -523,10 +523,11 @@ export default function StepTarotExperience({ readingType }: { readingType: stri
   else if (showReading) currentStep = 'reading';
 
   return (
-    <>
+    <>  
+      {/* Cargar reCAPTCHA v3 */}
       <Script
         src={`https://www.google.com/recaptcha/api.js?render=${process.env.NEXT_PUBLIC_RECAPTCHA_SITE_KEY}`}
-        strategy="afterInteractive"
+        strategy="lazyOnload"
       />
       
       {/* Ad Modal */}
@@ -549,7 +550,7 @@ export default function StepTarotExperience({ readingType }: { readingType: stri
         </div>
       )}
       
-      <div className="w-full flex flex-col items-center justify-center mt-12 h-screen max-h-screen overflow-hidden relative">
+      <div className="w-full h-screen flex flex-col items-center justify-start pt-8 relative overflow-hidden">
         <AnimatePresence mode="wait">
           {/* Limit Reached Screen */}
           {currentStep === 'limit' && (
@@ -629,9 +630,9 @@ export default function StepTarotExperience({ readingType }: { readingType: stri
               animate={{ opacity: 1 }}
               exit={{ opacity: 0 }}
               transition={{ duration: 0.7, ease: 'easeInOut' }}
-              className="w-full flex flex-col items-center justify-center absolute left-0 top-0 h-full max-h-screen overflow-y-auto"
+              className="w-full flex flex-col items-center justify-start absolute inset-0 overflow-hidden"
             >
-              <h2 className="font-cinzel text-3xl md:text-4xl text-amber-200 mb-2 text-center">
+              <h2 className="font-cinzel mt-16 text-3xl md:text-4xl text-amber-200 mb-2 text-center">
                 {readingTitle}
               </h2>
               <div className="text-base md:text-lg text-purple-200 mb-4 text-center" style={{ fontFamily: 'Garamond, serif' }}>
@@ -639,16 +640,18 @@ export default function StepTarotExperience({ readingType }: { readingType: stri
               </div>
               <div className="w-full flex flex-col items-center">
                 {revealIndex === null && !showReading && (
-                  <TarotDeck
-                    deck={deck}
-                    isShuffling={isShuffling}
-                    selectedCards={selectedCards}
-                    onSelectCard={selectCard}
-                    tarotBackUrl={"https://jhtjdapbeiybxpqvyqqs.supabase.co/storage/v1/object/public/deck//740937b3-dc03-49e3-acbf-1d2da17eddaf.png"}
-                    deckRevealed={deckRevealed}
-                    initialQuestion={question}
-                    onQuestionChange={setQuestion}
-                  />
+                  <div className="w-full flex justify-center flex-1 items-center">
+                    <TarotDeck
+                      deck={deck}
+                      isShuffling={isShuffling}
+                      selectedCards={selectedCards}
+                      onSelectCard={selectCard}
+                      tarotBackUrl={"https://jhtjdapbeiybxpqvyqqs.supabase.co/storage/v1/object/public/deck//740937b3-dc03-49e3-acbf-1d2da17eddaf.png"}
+                      deckRevealed={deckRevealed}
+                      initialQuestion={question}
+                      onQuestionChange={setQuestion}
+                    />
+                  </div>
                 )}
               </div>
             </motion.div>
