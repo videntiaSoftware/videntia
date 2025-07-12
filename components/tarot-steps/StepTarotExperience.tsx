@@ -515,6 +515,8 @@ export default function StepTarotExperience({ readingType }: { readingType: stri
   else if (revealIndex !== null && selectedCards[revealIndex]) currentStep = 'reveal';
   else if (showReading) currentStep = 'reading';
 
+  
+
   return (
     <>  
       {/* Cargar reCAPTCHA v3 */}
