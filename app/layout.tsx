@@ -221,6 +221,11 @@ export default function RootLayout({
             }
           `}
         </Script>
+        {/* Google reCAPTCHA v3 */}
+        <Script
+          src={`https://www.google.com/recaptcha/api.js?render=${process.env.NEXT_PUBLIC_RECAPTCHA_SITE_KEY}`}
+          strategy="beforeInteractive"
+        />
 
         {/* Web Vitals Tracking */}
         <Script
