@@ -470,11 +470,18 @@ export default function StepTarotExperience({ readingType }: { readingType: stri
         }
       } catch (fetchErr) {
         console.error("[fetchReading] Error en el fetch:", fetchErr);
-      } finally {
-        setLoadingReading(false);
+        // Intentar un fetch simplificado para depuración
+        try {
+          console.log("[fetchReading] Intentando fetch de prueba simple...");
+          const testRes = await fetch("/api");
+          console.log("[fetchReading] Fetch de prueba simple resultado:", testRes.status);
+        } catch (testErr) {
+          console.error("[fetchReading] Error incluso en fetch simple:", testErr);
+        }
       }
     } catch (e) {
       console.error("[fetchReading] Error global en fetchReading:", e);
+    } finally {
       setLoadingReading(false);
     }
   };

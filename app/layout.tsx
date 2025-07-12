@@ -147,12 +147,18 @@ export default function RootLayout({
         <link rel="preconnect" href="https://fonts.googleapis.com" />
         <link rel="preconnect" href="https://fonts.gstatic.com" crossOrigin="anonymous" />
         
-        <link rel="canonical" href={process.env.NEXT_PUBLIC_BASE_URL || "http://localhost:3000"} />
+        <link rel="canonical" href={process.env.NEXT_PUBLIC_BASE_URL} />
         
         {/* Open Graph / Facebook Meta Tags */}
         <meta property="og:image" content="https://videntiatarot.com/opengraph-image.png" />
         <meta property="og:image:width" content="1200" />
         <meta property="og:image:height" content="630" />
+
+        {/* reCAPTCHA v3 */}
+        <Script
+          src={`https://www.google.com/recaptcha/api.js?render=${process.env.NEXT_PUBLIC_RECAPTCHA_SITE_KEY}`}
+          strategy="beforeInteractive"
+        />
       </head>
       <body
         className={`min-h-screen flex flex-col max-w-screen bg-slate-950 text-amber-100 ${geistSans.variable} ${cinzelDecorative.variable} ${cormorantGaramond.variable}`}
@@ -221,17 +227,14 @@ export default function RootLayout({
             }
           `}
         </Script>
-        {/* Google reCAPTCHA v3 */}
-        <Script
-          src={`https://www.google.com/recaptcha/api.js?render=${process.env.NEXT_PUBLIC_RECAPTCHA_SITE_KEY}`}
-          strategy="beforeInteractive"
-        />
 
         {/* Web Vitals Tracking */}
         <Script
           src="https://unpkg.com/web-vitals@3/dist/web-vitals.umd.js"
           strategy="afterInteractive"
         />
+
+
         
         <AnalyticsProvider>
           <div className="flex-1 flex flex-col w-full max-w-screen overflow-x-auto">
