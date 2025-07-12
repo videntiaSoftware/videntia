@@ -291,7 +291,7 @@ export default function StepTarotExperience({ readingType }: { readingType: stri
 
   const fetchReading = async (cards: SelectedCard[]): Promise<void> => {
     console.log("[fetchReading] Ejecutando fetchReading", cards);
-    setLoadingReading(true;
+    setLoadingReading(true);
     try {
       // Inspeccionar la estructura completa de cards para debuggear
       console.log("[fetchReading] Estructura de cards:", JSON.stringify(cards, null, 2));
