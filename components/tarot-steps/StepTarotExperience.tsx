@@ -291,7 +291,7 @@ export default function StepTarotExperience({ readingType }: { readingType: stri
 
   const fetchReading = async (cards: SelectedCard[]): Promise<void> => {
     console.log("[fetchReading] Ejecutando fetchReading", cards);
-    setLoadingReading(true);
+    setLoadingReading(true;
     try {
       // Inspeccionar la estructura completa de cards para debuggear
       console.log("[fetchReading] Estructura de cards:", JSON.stringify(cards, null, 2));
@@ -470,18 +470,11 @@ export default function StepTarotExperience({ readingType }: { readingType: stri
         }
       } catch (fetchErr) {
         console.error("[fetchReading] Error en el fetch:", fetchErr);
-        // Intentar un fetch simplificado para depuración
-        try {
-          console.log("[fetchReading] Intentando fetch de prueba simple...");
-          const testRes = await fetch("/api");
-          console.log("[fetchReading] Fetch de prueba simple resultado:", testRes.status);
-        } catch (testErr) {
-          console.error("[fetchReading] Error incluso en fetch simple:", testErr);
-        }
+      } finally {
+        setLoadingReading(false);
       }
     } catch (e) {
       console.error("[fetchReading] Error global en fetchReading:", e);
-    } finally {
       setLoadingReading(false);
     }
   };
