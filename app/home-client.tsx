@@ -42,11 +42,42 @@ export default function HomeClient() {
     }
   };
 
-  // Show loading state
+  // Show minimal loading state that still has some content for SEO
   if (isLoading) {
     return (
-      <main className="min-h-screen flex items-center justify-center">
-        <div className="text-amber-300">Cargando...</div>
+      <main className="min-h-screen bg-gradient-to-br from-slate-900 to-purple-900 text-amber-100">
+        <div className="container mx-auto px-4 py-16">
+          <header className="text-center mb-16">
+            <h1 className="text-5xl font-bold mb-6 bg-gradient-to-r from-amber-300 to-purple-300 bg-clip-text text-transparent">
+              Videntia - Lecturas de Tarot Gratis Online
+            </h1>
+            <p className="text-xl text-amber-200 max-w-2xl mx-auto mb-8">
+              Descubre tu destino con lecturas de tarot gratis online. Consultas personalizadas de amor, trabajo, dinero y crecimiento espiritual disponibles 24/7.
+            </p>
+            <div className="text-amber-300 flex items-center justify-center gap-2">
+              <svg className="animate-spin h-5 w-5" viewBox="0 0 24 24">
+                <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4" fill="none" />
+                <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z" />
+              </svg>
+              Preparando tu experiencia de tarot...
+            </div>
+          </header>
+          
+          <section className="grid md:grid-cols-3 gap-8 mb-16">
+            <div className="text-center p-6 bg-slate-800/50 rounded-xl">
+              <h2 className="text-2xl font-bold text-amber-300 mb-4">Tarot del Amor</h2>
+              <p className="text-purple-200">Descubre los secretos de tu corazón y las energías románticas que te rodean.</p>
+            </div>
+            <div className="text-center p-6 bg-slate-800/50 rounded-xl">
+              <h2 className="text-2xl font-bold text-amber-300 mb-4">Tarot Laboral</h2>
+              <p className="text-purple-200">Encuentra claridad sobre tu carrera profesional y oportunidades de trabajo.</p>
+            </div>
+            <div className="text-center p-6 bg-slate-800/50 rounded-xl">
+              <h2 className="text-2xl font-bold text-amber-300 mb-4">Tarot del Dinero</h2>
+              <p className="text-purple-200">Explora las energías financieras y descubre el camino hacia la abundancia.</p>
+            </div>
+          </section>
+        </div>
       </main>
     );
   }
