@@ -526,10 +526,10 @@ export default function StepTarotExperience({ readingType }: { readingType: stri
 
   return (
     <>  
-      {/* Cargar reCAPTCHA v3 */}
+      {/* Cargar reCAPTCHA v3 - ÚNICA INSTANCIA */}
       <Script
         src={`https://www.google.com/recaptcha/api.js?render=${process.env.NEXT_PUBLIC_RECAPTCHA_SITE_KEY}`}
-        strategy="afterInteractive"
+        strategy="lazyOnload"
       />
       
       {/* Ad Modal */}
