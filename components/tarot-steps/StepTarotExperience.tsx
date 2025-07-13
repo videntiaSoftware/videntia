@@ -529,7 +529,7 @@ export default function StepTarotExperience({ readingType }: { readingType: stri
       {/* Cargar reCAPTCHA v3 */}
       <Script
         src={`https://www.google.com/recaptcha/api.js?render=${process.env.NEXT_PUBLIC_RECAPTCHA_SITE_KEY}`}
-        strategy="lazyOnload"
+        strategy="afterInteractive"
       />
       
       {/* Ad Modal */}
