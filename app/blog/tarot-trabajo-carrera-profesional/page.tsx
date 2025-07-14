@@ -122,7 +122,7 @@ export default function TarotTrabajoCarreraProfesional() {
           <h3 className="text-2xl font-bold text-green-800 mb-2">¿Quieres orientación para tu carrera?</h3>
           <p className="text-green-900 mb-4">Haz una tirada de tarot gratis y descubre el mensaje de las cartas para tu vida profesional.</p>
           <Link 
-            href="/consulta-tarot-gratis" 
+            href="/" 
             className="inline-block bg-green-700 hover:bg-green-800 text-white font-bold py-3 px-6 rounded-lg transition-colors"
           >
             🔮 Consultar Tarot Gratis

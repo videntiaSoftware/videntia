@@ -108,7 +108,7 @@ export default function TarotMeditacionIntuicion() {
           <h3 className="text-2xl font-bold text-purple-800 mb-2">¿Quieres potenciar tu intuición con el tarot?</h3>
           <p className="text-purple-900 mb-4">Haz tu consulta de tarot gratis y experimenta la conexión profunda con las cartas.</p>
           <Link 
-            href="/consulta-tarot-gratis" 
+            href="/" 
             className="inline-block bg-purple-700 hover:bg-purple-800 text-white font-bold py-3 px-6 rounded-lg transition-colors"
           >
             🔮 Consultar Tarot Gratis

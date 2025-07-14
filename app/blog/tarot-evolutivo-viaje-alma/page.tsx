@@ -103,7 +103,7 @@ export default function TarotEvolutivoViajeAlma() {
           <Link href="/blog/historia-tarot-origenes" className="text-purple-700 hover:underline font-semibold">Historia y orígenes del tarot</Link>
           <Link href="/blog/desarrollar-intuicion-tarot" className="text-purple-700 hover:underline font-semibold">Desarrollar la intuición en el tarot</Link>
           <Link href="/cartas/arcanos-mayores" className="text-purple-700 hover:underline font-semibold">Arcanos Mayores</Link>
-          <Link href="/consulta-tarot-gratis" className="text-purple-700 hover:underline font-semibold">Lectura de Tarot Gratis</Link>
+          <Link href="/" className="text-purple-700 hover:underline font-semibold">Lectura de Tarot Gratis</Link>
         </div>
 
         {/* CTA */}
@@ -111,7 +111,7 @@ export default function TarotEvolutivoViajeAlma() {
           <h3 className="text-2xl font-bold text-purple-800 mb-2">¿Quieres iniciar tu viaje evolutivo?</h3>
           <p className="text-purple-900 mb-4">Haz tu consulta de tarot gratis y comienza tu camino de autoconocimiento.</p>
           <Link 
-            href="/consulta-tarot-gratis" 
+            href="/" 
             className="inline-block bg-purple-700 hover:bg-purple-800 text-white font-bold py-3 px-6 rounded-lg transition-colors"
           >
             🔮 Consultar Tarot Gratis

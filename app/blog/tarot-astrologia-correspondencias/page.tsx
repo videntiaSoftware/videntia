@@ -114,7 +114,7 @@ export default function TarotAstrologiaCorrespondencias() {
           <h3 className="text-2xl font-bold text-indigo-800 mb-2">¿Quieres explorar tu carta natal con el tarot?</h3>
           <p className="text-indigo-900 mb-4">Haz una tirada de tarot gratis y descubre el mensaje de las cartas para tu signo.</p>
           <Link 
-            href="/consulta-tarot-gratis" 
+            href="/" 
             className="inline-block bg-indigo-700 hover:bg-indigo-800 text-white font-bold py-3 px-6 rounded-lg transition-colors"
           >
             🔮 Consultar Tarot Gratis

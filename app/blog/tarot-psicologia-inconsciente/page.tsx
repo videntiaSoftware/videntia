@@ -111,7 +111,7 @@ export default function TarotPsicologiaInconsciente() {
           <h3 className="text-2xl font-bold text-purple-800 mb-2">¿Quieres explorar tu inconsciente con el tarot?</h3>
           <p className="text-purple-900 mb-4">Haz tu consulta de tarot gratis y descubre el poder simbólico de las cartas en tu autoconocimiento.</p>
           <Link 
-            href="/consulta-tarot-gratis" 
+            href="/" 
             className="inline-block bg-purple-700 hover:bg-purple-800 text-white font-bold py-3 px-6 rounded-lg transition-colors"
           >
             🔮 Consultar Tarot Gratis
