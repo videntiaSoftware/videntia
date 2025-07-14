@@ -2,6 +2,10 @@ import { updateSession } from "@/lib/supabase/middleware";
 import { type NextRequest } from "next/server";
 
 export async function middleware(request: NextRequest) {
+  // Permitir acceso público a la ruta de donaciones MercadoPago
+  if (request.nextUrl.pathname === "/api/payments/mercadopago/create-donation") {
+    return;
+  }
   return await updateSession(request);
 }
 

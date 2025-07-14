@@ -16,6 +16,7 @@ import Script from "next/script";
 import SubtleAuthPrompt from "@/components/SubtleAuthPrompt";
 import PremiumAdComponent from "@/components/PremiumAdComponent";
 import { GuestCookieManager, CookieConsent } from "@/lib/cookies";
+import DonationButton from "@/components/DonationButton";
 
 interface Card {
   id: string;
@@ -730,6 +731,10 @@ export default function StepTarotExperience({ readingType }: { readingType: stri
                   <div className="prose prose-invert max-w-none font-cormorant text-lg" style={{ fontFamily: 'Cormorant Garamond, Garamond, serif' }}>
                     <ReactMarkdown>{readingData?.interpretation || "Esta es la conclusión de la lectura según las cartas seleccionadas."}</ReactMarkdown>
                   </div>
+                </div>
+                {/* Botón de donación al final de la lectura */}
+                <div className="mt-8 flex justify-center">
+                  <DonationButton />
                 </div>
                 <Button className="mt-6" onClick={resetReading}>Hacer otra pregunta</Button>
                 <div className="mt-8 p-4 bg-amber-50/80 dark:bg-slate-800/80 border border-amber-200 dark:border-slate-700 rounded-lg text-amber-900 dark:text-amber-100 text-center">

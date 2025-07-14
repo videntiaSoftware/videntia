@@ -1,4 +1,5 @@
 import Link from "next/link";
+import DonationButton from "../DonationButton";
 
 export default function Footer() {
   return (
@@ -42,6 +43,11 @@ export default function Footer() {
             </div>
           </div>
         </div>
+      </div>
+
+      {/* Botón de donación */}
+      <div className="max-w-md mx-auto mb-6">
+        <DonationButton />
       </div>
 
       {/* Enlaces legales */}
