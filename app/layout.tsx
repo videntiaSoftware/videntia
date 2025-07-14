@@ -101,7 +101,12 @@ export default function RootLayout({
       <head>
         {/* Google AdSense Account Verification */}
         <meta name="google-adsense-account" content="ca-pub-4987669803086382" />
-        
+        {/* Google AdSense Verification Script */}
+        <script
+          async
+          src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-4987669803086382"
+          crossOrigin="anonymous"
+        ></script>
         {/* Google Search Console Verification */}
         {GSC_CONFIG.verificationMeta && (
           <meta name="google-site-verification" content={GSC_CONFIG.verificationMeta} />
