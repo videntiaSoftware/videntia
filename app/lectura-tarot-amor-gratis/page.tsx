@@ -16,7 +16,7 @@ export const metadata: Metadata = {
     url: "/lectura-tarot-amor-gratis",
   },
   alternates: {
-    canonical: "https://videntiatarot.com/lectura-tarot-amor-gratis"
+    canonical: "https://videntiatarot.com/lectura-tarot-amor-gratis",
   },
 };
 

@@ -17,6 +17,9 @@ export const metadata: Metadata = {
   twitter: {
     title: "Videntia - Tarot Gratis Online",
     description: "Lecturas de tarot auténticas y personalizadas disponibles 24/7.",
+  },
+  alternates: {
+    canonical: "https://videntiatarot.com/",
   }
 };
 

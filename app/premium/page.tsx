@@ -18,6 +18,9 @@ export const metadata: Metadata = {
     title: "Premium - Lecturas de Tarot Ilimitadas | Videntia",
     description: "Acceso completo a todas las funciones de tarot premium. Lecturas ilimitadas y análisis profundos.",
   },
+  alternates: {
+    canonical: "https://videntiatarot.com/premium",
+  },
 };
 
 export default async function PremiumPage() {

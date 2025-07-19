@@ -12,6 +12,9 @@ export const metadata: Metadata = {
     title: "Política de Privacidad - Videntia Tarot",
     description: "Tu privacidad es importante. Conoce cómo protegemos tus datos en nuestras lecturas de tarot.",
   },
+  alternates: {
+    canonical: `${process.env.NEXT_PUBLIC_BASE_URL || "https://videntiatarot.com"}/politica-privacidad`,
+  },
 };
 
 export default function PoliticaPrivacidad() {

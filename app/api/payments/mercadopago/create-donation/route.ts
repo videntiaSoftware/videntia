@@ -7,14 +7,14 @@ export async function POST(req: NextRequest) {
     const mp = new MercadoPagoConfig({
       accessToken: process.env.MERCADOPAGO_ACCESS_TOKEN!,
     });
-    // Instantiate the Preference resource
-    const preferenceResource = new Preference(mp);
+    const preferenceClient = new Preference(mp);
 
     const { amount, description } = await req.json();
 
     const preference = {
       items: [
         {
+          id: "donacion-videntia", // MercadoPago requiere un id único por item
           title: description || "Donación Videntia",
           quantity: 1,
           currency_id: "ARS",
@@ -36,7 +36,7 @@ export async function POST(req: NextRequest) {
     });
     console.log('[MP] Preference:', preference);
 
-    const response = await preferenceResource.create({ body: preference });
+    const response = await preferenceClient.create({ body: preference });
     console.log('[MP] Response:', response);
     return NextResponse.json({ init_point: response.init_point });
   } catch (error: any) {
