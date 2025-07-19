@@ -649,7 +649,7 @@ export default function StepTarotExperience({ readingType }: { readingType: stri
                       isShuffling={isShuffling}
                       selectedCards={selectedCards}
                       onSelectCard={selectCard}
-                      tarotBackUrl={"https://jhtjdapbeiybxpqvyqqs.supabase.co/storage/v1/object/public/deck//740937b3-dc03-49e3-acbf-1d2da17eddaf.png"}
+                      tarotBackUrl={"https://jhtjdapbeiybxpqvyqqs.supabase.co/storage/v1/object/public/deck//fondo-card.webp"}
                       deckRevealed={deckRevealed}
                       initialQuestion={question}
                       onQuestionChange={setQuestion}

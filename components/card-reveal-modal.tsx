@@ -101,7 +101,7 @@ export default function CardRevealModal({ card, reading, cardIndex, totalCards, 
               {/* Dorso de la carta */}
               <div
                 className="absolute w-full h-full backface-hidden rounded-xl overflow-hidden bg-cover bg-center shadow-2xl"
-                style={{ backgroundImage: "url('https://jhtjdapbeiybxpqvyqqs.supabase.co/storage/v1/object/public/deck//740937b3-dc03-49e3-acbf-1d2da17eddaf.png')", backgroundColor: '#4c1d95', border: 'none' }}
+                style={{ backgroundImage: "url('https://jhtjdapbeiybxpqvyqqs.supabase.co/storage/v1/object/public/deck//fondo-card.webp')", backgroundColor: '#4c1d95', border: 'none' }}
               />
               {/* Frente de la carta */}
               <div

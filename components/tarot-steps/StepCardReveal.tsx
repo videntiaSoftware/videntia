@@ -40,7 +40,7 @@ export default function StepCardReveal({ cards, readings, layoutLabels, currentI
   // Preload back image (solo una vez)
   useEffect(() => {
     const img = new window.Image();
-    img.src = "https://jhtjdapbeiybxpqvyqqs.supabase.co/storage/v1/object/public/deck//740937b3-dc03-49e3-acbf-1d2da17eddaf.png";
+    img.src = "https://jhtjdapbeiybxpqvyqqs.supabase.co/storage/v1/object/public/deck//fondo-card.webp";
     img.onload = () => setBackLoaded(true);
   }, []);
 
@@ -119,7 +119,7 @@ export default function StepCardReveal({ cards, readings, layoutLabels, currentI
                   className="absolute w-full h-full rounded-xl overflow-hidden bg-cover bg-center shadow-2xl flex items-center justify-center"
                   style={{
                     backfaceVisibility: 'hidden',
-                    backgroundImage: backLoaded ? "url('https://jhtjdapbeiybxpqvyqqs.supabase.co/storage/v1/object/public/deck//740937b3-dc03-49e3-acbf-1d2da17eddaf.png')" : 'none',
+                    backgroundImage: backLoaded ? "url('https://jhtjdapbeiybxpqvyqqs.supabase.co/storage/v1/object/public/deck//fondo-card.webp')" : 'none',
                     backgroundColor: '#4c1d95',
                     transform: 'rotateY(180deg)',
                     zIndex: !isFlipped ? 2 : 0,
