@@ -79,7 +79,7 @@ export default function CardRevealModal({ card, reading, cardIndex, totalCards, 
       isOpen={!!card}
       onRequestClose={onClose}
       className="card-reveal-modal fixed inset-0 flex items-center justify-center z-50"
-      overlayClassName="fixed inset-0 z-40 bg-[url('https://jhtjdapbeiybxpqvyqqs.supabase.co/storage/v1/object/public/assets//fondo.png')] bg-cover bg-center before:absolute before:inset-0 before:bg-gradient-to-b before:from-transparent before:to-black before:to-90% before:opacity-90 before:pointer-events-none card-reveal-modal-overlay"
+      overlayClassName="fixed inset-0 z-40 bg-[url('https://jhtjdapbeiybxpqvyqqs.supabase.co/storage/v1/object/public/assets//fondo-lightweight.webp')] bg-cover bg-center before:absolute before:inset-0 before:bg-gradient-to-b before:from-transparent before:to-black before:to-90% before:opacity-90 before:pointer-events-none card-reveal-modal-overlay"
       ariaHideApp={false}
     >
       <div className="relative flex flex-col items-center justify-center w-full max-w-lg min-h-[70vh] p-0 bg-transparent shadow-none">

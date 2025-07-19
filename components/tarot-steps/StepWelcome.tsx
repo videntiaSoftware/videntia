@@ -21,7 +21,7 @@ export default function StepWelcome({ onFinish }: { onFinish: () => void }) {
         showWelcome ? "opacity-100" : "opacity-0 pointer-events-none"
       )}
       style={{
-        backgroundImage: "url('https://jhtjdapbeiybxpqvyqqs.supabase.co/storage/v1/object/public/assets//fondo.png')",
+        backgroundImage: "url('https://jhtjdapbeiybxpqvyqqs.supabase.co/storage/v1/object/public/assets//fondo-lightweight.webp')",
         backgroundSize: "cover",
         backgroundPosition: "center",
       }}

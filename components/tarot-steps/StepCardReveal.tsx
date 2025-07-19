@@ -74,7 +74,7 @@ export default function StepCardReveal({ cards, readings, layoutLabels, currentI
   // Animación lenta (2.2s)
   return (
     <div className="fixed inset-0 z-40 flex flex-col items-center justify-center h-screen max-h-screen overflow-hidden w-full" style={{
-      backgroundImage: `url('https://jhtjdapbeiybxpqvyqqs.supabase.co/storage/v1/object/public/assets//fondo.png')`,
+      backgroundImage: `url('https://jhtjdapbeiybxpqvyqqs.supabase.co/storage/v1/object/public/assets//fondo-lightweight.webp')`,
       backgroundBlendMode: 'normal',
       backgroundSize: 'cover',
       backgroundPosition: 'center',
