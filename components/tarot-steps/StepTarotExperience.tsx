@@ -291,7 +291,17 @@ export default function StepTarotExperience({ readingType }: { readingType: stri
   };
 
   const fetchReading = async (cards: SelectedCard[]): Promise<void> => {
-    console.log("[fetchReading] Ejecutando fetchReading", cards);
+    // Validar orden y cantidad de cartas según layout
+    const expectedLayout = READING_TYPE_LAYOUTS[readingType]?.layout;
+    if (expectedLayout && cards.length !== expectedLayout.length) {
+      console.warn(`[fetchReading] Cantidad de cartas (${cards.length}) no coincide con el layout (${expectedLayout.length}) para ${readingType}`);
+    }
+    // Log para depuración: mostrar el orden y posición
+    if (expectedLayout) {
+      cards.forEach((c, i) => {
+        console.log(`[fetchReading] Posición ${i + 1}: ${expectedLayout[i]} - Carta: ${c.card.name} (${c.orientation})`);
+      });
+    }
     setLoadingReading(true);
     try {
       // Inspeccionar la estructura completa de cards para debuggear
@@ -677,6 +687,7 @@ export default function StepTarotExperience({ readingType }: { readingType: stri
                 )}
                 layoutLabels={READING_TYPE_LAYOUTS[readingType]?.layout}
                 currentIndex={revealIndex!}
+                instructions={READING_TYPE_LAYOUTS[readingType]?.instructions} // Nuevo: pasa el instructivo
                 onNext={() => {
                   if (revealIndex! < selectedCards.length - 1) {
                     setRevealIndex(revealIndex! + 1);
@@ -687,7 +698,6 @@ export default function StepTarotExperience({ readingType }: { readingType: stri
                 }}
                 onPrev={() => setRevealIndex((prev) => (prev !== null && prev > 0 ? prev - 1 : prev))}
                 onFinish={() => {
-                  console.log("[StepCardReveal] onFinish llamado", selectedCards);
                   setRevealIndex(null);
                   setShowReading(true);
                   fetchReading(selectedCards);

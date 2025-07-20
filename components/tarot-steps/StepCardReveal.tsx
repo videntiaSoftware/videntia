@@ -3,6 +3,7 @@ import { motion, AnimatePresence } from 'framer-motion';
 import { Button } from '@/components/ui/button';
 import { ChevronLeft, ChevronRight } from 'lucide-react';
 import TypewriterText from '@/components/TypewriterText';
+import Image from 'next/image';
 
 export interface RevealCard {
   id: string;
@@ -22,9 +23,10 @@ interface StepCardRevealProps {
   onNext: () => void;
   onPrev: () => void;
   onFinish: () => void;
+  instructions?: string; // Nuevo prop para mensaje instructivo
 }
 
-export default function StepCardReveal({ cards, readings, layoutLabels, currentIndex, onNext, onPrev, onFinish }: StepCardRevealProps) {
+export default function StepCardReveal({ cards, readings, layoutLabels, currentIndex, onNext, onPrev, onFinish, instructions }: StepCardRevealProps) {
   const card = cards[currentIndex]?.card;
   const orientation = cards[currentIndex]?.orientation || 'upright';
   const reading = readings[currentIndex] || '';
@@ -34,6 +36,8 @@ export default function StepCardReveal({ cards, readings, layoutLabels, currentI
   const [hasMounted, setHasMounted] = useState(false);
   const [cardKey, setCardKey] = useState(0); // Para forzar remount y animación entre cartas
   const [backLoaded, setBackLoaded] = useState(false);
+  const [frontLoaded, setFrontLoaded] = useState(false);
+  const [loadingReading, setLoadingReading] = useState(false); // Nuevo estado para controlar la carga de la lectura
   const flipTimeout = useRef<NodeJS.Timeout | null>(null);
   const interpTimeout = useRef<NodeJS.Timeout | null>(null);
 
@@ -44,15 +48,23 @@ export default function StepCardReveal({ cards, readings, layoutLabels, currentI
     img.onload = () => setBackLoaded(true);
   }, []);
 
+  // Preload front image (de la carta actual) y sincroniza el flip con la carga
+  useEffect(() => {
+    setFrontLoaded(false);
+    if (!card?.image_url) return;
+    const img = new window.Image();
+    img.src = card.image_url;
+    img.onload = () => setFrontLoaded(true);
+  }, [card?.image_url]);
+
   useEffect(() => {
     setIsFlipped(false);
     setShowInterpretation(false);
     setHasMounted(false);
     setCardKey(prev => prev + 1);
-    // Solo permitir flip si la espalda está cargada
-    if (!backLoaded) return;
+    // Solo permitir flip si la espalda y la cara están cargadas
+    if (!backLoaded || !frontLoaded) return;
     const mountTimer = setTimeout(() => setHasMounted(true), 10);
-    // +500ms para dejar la espalda 0.5s más
     flipTimeout.current = setTimeout(() => setIsFlipped(true), 1300);
     interpTimeout.current = setTimeout(() => setShowInterpretation(true), 2500);
     return () => {
@@ -60,7 +72,7 @@ export default function StepCardReveal({ cards, readings, layoutLabels, currentI
       if (flipTimeout.current) clearTimeout(flipTimeout.current);
       if (interpTimeout.current) clearTimeout(interpTimeout.current);
     };
-  }, [currentIndex, backLoaded]);
+  }, [currentIndex, backLoaded, frontLoaded]);
 
   // Handler para click/tap en la carta
   const handleCardClick = () => {
@@ -91,6 +103,12 @@ export default function StepCardReveal({ cards, readings, layoutLabels, currentI
       }} />
       <div className="relative flex flex-col items-center justify-center w-full max-w-lg h-full max-h-full p-0 bg-transparent shadow-none z-10">
         <div className="w-full flex flex-col items-center justify-center">
+          {/* Instructivo personalizado para cada tipo de lectura */}
+          {instructions && (
+            <div className="mb-2 text-base text-amber-200 text-center font-cormorant px-2 max-w-xl w-full">
+              {instructions}
+            </div>
+          )}
           <AnimatePresence mode="wait">
             <motion.div
               key={card?.id || cardKey}
@@ -127,17 +145,24 @@ export default function StepCardReveal({ cards, readings, layoutLabels, currentI
                     transition: 'opacity 0.2s linear 2.1s',
                   }}
                 />
-                {/* Front of card: solo se renderiza si hasMounted, isFlipped y backLoaded son true */}
-                {hasMounted && isFlipped && backLoaded && (
-                  <div
-                    className="absolute w-full h-full rounded-xl overflow-hidden bg-cover bg-center flex flex-col items-center justify-end p-2 shadow-2xl"
+                {/* Front of card: solo se renderiza si hasMounted, isFlipped, backLoaded y frontLoaded son true */}
+                {hasMounted && isFlipped && backLoaded && frontLoaded && (
+                  <Image
+                    src={card?.image_url || ''}
+                    alt={card?.name || 'Carta de tarot'}
+                    fill
+                    sizes="(max-width: 768px) 100vw, 44vw"
+                    className="absolute w-full h-full rounded-xl object-cover shadow-2xl"
                     style={{
                       backfaceVisibility: 'hidden',
-                      backgroundImage: card?.image_url ? `url('${card.image_url}')` : undefined,
                       backgroundColor: '#1e293b',
                       transform: orientation === 'reversed' ? 'rotateY(0deg) rotate(180deg)' : 'rotateY(0deg)',
                       zIndex: 3,
                     }}
+                    quality={30}
+                    placeholder="blur"
+                    blurDataURL="data:image/svg+xml;base64,PHN2ZyB3aWR0aD0nMTAwJyBoZWlnaHQ9JzE1MCcgdmlld0JveD0nMCAwIDEwMCAxNTAnIHhtbG5zPSdodHRwOi8vd3d3LnczLm9yZy8yMDAwL3N2Zyc+PHJlY3Qgd2lkdGg9JzEwMCUnIGhlaWdodD0nMTUwJyBmaWxsPSIjMWUyOTNiIi8+PC9zdmc+"
+                    priority={false}
                   />
                 )}
               </div>
@@ -191,6 +216,15 @@ export default function StepCardReveal({ cards, readings, layoutLabels, currentI
           </motion.div>
         </div>
       </div>
+      {loadingReading && (
+        <div className="fixed inset-0 z-50 flex flex-col items-center justify-center bg-black/70 backdrop-blur-sm">
+          <div className="flex flex-col items-center justify-center">
+            <div className="animate-spin rounded-full h-20 w-20 border-t-4 border-b-4 border-purple-400 mb-6"></div>
+            <div className="text-2xl text-amber-200 font-cinzel mb-2">Generando tu lectura...</div>
+            <div className="text-base text-purple-200 font-cormorant">Por favor espera unos segundos mientras la IA interpreta tus cartas.</div>
+          </div>
+        </div>
+      )}
     </div>
   );
 }
