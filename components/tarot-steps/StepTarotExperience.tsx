@@ -406,7 +406,7 @@ export default function StepTarotExperience({ readingType }: { readingType: stri
       // Preparar payload para el fetch
       const payload = {
         type: readingType,
-        question: question.trim(),
+        question: question.trim().toLowerCase(),
         cards: processedCards,
         recaptchaToken,
         guest_id: guestId,
@@ -503,24 +503,17 @@ export default function StepTarotExperience({ readingType }: { readingType: stri
     }
   };
 
-  // Prefetch de la conclusión cuando comienza el reveal
+  // Detectar si es lectura de una sola carta
+  const isSingleCardReading = selectedCards.length === 1;
+
+  // Prefetch de la conclusión SOLO para lecturas de varias cartas
   useEffect(() => {
-    // Solo dispara si empieza el reveal, hay cartas seleccionadas, y no se ha pedido aún
-    if (
-      revealIndex === 0 &&
-      selectedCards.length > 0 &&
-      !conclusionRequested
-    ) {
+    if (!isSingleCardReading && revealIndex === 0 && selectedCards.length > 1 && !conclusionRequested) {
       setConclusionRequested(true);
       setConclusionLoading(true);
       setConclusionError(null);
-      // Llama a la función fetchReading pero NO setea showReading ni readingData
       (async () => {
         try {
-          // Copia de fetchReading pero solo para la conclusión
-          const expectedLayout = READING_TYPE_LAYOUTS[readingType]?.layout;
-          const cards = selectedCards;
-          const processedCards = cards.map((c) => ({ id: c.card.id, orientation: c.orientation }));
           const supabase = createClient();
           const { data: userData } = await supabase.auth.getUser();
           const isUserAuthenticated = !!userData?.user;
@@ -533,6 +526,7 @@ export default function StepTarotExperience({ readingType }: { readingType: stri
           if (!isUserAuthenticated && typeof window !== 'undefined') {
             guestId = localStorage.getItem('guest_id') || '';
           }
+          const processedCards = selectedCards.map((c) => ({ id: c.card.id, orientation: c.orientation }));
           const payload = {
             type: readingType,
             question: question.trim(),
@@ -567,7 +561,57 @@ export default function StepTarotExperience({ readingType }: { readingType: stri
       setConclusionError(null);
       setConclusionLoading(false);
     }
-  }, [revealIndex, selectedCards, readingType, question]);
+  }, [revealIndex, selectedCards, readingType, question, isSingleCardReading]);
+
+  // Para lectura de una sola carta, el fetch se hace solo al finalizar
+  const handleRevealFinish = async () => {
+    setRevealIndex(null);
+    setShowReading(true);
+    if (isSingleCardReading && !conclusionRequested) {
+      setConclusionRequested(true);
+      setConclusionLoading(true);
+      setConclusionError(null);
+      try {
+        const supabase = createClient();
+        const { data: userData } = await supabase.auth.getUser();
+        const isUserAuthenticated = !!userData?.user;
+        let recaptchaToken = '';
+        if (!isUserAuthenticated && typeof window !== 'undefined' && process.env.NEXT_PUBLIC_RECAPTCHA_SITE_KEY) {
+          await waitForRecaptcha();
+          recaptchaToken = await (window as any).grecaptcha.execute(process.env.NEXT_PUBLIC_RECAPTCHA_SITE_KEY, { action: 'reading' });
+        }
+        let guestId = null;
+        if (!isUserAuthenticated && typeof window !== 'undefined') {
+          guestId = localStorage.getItem('guest_id') || '';
+        }
+        const processedCards = selectedCards.map((c) => ({ id: c.card.id, orientation: c.orientation }));
+        const payload = {
+          type: readingType,
+          question: question.trim(),
+          cards: processedCards,
+          recaptchaToken,
+          guest_id: guestId,
+        };
+        const res = await fetch("/api/reading/generate", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify(payload),
+        });
+        if (!res.ok) {
+          const errorData = await res.json();
+          setConclusionError(errorData.error || 'Error generando la conclusión.');
+          setConclusionLoading(false);
+          return;
+        }
+        const data = await res.json();
+        setConclusionData(data);
+      } catch (e: any) {
+        setConclusionError(e?.message || 'Error generando la conclusión.');
+      } finally {
+        setConclusionLoading(false);
+      }
+    }
+  };
 
   const resetReading = () => {
     setQuestion("");
@@ -610,14 +654,6 @@ export default function StepTarotExperience({ readingType }: { readingType: stri
   if (limitReached) currentStep = 'limit';
   else if (revealIndex !== null && selectedCards[revealIndex]) currentStep = 'reveal';
   else if (showReading) currentStep = 'reading';
-
-  // Cambiar onFinish del StepCardReveal para solo mostrar la conclusión
-  const handleRevealFinish = () => {
-    setRevealIndex(null);
-    setShowReading(true);
-    // Si la conclusión aún está cargando, muestra el loader (ya lo hace el render)
-    // Si ya está, se muestra directamente
-  };
 
   return (
     <>  
