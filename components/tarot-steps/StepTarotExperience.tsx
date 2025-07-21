@@ -505,111 +505,53 @@ export default function StepTarotExperience({ readingType }: { readingType: stri
 
   // Detectar si es lectura de una sola carta
   const isSingleCardReading = selectedCards.length === 1;
+  const [fetchStarted, setFetchStarted] = useState(false);
 
-  // Prefetch de la conclusión SOLO para lecturas de varias cartas
-  useEffect(() => {
-    if (!isSingleCardReading && revealIndex === 0 && selectedCards.length > 1 && !conclusionRequested) {
-      setConclusionRequested(true);
-      setConclusionLoading(true);
-      setConclusionError(null);
-      (async () => {
-        try {
-          const supabase = createClient();
-          const { data: userData } = await supabase.auth.getUser();
-          const isUserAuthenticated = !!userData?.user;
-          let recaptchaToken = '';
-          if (!isUserAuthenticated && typeof window !== 'undefined' && process.env.NEXT_PUBLIC_RECAPTCHA_SITE_KEY) {
-            await waitForRecaptcha();
-            recaptchaToken = await (window as any).grecaptcha.execute(process.env.NEXT_PUBLIC_RECAPTCHA_SITE_KEY, { action: 'reading' });
-          }
-          let guestId = null;
-          if (!isUserAuthenticated && typeof window !== 'undefined') {
-            guestId = localStorage.getItem('guest_id') || '';
-          }
-          const processedCards = selectedCards.map((c) => ({ id: c.card.id, orientation: c.orientation }));
-          const payload = {
-            type: readingType,
-            question: question.trim(),
-            cards: processedCards,
-            recaptchaToken,
-            guest_id: guestId,
-          };
-          const res = await fetch("/api/reading/generate", {
-            method: "POST",
-            headers: { "Content-Type": "application/json" },
-            body: JSON.stringify(payload),
-          });
-          if (!res.ok) {
-            const errorData = await res.json();
-            setConclusionError(errorData.error || 'Error generando la conclusión.');
-            setConclusionLoading(false);
-            return;
-          }
-          const data = await res.json();
-          setConclusionData(data);
-        } catch (e: any) {
-          setConclusionError(e?.message || 'Error generando la conclusión.');
-        } finally {
-          setConclusionLoading(false);
-        }
-      })();
-    }
-    // Reset conclusion states si se reinicia la tirada
-    if (revealIndex === null) {
-      setConclusionRequested(false);
-      setConclusionData(null);
-      setConclusionError(null);
-      setConclusionLoading(false);
-    }
-  }, [revealIndex, selectedCards, readingType, question, isSingleCardReading]);
-
-  // Para lectura de una sola carta, el fetch se hace solo al finalizar
-  const handleRevealFinish = async () => {
-    setRevealIndex(null);
-    setShowReading(true);
-    if (isSingleCardReading && !conclusionRequested) {
-      setConclusionRequested(true);
-      setConclusionLoading(true);
-      setConclusionError(null);
-      try {
-        const supabase = createClient();
-        const { data: userData } = await supabase.auth.getUser();
-        const isUserAuthenticated = !!userData?.user;
-        let recaptchaToken = '';
-        if (!isUserAuthenticated && typeof window !== 'undefined' && process.env.NEXT_PUBLIC_RECAPTCHA_SITE_KEY) {
-          await waitForRecaptcha();
-          recaptchaToken = await (window as any).grecaptcha.execute(process.env.NEXT_PUBLIC_RECAPTCHA_SITE_KEY, { action: 'reading' });
-        }
-        let guestId = null;
-        if (!isUserAuthenticated && typeof window !== 'undefined') {
-          guestId = localStorage.getItem('guest_id') || '';
-        }
-        const processedCards = selectedCards.map((c) => ({ id: c.card.id, orientation: c.orientation }));
-        const payload = {
-          type: readingType,
-          question: question.trim(),
-          cards: processedCards,
-          recaptchaToken,
-          guest_id: guestId,
-        };
-        const res = await fetch("/api/reading/generate", {
-          method: "POST",
-          headers: { "Content-Type": "application/json" },
-          body: JSON.stringify(payload),
-        });
-        if (!res.ok) {
-          const errorData = await res.json();
-          setConclusionError(errorData.error || 'Error generando la conclusión.');
-          setConclusionLoading(false);
-          return;
-        }
-        const data = await res.json();
-        setConclusionData(data);
-      } catch (e: any) {
-        setConclusionError(e?.message || 'Error generando la conclusión.');
-      } finally {
-        setConclusionLoading(false);
+  // Handler para disparar el fetch SOLO en la primera acción del usuario en lecturas de varias cartas
+  const handleFirstNext = async () => {
+    if (fetchStarted || isSingleCardReading) return;
+    setFetchStarted(true);
+    setConclusionRequested(true);
+    setConclusionLoading(true);
+    setConclusionError(null);
+    try {
+      const supabase = createClient();
+      const { data: userData } = await supabase.auth.getUser();
+      const isUserAuthenticated = !!userData?.user;
+      let recaptchaToken = '';
+      if (!isUserAuthenticated && typeof window !== 'undefined' && process.env.NEXT_PUBLIC_RECAPTCHA_SITE_KEY) {
+        await waitForRecaptcha();
+        recaptchaToken = await (window as any).grecaptcha.execute(process.env.NEXT_PUBLIC_RECAPTCHA_SITE_KEY, { action: 'reading' });
       }
+      let guestId = null;
+      if (!isUserAuthenticated && typeof window !== 'undefined') {
+        guestId = localStorage.getItem('guest_id') || '';
+      }
+      const processedCards = selectedCards.map((c) => ({ id: c.card.id, orientation: c.orientation }));
+      const payload = {
+        type: readingType,
+        question: question.trim(),
+        cards: processedCards,
+        recaptchaToken,
+        guest_id: guestId,
+      };
+      const res = await fetch("/api/reading/generate", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify(payload),
+      });
+      if (!res.ok) {
+        const errorData = await res.json();
+        setConclusionError(errorData.error || 'Error generando la conclusión.');
+        setConclusionLoading(false);
+        return;
+      }
+      const data = await res.json();
+      setConclusionData(data);
+    } catch (e: any) {
+      setConclusionError(e?.message || 'Error generando la conclusión.');
+    } finally {
+      setConclusionLoading(false);
     }
   };
 
@@ -654,6 +596,15 @@ export default function StepTarotExperience({ readingType }: { readingType: stri
   if (limitReached) currentStep = 'limit';
   else if (revealIndex !== null && selectedCards[revealIndex]) currentStep = 'reveal';
   else if (showReading) currentStep = 'reading';
+
+  // Para lectura de una sola carta, el fetch se hace solo al finalizar
+  function handleRevealFinish() {
+    setRevealIndex(null);
+    setShowReading(true);
+    if (isSingleCardReading && !conclusionRequested) {
+      handleFirstNext();
+    }
+  }
 
   return (
     <>  
@@ -817,6 +768,7 @@ export default function StepTarotExperience({ readingType }: { readingType: stri
                 }}
                 onPrev={() => setRevealIndex((prev) => (prev !== null && prev > 0 ? prev - 1 : prev))}
                 onFinish={handleRevealFinish}
+                onFirstNext={isSingleCardReading ? undefined : handleFirstNext}
               />
             </motion.div>
           )}

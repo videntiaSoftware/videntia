@@ -15,6 +15,7 @@ export interface RevealCard {
   interpretation_upright?: string;
 }
 
+// Recibe un prop: onFirstNext (solo para lecturas de varias cartas)
 interface StepCardRevealProps {
   cards: { card: RevealCard; orientation: 'upright' | 'reversed' }[];
   readings: string[];
@@ -23,10 +24,11 @@ interface StepCardRevealProps {
   onNext: () => void;
   onPrev: () => void;
   onFinish: () => void;
-  instructions?: string; // Nuevo prop para mensaje instructivo
+  onFirstNext?: () => void; // Nuevo prop
+  instructions?: string;
 }
 
-export default function StepCardReveal({ cards, readings, layoutLabels, currentIndex, onNext, onPrev, onFinish, instructions }: StepCardRevealProps) {
+export default function StepCardReveal({ cards, readings, layoutLabels, currentIndex, onNext, onPrev, onFinish, onFirstNext, instructions }: StepCardRevealProps) {
   const card = cards[currentIndex]?.card;
   const orientation = cards[currentIndex]?.orientation || 'upright';
   const reading = readings[currentIndex] || '';
@@ -77,8 +79,14 @@ export default function StepCardReveal({ cards, readings, layoutLabels, currentI
   // Handler para click/tap en la carta
   const handleCardClick = () => {
     if (showInterpretation) {
-      if (currentIndex < totalCards - 1) onNext();
-      else onFinish();
+      if (currentIndex < totalCards - 1) {
+        if (currentIndex === 0 && typeof onFirstNext === 'function') {
+          onFirstNext(); // Solo la primera vez que se avanza en lecturas de varias cartas
+        }
+        onNext();
+      } else {
+        onFinish();
+      }
     }
   };
 
@@ -198,7 +206,7 @@ export default function StepCardReveal({ cards, readings, layoutLabels, currentI
           </Button>
           <motion.div whileHover={{ scale: 1.05 }} whileTap={{ scale: 0.98 }}>
             <Button 
-              onClick={currentIndex < totalCards - 1 ? onNext : onFinish} 
+              onClick={handleCardClick}
               className={`font-cormorant text-lg px-8 py-2 shadow-xl transition-all ${currentIndex < totalCards - 1 
                 ? 'bg-gradient-to-r from-purple-800 via-amber-700 to-amber-500 hover:from-amber-700 hover:to-purple-800 text-white' 
                 : 'bg-gradient-to-r from-green-700 via-green-600 to-green-400 hover:from-green-600 hover:to-green-400 text-white'}`}
