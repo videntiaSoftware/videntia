@@ -103,16 +103,33 @@ export default function CardRevealModal({ card, reading, cardIndex, totalCards, 
                 className="absolute w-full h-full backface-hidden rounded-xl overflow-hidden bg-cover bg-center shadow-2xl"
                 style={{ backgroundImage: "url('https://jhtjdapbeiybxpqvyqqs.supabase.co/storage/v1/object/public/deck//fondo-card.webp')", backgroundColor: '#4c1d95', border: 'none' }}
               />
-              {/* Frente de la carta */}
+              {/* Frente de la carta: ahora usando <img> para asegurar visualización y calidad */}
               <div
-                className="absolute w-full h-full backface-hidden rounded-xl overflow-hidden bg-cover bg-center flex flex-col items-center justify-end p-2 shadow-2xl"
+                className="absolute w-full h-full backface-hidden rounded-xl overflow-hidden flex flex-col items-center justify-end p-2 shadow-2xl"
                 style={{
-                  backgroundImage: card.image_url ? `url('${card.image_url}')` : `url('/tarot-cards/${card.id}.jpg')`,
                   backgroundColor: '#1e293b',
-                  transform: 'rotateY(180deg)' + (orientation === 'reversed' ? ' rotate(180deg)' : ''),
                   border: 'none',
+                  transform: 'rotateY(180deg)',
+                  zIndex: 2,
+                  display: 'flex',
+                  alignItems: 'center',
+                  justifyContent: 'center',
+                  padding: 0,
                 }}
-              />
+              >
+                {card.image_url && (
+                  <img
+                    src={card.image_url.replace(/([^:])\/\//g, '$1/')}
+                    alt={card.name}
+                    className="w-full h-full object-cover rounded-xl"
+                    style={{
+                      transform: orientation === 'reversed' ? 'rotate(180deg)' : 'none',
+                      background: '#1e293b',
+                    }}
+                    draggable={false}
+                  />
+                )}
+              </div>
             </motion.div>
             <h2 className="font-cinzel text-4xl text-purple-100 mb-6 text-center drop-shadow-lg tracking-widest select-none min-h-[2.5em] flex items-center justify-center w-full">
               {card.name}
@@ -121,7 +138,7 @@ export default function CardRevealModal({ card, reading, cardIndex, totalCards, 
               {layoutLabels && layoutLabels[cardIndex] ? layoutLabels[cardIndex] : ''}
             </div>
             <p className="text-amber-200 mb-5 text-base text-center font-cormorant tracking-widest select-none min-h-[2em] flex items-center justify-center w-full">
-              {card.type === 'major' ? 'Arcano Mayor' : 'Arcano Menor'} · {orientation === 'reversed' ? 'Invertida' : 'Al derecho'}
+              {card.type === 'major' ? 'Arcano Mayor' : 'Arcano Mayor'} · {orientation === 'reversed' ? 'Invertida' : 'Al derecho'}
             </p>
             <motion.div
               className="w-full max-w-xl mx-auto mt-2 px-4 min-h-[5.5em] flex items-center justify-center"

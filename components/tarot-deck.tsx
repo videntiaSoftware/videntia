@@ -1,6 +1,6 @@
 "use client"
 
-import { useState, useEffect, useRef } from "react"
+import React, { useState, useEffect, useRef, useMemo } from "react"
 import { motion, AnimatePresence } from "framer-motion";
 
 // Card type definition
@@ -24,6 +24,85 @@ interface TarotDeckProps {
   initialQuestion?: string;
   onQuestionChange?: (question: string) => void;
 }
+
+// Componente memoizado para carta individual
+const TarotCard = React.memo(function TarotCard({
+  card,
+  i,
+  flowState,
+  animateProps,
+  tarotBackUrl,
+  flipped,
+  onClick,
+  onMouseEnter,
+  onMouseLeave
+}: {
+  card: Card;
+  i: number;
+  flowState: string;
+  animateProps: any;
+  tarotBackUrl?: string;
+  flipped: boolean;
+  onClick?: () => void;
+  onMouseEnter?: () => void;
+  onMouseLeave?: () => void;
+}) {
+  const showBack = !flipped;
+  return (
+    <motion.div
+      layout
+      key={card.id}
+      className={`absolute left-1/2 top-1/2 transform -translate-x-1/2 -translate-y-1/2 w-[96px] h-[154px] md:w-[140px] md:h-[224px] rounded-lg border-2 ${i === 0 ? 'border-amber-500/80' : 'border-amber-500/50'} bg-cover bg-center shadow-xl ${flowState === 'selection' ? 'cursor-pointer pointer-events-auto' : ''}`}
+      style={{
+        zIndex: 10 + i,
+        backgroundColor: '#4c1d95',
+      }}
+      initial={{
+        x: 0,
+        y: 0,
+        rotate: i * 2 - 20,
+        scale: 1.8 - i * 0.018,
+        opacity: 1
+      }}
+      animate={animateProps}
+      transition={{
+        type: 'spring',
+        duration: flowState === 'selection' ? 1.2 : 1.1,
+        delay: flowState === 'selection' ? i * 0.03 : i * 0.01,
+        stiffness: 60,
+        damping: 16
+      }}
+      onClick={onClick}
+      onMouseEnter={onMouseEnter}
+      onMouseLeave={onMouseLeave}
+    >
+      {showBack ? (
+        <div
+          className="w-full h-full bg-cover bg-center rounded-md"
+          style={{
+            backgroundImage: `url('${tarotBackUrl || "/tarot-card-back.png"}')`,
+            backgroundColor: '#4c1d95',
+            width: '100%',
+            height: '100%'
+          }}
+        ></div>
+      ) : (
+        <div
+          className="w-full h-full bg-cover bg-center rounded-md flex flex-col items-center justify-end p-1"
+          style={{
+            backgroundImage: `url('${card.image_url}')`,
+            backgroundColor: "#1e293b",
+            transform: 'none',
+          }}
+        >
+          <div className="bg-black/80 text-amber-200 text-base w-full text-center rounded py-1 font-semibold shadow-md">
+            {card.name}
+          </div>
+        </div>
+      )}
+    </motion.div>
+  );
+});
 
 export default function TarotDeck({ 
   deck, 
@@ -264,6 +343,40 @@ export default function TarotDeck({
     }
   };
 
+  // Estado para posiciones aleatorias de mezcla
+  const [shufflePositions, setShufflePositions] = useState<{x: number, y: number, rotate: number}[]>([]);
+
+  // Calcular posiciones aleatorias solo al iniciar la animación de mezcla
+  useEffect(() => {
+    if (flowState === 'shuffling') {
+      const vw = typeof window !== 'undefined' ? window.innerWidth : 800;
+      const vh = typeof window !== 'undefined' ? window.innerHeight : 600;
+      const positions = deck.slice(0, showAllCards ? 22 : 10).map(() => ({
+        x: (Math.random() - 0.5) * vw * 0.5,
+        y: (Math.random() - 0.5) * vh * 0.5,
+        rotate: (Math.random() - 0.5) * 360
+      }));
+      setShufflePositions(positions);
+    }
+  }, [flowState, deck, showAllCards]);
+
+  // Memo para posiciones de cartas en selección
+  const selectionCardPositions = useMemo(() => {
+    if (flowState !== 'selection') return [];
+    const isMobileVal = isMobile;
+    return deck.slice(0, showAllCards ? 22 : 10).map((_, i) => getCardPosition(i, displayedDeck.length, isMobileVal));
+  }, [flowState, deck, showAllCards, displayedDeck.length, isMobile]);
+
+  // Memo para escalas
+  const cardScales = useMemo(() => {
+    return deck.slice(0, showAllCards ? 22 : 10).map((_, i) => {
+      if (flowState === 'selection') {
+        return isMobile ? 0.92 : 1.22;
+      }
+      return 1.8 - i * 0.018;
+    });
+  }, [deck, showAllCards, flowState, isMobile]);
+
   // Renderizado principal
   return (
     <div className="relative w-full flex flex-col items-center justify-center min-h-[60vh] max-h-[90vh] overflow-visible">
@@ -312,98 +425,41 @@ export default function TarotDeck({
           onClick={handleShuffle}
         >
           {deck.slice(0, showAllCards ? 22 : 10).map((card, i) => {
-            let x = 0, y = 0, rotate = i * 2 - 20;
-            // Aumentar tamaño de cartas
-            let scale = 1.8 - i * 0.018; // antes 1.6
-            let showBack = true;
             let animateProps = {};
-            if (flowState === 'shuffling') {
-              // Animación "explosiva": cada carta se va a una posición aleatoria, pero menos lejos del centro
-              const vw = typeof window !== 'undefined' ? window.innerWidth : 800;
-              const vh = typeof window !== 'undefined' ? window.innerHeight : 600;
-              // Reducir el factor de dispersión de 1.5 a 0.5
-              const randX = (Math.random() - 0.5) * vw * 0.5;
-              const randY = (Math.random() - 0.5) * vh * 0.5;
-              const randRot = (Math.random() - 0.5) * 360;
+            if (flowState === 'shuffling' && shufflePositions[i]) {
               animateProps = {
-                x: randX,
-                y: randY,
-                rotate: randRot,
-                scale,
+                ...shufflePositions[i],
+                scale: cardScales[i],
                 opacity: 1
               };
-            } else if (flowState === 'selection') {
-              const isMobile = typeof window !== 'undefined' ? window.innerWidth < 640 : true;
-              const pos = getCardPosition(i, displayedDeck.length, isMobile);
-              x = pos.x;
-              y = pos.y;
-              rotate = pos.rotate;
-              // Aumentar scale: mobile 0.92, desktop 1.22
-              scale = isMobile ? 0.92 : 1.22; // antes 0.82 y 1.1
-              showBack = !flippedCards.includes(card.id);
-              animateProps = { x, y, rotate, scale, opacity: 1 };
+            } else if (flowState === 'selection' && selectionCardPositions[i]) {
+              animateProps = {
+                ...selectionCardPositions[i],
+                scale: cardScales[i],
+                opacity: 1
+              };
             } else {
               animateProps = {
                 x: 0,
                 y: 0,
                 rotate: i * 2 - 20,
-                scale: 1.8 - i * 0.018, // antes 1.6
+                scale: cardScales[i],
                 opacity: 1
               };
             }
             return (
-              <motion.div
+              <TarotCard
                 key={card.id}
-                className={`absolute left-1/2 top-1/2 transform -translate-x-1/2 -translate-y-1/2 w-[96px] h-[154px] md:w-[140px] md:h-[224px] rounded-lg border-2 ${i === 0 ? 'border-amber-500/80' : 'border-amber-500/50'} bg-cover bg-center shadow-xl ${flowState === 'selection' ? 'cursor-pointer pointer-events-auto' : ''}`}
-                style={{
-                  zIndex: 10 + i,
-                  backgroundColor: '#4c1d95',
-                }}
-                initial={{
-                  x: 0,
-                  y: 0,
-                  rotate: i * 2 - 20,
-                  scale: 1.8 - i * 0.018, // antes 1.6
-                  opacity: 1
-                }}
-                animate={animateProps}
-                transition={{
-                  type: 'spring',
-                  duration: flowState === 'selection' ? 1.2 : 1.1,
-                  delay: flowState === 'selection' ? i * 0.03 : i * 0.01,
-                  stiffness: 60,
-                  damping: 16
-                }}
+                card={card}
+                i={i}
+                flowState={flowState}
+                animateProps={animateProps}
+                tarotBackUrl={tarotBackUrl}
+                flipped={flippedCards.includes(card.id)}
                 onClick={() => flowState === 'selection' && !flippedCards.includes(card.id) && handleCardSelect(card, Math.random() < 0.5 ? 'upright' : 'reversed')}
                 onMouseEnter={() => setHoveredCard(card)}
                 onMouseLeave={() => setHoveredCard(null)}
-              >
-                {/* Siempre mostrar el dorso, salvo que esté volteada */}
-                {showBack ? (
-                  <div
-                    className="w-full h-full bg-cover bg-center rounded-md"
-                    style={{
-                      backgroundImage: `url('${tarotBackUrl || "/tarot-card-back.png"}')`,
-                      backgroundColor: '#4c1d95',
-                      width: '100%',
-                      height: '100%'
-                    }}
-                  ></div>
-                ) : (
-                  <div
-                    className="w-full h-full bg-cover bg-center rounded-md flex flex-col items-center justify-end p-1"
-                    style={{
-                      backgroundImage: `url('${card.image_url}')`,
-                      backgroundColor: "#1e293b",
-                      transform: 'none',
-                    }}
-                  >
-                    <div className="bg-black/80 text-amber-200 text-base w-full text-center rounded py-1 font-semibold shadow-md">
-                      {card.name}
-                    </div>
-                  </div>
-                )}
-              </motion.div>
+              />
             );
           })}
           {/* End of deck container */}
