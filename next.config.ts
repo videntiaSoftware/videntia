@@ -49,7 +49,7 @@ const nextConfig: NextConfig = {
               "style-src 'self' 'unsafe-inline' https://fonts.googleapis.com",
               "font-src 'self' https://fonts.gstatic.com",
               "img-src 'self' data: https: blob:",
-              "connect-src 'self' https://www.google-analytics.com https://jhtjdapbeiybxpqvyqqs.supabase.co https://api.ipify.org https://ipapi.co https://www.google.com/recaptcha/api/siteverify",
+              "connect-src 'self' https://www.google-analytics.com https://jhtjdapbeiybxpqvyqqs.supabase.co https://api.ipify.org https://ipapi.co https://www.google.com/recaptcha/api/siteverify https://www.google.com/recaptcha/ https://www.google.com/recaptcha/api2/ https://www.google.com/recaptcha/api2/clr",
               "frame-src 'self' https://www.google.com/recaptcha/",
               "frame-ancestors 'none'",
               "base-uri 'self'",
