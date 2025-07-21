@@ -172,48 +172,6 @@ export async function POST(req: NextRequest) {
     }, { status: 403 });
   }
 
-  // --- Enhanced reCAPTCHA Validation (for non-premium users) ---
-  if (userTier !== 'premium') {
-    const recaptchaToken = body.recaptchaToken;
-    const skipRecaptcha = process.env.SKIP_RECAPTCHA === 'true';
-    
-    console.log("[reCAPTCHA] Token recibido:", recaptchaToken);
-    console.log("[reCAPTCHA] Skip habilitado:", skipRecaptcha);
-    
-    if (!recaptchaToken && !skipRecaptcha) {
-      console.warn(`[SUSPECT] Intento sin reCAPTCHA | IP: ${userActivity.ipAddress} | guest_id: ${guestId}`);
-      return NextResponse.json({ error: 'Falta el token de reCAPTCHA. Por favor, recarga la página e intenta de nuevo.' }, { status: 400 });
-    }
-    
-    // Validate reCAPTCHA with Google (solo si no está deshabilitado)
-    if (!skipRecaptcha) {
-      const secret = process.env.RECAPTCHA_SECRET_KEY;
-      
-      try {
-        const verifyRes = await fetch('https://www.google.com/recaptcha/api/siteverify', {
-          method: 'POST',
-          headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
-          body: `secret=${secret}&response=${recaptchaToken}`,
-        });
-        const verifyData = await verifyRes.json();
-        console.log("[reCAPTCHA] Respuesta de Google:", verifyData);
-        
-        if (!verifyData.success || (verifyData.score !== undefined && verifyData.score < 0.5)) {
-          console.warn(`[SUSPECT] Fallo reCAPTCHA | IP: ${userActivity.ipAddress} | guest_id: ${guestId} | score: ${verifyData.score}`);
-          return NextResponse.json({ 
-            error: 'No se pudo verificar reCAPTCHA. Por favor, recarga la página e intenta de nuevo.' 
-          }, { status: 403 });
-        }
-      } catch (recaptchaError) {
-        console.error(`[reCAPTCHA] Error de conectividad:`, recaptchaError);
-        // En caso de error de conectividad con Google, permitir la lectura pero logear el evento
-        console.warn(`[reCAPTCHA] Fallback activado por error de conectividad | IP: ${userActivity.ipAddress} | guest_id: ${guestId}`);
-      }
-    } else {
-      console.log("[reCAPTCHA] ⚠️ SALTADO para testing");
-    }
-  }
-
   // --- Enhanced Rate Limiting by Tier ---
   let filter = {};
   let who = '';

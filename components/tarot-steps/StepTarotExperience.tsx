@@ -12,7 +12,6 @@ import { getUserTier, canAccessReadingType, getTierLimits } from "@/lib/user-tie
 import ReactMarkdown from 'react-markdown';
 import FingerprintJS from '@fingerprintjs/fingerprintjs';
 import { AnimatePresence, motion } from 'framer-motion';
-import Script from "next/script";
 import SubtleAuthPrompt from "@/components/SubtleAuthPrompt";
 import PremiumAdComponent from "@/components/PremiumAdComponent";
 import { GuestCookieManager, CookieConsent } from "@/lib/cookies";
@@ -316,27 +315,6 @@ export default function StepTarotExperience({ readingType }: { readingType: stri
       const supabase = createClient();
       const { data: userData } = await supabase.auth.getUser();
       const isUserAuthenticated = !!userData?.user;
-      let recaptchaToken = '';
-      let recaptchaOk = false;
-      
-      if (!isUserAuthenticated && typeof window !== 'undefined' && process.env.NEXT_PUBLIC_RECAPTCHA_SITE_KEY) {
-        try {
-          console.log("[fetchReading] Esperando a que reCAPTCHA esté listo...");
-          await waitForRecaptcha();
-          console.log("[fetchReading] reCAPTCHA listo, obteniendo token...");
-          recaptchaToken = await (window as any).grecaptcha.execute(process.env.NEXT_PUBLIC_RECAPTCHA_SITE_KEY, { action: 'reading' });
-          recaptchaOk = typeof recaptchaToken === 'string' && recaptchaToken.length > 0;
-          console.log("[fetchReading] reCAPTCHA token generado:", recaptchaToken, "OK:", recaptchaOk);
-        } catch (err) {
-          console.error("[fetchReading] Error ejecutando grecaptcha:", err);
-        }
-      } else {
-        console.warn("[fetchReading] reCAPTCHA no requerido", {
-          isUserAuthenticated,
-          siteKeyExists: !!process.env.NEXT_PUBLIC_RECAPTCHA_SITE_KEY
-        });
-      }
-      
       let guestId = null;
       if (!isUserAuthenticated && typeof window !== 'undefined') {
         guestId = localStorage.getItem('guest_id') || '';
@@ -408,7 +386,6 @@ export default function StepTarotExperience({ readingType }: { readingType: stri
         type: readingType,
         question: question.trim().toLowerCase(),
         cards: processedCards,
-        recaptchaToken,
         guest_id: guestId,
       };
       
@@ -518,21 +495,16 @@ export default function StepTarotExperience({ readingType }: { readingType: stri
       const supabase = createClient();
       const { data: userData } = await supabase.auth.getUser();
       const isUserAuthenticated = !!userData?.user;
-      let recaptchaToken = '';
-      if (!isUserAuthenticated && typeof window !== 'undefined' && process.env.NEXT_PUBLIC_RECAPTCHA_SITE_KEY) {
-        await waitForRecaptcha();
-        recaptchaToken = await (window as any).grecaptcha.execute(process.env.NEXT_PUBLIC_RECAPTCHA_SITE_KEY, { action: 'reading' });
-      }
       let guestId = null;
       if (!isUserAuthenticated && typeof window !== 'undefined') {
         guestId = localStorage.getItem('guest_id') || '';
       }
       const processedCards = selectedCards.map((c) => ({ id: c.card.id, orientation: c.orientation }));
+      // Eliminar toda lógica de reCAPTCHA en el fetch de la lectura
       const payload = {
         type: readingType,
         question: question.trim(),
         cards: processedCards,
-        recaptchaToken,
         guest_id: guestId,
       };
       const res = await fetch("/api/reading/generate", {
@@ -608,12 +580,6 @@ export default function StepTarotExperience({ readingType }: { readingType: stri
 
   return (
     <>  
-      {/* Cargar reCAPTCHA v3 - ÚNICA INSTANCIA */}
-      <Script
-        src={`https://www.google.com/recaptcha/api.js?render=${process.env.NEXT_PUBLIC_RECAPTCHA_SITE_KEY}`}
-        strategy="lazyOnload"
-      />
-      
       {/* Ad Modal */}
       {showAdModal && (
         <div className="fixed inset-0 bg-black/50 z-50 flex items-center justify-center">
