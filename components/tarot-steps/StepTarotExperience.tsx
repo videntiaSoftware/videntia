@@ -769,24 +769,6 @@ export default function StepTarotExperience({ readingType }: { readingType: stri
                     ))}
                   </ul>
                 </div>
-                <div className="mt-4 p-4 bg-black/40 rounded">
-                  <h3 className="text-lg md:text-xl font-semibold text-amber-300 mb-2 font-cinzel">Conclusión</h3>
-                  <div className="prose prose-invert max-w-none font-cormorant text-lg" style={{ fontFamily: 'Cormorant Garamond, Garamond, serif' }}>
-                    {conclusionLoading ? (
-                      <div className="flex flex-col items-center justify-center py-8">
-                        <svg className="animate-spin h-8 w-8 text-amber-400 mb-4" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
-                          <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"></circle>
-                          <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8v8z"></path>
-                        </svg>
-                        <div className="text-amber-200 font-cinzel text-lg text-center">Generando tu lectura, por favor espera...</div>
-                      </div>
-                    ) : conclusionError ? (
-                      <div className="text-red-400 font-cormorant">{conclusionError}</div>
-                    ) : (
-                      <ReactMarkdown>{conclusionData?.interpretation || "Esta es la conclusión de la lectura según las cartas seleccionadas."}</ReactMarkdown>
-                    )}
-                  </div>
-                </div>
                 {/* Botón de donación al final de la lectura */}
                 <div className="mt-8 flex justify-center">
                   <DonationButton />
@@ -816,11 +798,11 @@ export default function StepTarotExperience({ readingType }: { readingType: stri
       
       {/* Prompt de autenticación para usuarios invitados */}
       <SubtleAuthPrompt 
-        showPrompt={showAuthPrompt}
+        showPrompt={showAuthPrompt || (userTier === 'guest' && currentStep === 'limit')}
         onClose={() => setShowAuthPrompt(false)}
       />
 
-      {/* 🔥 PREMIUM AD COMPONENT - Revenue multiplier 10-25x */}
+      {/* PREMIUM AD COMPONENT - Revenue multiplier 10-25x */}
       <PremiumAdComponent
         questionAnalysis={questionAnalysis}
         onAdComplete={() => {
@@ -832,6 +814,28 @@ export default function StepTarotExperience({ readingType }: { readingType: stri
           console.log('[PREMIUM_ADS] Ad skipped by user');
         }}
       />
+
+      {/* Loader y error en el bloque de conclusión */}
+      {currentStep === 'reading' || currentStep === 'limit' ? (
+        <div className="mt-4 p-4 bg-black/40 rounded">
+          <h3 className="text-lg md:text-xl font-semibold text-amber-300 mb-2 font-cinzel">Conclusión</h3>
+          <div className="prose prose-invert max-w-none font-cormorant text-lg" style={{ fontFamily: 'Cormorant Garamond, Garamond, serif' }}>
+            {conclusionLoading ? (
+              <div className="flex flex-col items-center justify-center py-8">
+                <svg className="animate-spin h-8 w-8 text-amber-400 mb-4" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
+                  <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"></circle>
+                  <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8v8z"></path>
+                </svg>
+                <div className="text-amber-200 font-cinzel text-lg text-center">Generando tu lectura, por favor espera...</div>
+              </div>
+            ) : conclusionError ? (
+              <div className="text-red-400 font-cormorant">{conclusionError}</div>
+            ) : (
+              <ReactMarkdown>{conclusionData?.interpretation || "Esta es la conclusión de la lectura según las cartas seleccionadas."}</ReactMarkdown>
+            )}
+          </div>
+        </div>
+      ) : null}
     </>
   );
 }
