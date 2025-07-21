@@ -55,6 +55,12 @@ export default function StepTarotExperience({ readingType }: { readingType: stri
   const [questionAnalysis, setQuestionAnalysis] = useState<any>(null);
   const questionRef = useRef<HTMLInputElement>(null);
 
+  // Estados para la conclusión generada por IA
+  const [conclusionData, setConclusionData] = useState<any>(null);
+  const [conclusionLoading, setConclusionLoading] = useState(false);
+  const [conclusionError, setConclusionError] = useState<string | null>(null);
+  const [conclusionRequested, setConclusionRequested] = useState(false);
+
   useEffect(() => {
     const fetchDeck = async () => {
       const supabase = createClient();
@@ -497,6 +503,72 @@ export default function StepTarotExperience({ readingType }: { readingType: stri
     }
   };
 
+  // Prefetch de la conclusión cuando comienza el reveal
+  useEffect(() => {
+    // Solo dispara si empieza el reveal, hay cartas seleccionadas, y no se ha pedido aún
+    if (
+      revealIndex === 0 &&
+      selectedCards.length > 0 &&
+      !conclusionRequested
+    ) {
+      setConclusionRequested(true);
+      setConclusionLoading(true);
+      setConclusionError(null);
+      // Llama a la función fetchReading pero NO setea showReading ni readingData
+      (async () => {
+        try {
+          // Copia de fetchReading pero solo para la conclusión
+          const expectedLayout = READING_TYPE_LAYOUTS[readingType]?.layout;
+          const cards = selectedCards;
+          const processedCards = cards.map((c) => ({ id: c.card.id, orientation: c.orientation }));
+          const supabase = createClient();
+          const { data: userData } = await supabase.auth.getUser();
+          const isUserAuthenticated = !!userData?.user;
+          let recaptchaToken = '';
+          if (!isUserAuthenticated && typeof window !== 'undefined' && process.env.NEXT_PUBLIC_RECAPTCHA_SITE_KEY) {
+            await waitForRecaptcha();
+            recaptchaToken = await (window as any).grecaptcha.execute(process.env.NEXT_PUBLIC_RECAPTCHA_SITE_KEY, { action: 'reading' });
+          }
+          let guestId = null;
+          if (!isUserAuthenticated && typeof window !== 'undefined') {
+            guestId = localStorage.getItem('guest_id') || '';
+          }
+          const payload = {
+            type: readingType,
+            question: question.trim(),
+            cards: processedCards,
+            recaptchaToken,
+            guest_id: guestId,
+          };
+          const res = await fetch("/api/reading/generate", {
+            method: "POST",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify(payload),
+          });
+          if (!res.ok) {
+            const errorData = await res.json();
+            setConclusionError(errorData.error || 'Error generando la conclusión.');
+            setConclusionLoading(false);
+            return;
+          }
+          const data = await res.json();
+          setConclusionData(data);
+        } catch (e: any) {
+          setConclusionError(e?.message || 'Error generando la conclusión.');
+        } finally {
+          setConclusionLoading(false);
+        }
+      })();
+    }
+    // Reset conclusion states si se reinicia la tirada
+    if (revealIndex === null) {
+      setConclusionRequested(false);
+      setConclusionData(null);
+      setConclusionError(null);
+      setConclusionLoading(false);
+    }
+  }, [revealIndex, selectedCards, readingType, question]);
+
   const resetReading = () => {
     setQuestion("");
     setIsShuffling(false);
@@ -510,6 +582,12 @@ export default function StepTarotExperience({ readingType }: { readingType: stri
     setShowAdModal(false);
     setShowPremiumAd(false);
     setQuestionAnalysis(null);
+
+    // Reset conclusion states
+    setConclusionRequested(false);
+    setConclusionData(null);
+    setConclusionError(null);
+    setConclusionLoading(false);
   };
 
   const handleAdComplete = () => {
@@ -533,7 +611,13 @@ export default function StepTarotExperience({ readingType }: { readingType: stri
   else if (revealIndex !== null && selectedCards[revealIndex]) currentStep = 'reveal';
   else if (showReading) currentStep = 'reading';
 
-  
+  // Cambiar onFinish del StepCardReveal para solo mostrar la conclusión
+  const handleRevealFinish = () => {
+    setRevealIndex(null);
+    setShowReading(true);
+    // Si la conclusión aún está cargando, muestra el loader (ya lo hace el render)
+    // Si ya está, se muestra directamente
+  };
 
   return (
     <>  
@@ -687,21 +771,16 @@ export default function StepTarotExperience({ readingType }: { readingType: stri
                 )}
                 layoutLabels={READING_TYPE_LAYOUTS[readingType]?.layout}
                 currentIndex={revealIndex!}
-                instructions={READING_TYPE_LAYOUTS[readingType]?.instructions} // Nuevo: pasa el instructivo
+                instructions={READING_TYPE_LAYOUTS[readingType]?.instructions}
                 onNext={() => {
                   if (revealIndex! < selectedCards.length - 1) {
                     setRevealIndex(revealIndex! + 1);
                   } else {
-                    setRevealIndex(null);
-                    setShowReading(true);
+                    handleRevealFinish();
                   }
                 }}
                 onPrev={() => setRevealIndex((prev) => (prev !== null && prev > 0 ? prev - 1 : prev))}
-                onFinish={() => {
-                  setRevealIndex(null);
-                  setShowReading(true);
-                  fetchReading(selectedCards);
-                }}
+                onFinish={handleRevealFinish}
               />
             </motion.div>
           )}
@@ -739,7 +818,19 @@ export default function StepTarotExperience({ readingType }: { readingType: stri
                 <div className="mt-4 p-4 bg-black/40 rounded">
                   <h3 className="text-lg md:text-xl font-semibold text-amber-300 mb-2 font-cinzel">Conclusión</h3>
                   <div className="prose prose-invert max-w-none font-cormorant text-lg" style={{ fontFamily: 'Cormorant Garamond, Garamond, serif' }}>
-                    <ReactMarkdown>{readingData?.interpretation || "Esta es la conclusión de la lectura según las cartas seleccionadas."}</ReactMarkdown>
+                    {conclusionLoading ? (
+                      <div className="flex flex-col items-center justify-center py-8">
+                        <svg className="animate-spin h-8 w-8 text-amber-400 mb-4" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
+                          <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"></circle>
+                          <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8v8z"></path>
+                        </svg>
+                        <div className="text-amber-200 font-cinzel text-lg text-center">Generando tu lectura, por favor espera...</div>
+                      </div>
+                    ) : conclusionError ? (
+                      <div className="text-red-400 font-cormorant">{conclusionError}</div>
+                    ) : (
+                      <ReactMarkdown>{conclusionData?.interpretation || "Esta es la conclusión de la lectura según las cartas seleccionadas."}</ReactMarkdown>
+                    )}
                   </div>
                 </div>
                 {/* Botón de donación al final de la lectura */}
