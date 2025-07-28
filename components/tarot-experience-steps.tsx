@@ -69,13 +69,22 @@ export default function TarotExperienceSteps({
 	const [readingsToday, setReadingsToday] = useState(0);
 	const [adsWatched, setAdsWatched] = useState(0);
 
-	// Initialize step from URL
+	// Initialize step and reading type from URL
 	useEffect(() => {
 		const urlStep = searchParams.get("step");
-		if (urlStep && !isNaN(+urlStep)) {
+		const urlReadingType = searchParams.get("readingType");
+		
+		if (urlReadingType) {
+			// Validar que el tipo de lectura sea válido
+			const validTypes = READING_TYPES.map(type => type.value);
+			if (validTypes.includes(urlReadingType)) {
+				setSelectedType(urlReadingType);
+				setStep(2); // Ir directamente al paso de lectura
+			}
+		} else if (urlStep && !isNaN(+urlStep)) {
 			setStep(+urlStep);
 		}
-	}, []);
+	}, [searchParams]);
 
 	// When step changes, update URL without reload and notify parent
 	useEffect(() => {
@@ -91,7 +100,17 @@ export default function TarotExperienceSteps({
 		const onPopState = () => {
 			const urlParams = new URLSearchParams(window.location.search);
 			const popStep = urlParams.get("step");
-			if (popStep && !isNaN(+popStep)) setStep(+popStep);
+			const popReadingType = urlParams.get("readingType");
+			
+			if (popReadingType) {
+				const validTypes = READING_TYPES.map(type => type.value);
+				if (validTypes.includes(popReadingType)) {
+					setSelectedType(popReadingType);
+					setStep(2);
+				}
+			} else if (popStep && !isNaN(+popStep)) {
+				setStep(+popStep);
+			}
 		};
 		window.addEventListener("popstate", onPopState);
 		return () => window.removeEventListener("popstate", onPopState);

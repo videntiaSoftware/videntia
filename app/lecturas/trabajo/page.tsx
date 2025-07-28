@@ -72,7 +72,7 @@ export default function LecturaTrabajoPage() {
               Descubre tu futuro profesional y las oportunidades que te esperan. 
               Obtén claridad sobre tu carrera, cambios laborales y el camino hacia el éxito.
             </p>
-            <Link href="/">
+            <Link href="/?readingType=life_purpose">
               <Button size="lg" className="bg-green-600 hover:bg-green-700 text-white text-lg px-8 py-4">
                 <Briefcase className="mr-2 h-5 w-5" />
                 Comenzar Lectura Gratuita
@@ -157,7 +157,7 @@ export default function LecturaTrabajoPage() {
                 </p>
 
                 <div className="text-center mt-8">
-                  <Link href="/">
+                  <Link href="/?readingType=life_purpose">
                     <Button className="bg-green-600 hover:bg-green-700 text-white">
                       Consultar tu Futuro Laboral
                     </Button>

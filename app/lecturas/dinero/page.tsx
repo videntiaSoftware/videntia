@@ -72,7 +72,7 @@ export default function LecturaDineroPage() {
               Descubre tu futuro financiero y las oportunidades de abundancia que te esperan. 
               Obtén claridad sobre inversiones, negocios y el camino hacia la prosperidad.
             </p>
-            <Link href="/">
+            <Link href="/?readingType=life_purpose">
               <Button size="lg" className="bg-yellow-600 hover:bg-yellow-700 text-white text-lg px-8 py-4">
                 <DollarSign className="mr-2 h-5 w-5" />
                 Comenzar Lectura Gratuita
@@ -163,7 +163,7 @@ export default function LecturaDineroPage() {
                 </p>
 
                 <div className="text-center mt-8">
-                  <Link href="/">
+                  <Link href="/?readingType=life_purpose">
                     <Button className="bg-yellow-600 hover:bg-yellow-700 text-white">
                       Descubrir tu Futuro Financiero
                     </Button>

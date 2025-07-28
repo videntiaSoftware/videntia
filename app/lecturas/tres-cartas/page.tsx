@@ -1,5 +1,5 @@
 import { redirect } from 'next/navigation';
 
-export default function FuturoRedirect() {
+export default function TresCartasRedirect() {
   redirect('/?readingType=three_card');
-}
+} 

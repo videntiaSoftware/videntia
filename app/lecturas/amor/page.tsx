@@ -3,6 +3,7 @@ import Link from 'next/link'
 import { Button } from '@/components/ui/button'
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card'
 import { Heart, Star, Sparkles, ArrowRight } from 'lucide-react'
+import { redirect } from 'next/navigation'
 
 export const metadata: Metadata = {
   title: 'Lectura de Tarot del Amor | Videntia Tarot - Descubre tu Futuro Amoroso',
@@ -72,7 +73,7 @@ export default function LecturaAmorPage() {
               Descubre los secretos de tu corazón y el futuro de tus relaciones amorosas. 
               Nuestras lecturas especializadas en amor te revelarán lo que el universo tiene preparado para ti.
             </p>
-            <Link href="/">
+            <Link href="/?readingType=love_relationship">
               <Button size="lg" className="bg-pink-600 hover:bg-pink-700 text-white text-lg px-8 py-4">
                 <Heart className="mr-2 h-5 w-5" />
                 Comenzar Lectura Gratuita
@@ -156,7 +157,7 @@ export default function LecturaAmorPage() {
                 </p>
 
                 <div className="text-center mt-8">
-                  <Link href="/">
+                  <Link href="/?readingType=love_relationship">
                     <Button className="bg-pink-600 hover:bg-pink-700 text-white">
                       Comenzar tu Lectura de Amor Ahora
                     </Button>
