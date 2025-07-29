@@ -13,7 +13,7 @@ export default function Footer() {
               <Link href="/lecturas/amor" className="block hover:text-purple-300 transition-colors">Tarot del Amor</Link>
               <Link href="/lecturas/trabajo" className="block hover:text-purple-300 transition-colors">Tarot Laboral</Link>
               <Link href="/lecturas/dinero" className="block hover:text-purple-300 transition-colors">Tarot del Dinero</Link>
-              <Link href="/lecturas/salud" className="block hover:text-purple-300 transition-colors">Tarot de Salud</Link>
+
             </div>
           </div>
           <div>

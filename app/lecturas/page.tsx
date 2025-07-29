@@ -43,14 +43,7 @@ const lecturas = [
     bgColor: 'bg-yellow-600 hover:bg-yellow-700',
     href: '/lecturas/dinero'
   },
-  {
-    title: 'Lectura de Salud',
-    description: 'Bienestar físico, mental y energía vital',
-    icon: Shield,
-    color: 'text-red-400',
-    bgColor: 'bg-red-600 hover:bg-red-700',
-    href: '/lecturas/salud'
-  },
+
   {
     title: 'Lectura Familiar',
     description: 'Relaciones familiares, armonía y conflictos',

@@ -19,7 +19,7 @@ export default function SEONavigationSection() {
     { href: '/lecturas/amor', title: 'Tarot del Amor', icon: Heart, color: 'text-pink-400' },
     { href: '/lecturas/trabajo', title: 'Tarot Laboral', icon: Briefcase, color: 'text-green-400' },
     { href: '/lecturas/dinero', title: 'Tarot del Dinero', icon: DollarSign, color: 'text-yellow-400' },
-    { href: '/lecturas/salud', title: 'Tarot de Salud', icon: Shield, color: 'text-red-400' },
+
     { href: '/lecturas/familia', title: 'Tarot Familiar', icon: Users, color: 'text-blue-400' },
     { href: '/lecturas/futuro', title: 'Tarot del Futuro', icon: Eye, color: 'text-purple-400' },
   ]

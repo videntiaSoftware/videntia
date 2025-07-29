@@ -153,7 +153,7 @@ export default function SEODashboard() {
         '/seo/amor-pareja',
         '/seo/trabajo-carrera',
         '/seo/dinero-finanzas',
-        '/seo/salud-bienestar',
+    
         '/seo/familia-relaciones',
         '/seo/crecimiento-espiritual',
         '/seo/viajes-aventuras',

@@ -293,7 +293,7 @@ function createFallbackAnalysis(questionText: string) {
     retirement_planning: ['jubil', 'pension', 'retir', 'ahorr', 'inversion'],
     real_estate_investment: ['casa', 'propiedad', 'inmueble', 'comprar', 'vender', 'hipoteca'],
     business_growth: ['negocio', 'empresa', 'emprendimiento', 'comercio', 'sociedad'],
-    medical_procedures: ['operar', 'cirugia', 'tratamiento', 'salud', 'medico'],
+
     education_financing: ['estudi', 'universidad', 'curso', 'capacita', 'educacion'],
     luxury_travel: ['viaj', 'vacation', 'europa', 'crucero', 'lujo'],
     career_development: ['trabajo', 'carrera', 'empleo', 'ascenso', 'profesional'],

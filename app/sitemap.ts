@@ -17,7 +17,7 @@ export default function sitemap(): MetadataRoute.Sitemap {
     'lecturas/amor',
     'lecturas/trabajo',
     'lecturas/dinero',
-    'lecturas/salud',
+
     'lecturas/cruz-celta',
     'lecturas/si-o-no',
     'blog',

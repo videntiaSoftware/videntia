@@ -307,7 +307,7 @@ function createFallbackAnalysis(questionText: string) {
     money: ['dinero', 'trabajo', 'negocio', 'inversion', 'deuda', 'economia', 'plata', 'ganar'],
     relationships: ['amor', 'pareja', 'matrimonio', 'novio', 'novia', 'ex', 'romance', 'solter'],
     career: ['trabajo', 'carrera', 'empleo', 'jefe', 'profesional', 'estudios', 'ascenso'],
-    health: ['salud', 'enfermedad', 'doctor', 'medicina', 'bienestar', 'dolor', 'operar'],
+
     family: ['familia', 'hijo', 'padre', 'madre', 'hermano', 'bebe', 'embaraz'],
     spiritual: ['espiritual', 'alma', 'energia', 'proposito', 'crecer', 'karma', 'destino']
   };

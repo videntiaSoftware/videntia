@@ -20,6 +20,9 @@ export const metadata: Metadata = {
   },
   alternates: {
     canonical: "https://videntiatarot.com/",
+  },
+  other: {
+    'google-adsense-account': 'ca-pub-4987669803086382'
   }
 };
 
