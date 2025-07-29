@@ -45,12 +45,12 @@ const nextConfig: NextConfig = {
             key: 'Content-Security-Policy',
             value: [
               "default-src 'self'",
-              "script-src 'self' 'unsafe-inline' 'unsafe-eval' https://www.googletagmanager.com https://www.google-analytics.com https://unpkg.com https://www.google.com/recaptcha/ https://www.gstatic.com/recaptcha/",
+              "script-src 'self' 'unsafe-inline' 'unsafe-eval' https://www.googletagmanager.com https://www.google-analytics.com https://unpkg.com https://www.google.com/recaptcha/ https://www.gstatic.com/recaptcha/ https://pagead2.googlesyndication.com https://www.googleadservices.com https://googleads.g.doubleclick.net",
               "style-src 'self' 'unsafe-inline' https://fonts.googleapis.com",
               "font-src 'self' https://fonts.gstatic.com",
-              "img-src 'self' data: https: blob:",
-              "connect-src 'self' https://www.google-analytics.com https://jhtjdapbeiybxpqvyqqs.supabase.co https://api.ipify.org https://ipapi.co https://www.google.com/recaptcha/api/siteverify https://www.google.com/recaptcha/ https://www.google.com/recaptcha/api2/ https://www.google.com/recaptcha/api2/clr",
-              "frame-src 'self' https://www.google.com/recaptcha/",
+              "img-src 'self' data: https: blob: https://pagead2.googlesyndication.com https://www.googleadservices.com https://googleads.g.doubleclick.net https://tpc.googlesyndication.com",
+              "connect-src 'self' https://www.google-analytics.com https://jhtjdapbeiybxpqvyqqs.supabase.co https://api.ipify.org https://ipapi.co https://www.google.com/recaptcha/api/siteverify https://www.google.com/recaptcha/ https://www.google.com/recaptcha/api2/ https://www.google.com/recaptcha/api2/clr https://pagead2.googlesyndication.com https://www.googleadservices.com https://googleads.g.doubleclick.net",
+              "frame-src 'self' https://www.google.com/recaptcha/ https://pagead2.googlesyndication.com https://www.googleadservices.com https://googleads.g.doubleclick.net https://tpc.googlesyndication.com",
               "frame-ancestors 'none'",
               "base-uri 'self'",
               "form-action 'self'"
