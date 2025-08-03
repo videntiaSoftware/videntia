@@ -1,27 +1,50 @@
 "use client";
-import { useEffect, useState } from 'react';
+import { useEffect, useState, useRef } from 'react';
 import Script from 'next/script';
-import { useAdSense } from '@/hooks/useAdSense';
 
 interface AdSenseHeaderBannerProps {
   className?: string;
 }
 
+declare global {
+  interface Window {
+    adsbygoogle: any[];
+  }
+}
+
 export default function AdSenseHeaderBanner({ className = "" }: AdSenseHeaderBannerProps) {
-  const { pushAd } = useAdSense();
   const [isLoaded, setIsLoaded] = useState(false);
   const [hasError, setHasError] = useState(false);
+  const [adPushed, setAdPushed] = useState(false);
+  const adRef = useRef<HTMLModElement>(null);
+  const retryCount = useRef(0);
+
+  const pushAd = () => {
+    if (typeof window !== 'undefined' && window.adsbygoogle && adRef.current && !adPushed) {
+      try {
+        console.log('🚀 Pushing AdSense ad...');
+        (window.adsbygoogle = window.adsbygoogle || []).push({});
+        setAdPushed(true);
+        console.log('✅ AdSense ad pushed successfully');
+      } catch (error) {
+        console.error('❌ Error pushing AdSense ad:', error);
+        // Retry up to 3 times
+        if (retryCount.current < 3) {
+          retryCount.current++;
+          setTimeout(pushAd, 2000);
+        }
+      }
+    }
+  };
 
   useEffect(() => {
-    if (isLoaded && !hasError) {
+    if (isLoaded && !hasError && !adPushed) {
+      console.log('📡 AdSense script loaded, initializing ad...');
       // Small delay to ensure DOM is ready
-      const timer = setTimeout(() => {
-        pushAd();
-      }, 500);
-
+      const timer = setTimeout(pushAd, 1000);
       return () => clearTimeout(timer);
     }
-  }, [pushAd, isLoaded, hasError]);
+  }, [isLoaded, hasError, adPushed]);
 
   const handleScriptLoad = () => {
     console.log('AdSense script loaded successfully');
@@ -35,6 +58,22 @@ export default function AdSenseHeaderBanner({ className = "" }: AdSenseHeaderBan
 
   // Don't render anything if there's an error
   if (hasError) {
+    // Show placeholder in development
+    if (process.env.NODE_ENV === 'development') {
+      return (
+        <div className={`w-full max-w-4xl mx-auto mb-6 ${className}`}>
+          <div className="bg-red-900/20 rounded-lg p-4 border border-red-500/20">
+            <div className="text-xs text-red-400/60 text-center mb-2">AdSense Error - Modo Desarrollo</div>
+            <div className="bg-red-800/20 h-24 flex items-center justify-center text-red-400 text-sm">
+              ❌ No se pudo cargar el anuncio (normal en desarrollo)
+            </div>
+            <div className="text-xs text-red-400/40 text-center mt-2">
+              En producción se intentaría cargar un anuncio real aquí
+            </div>
+          </div>
+        </div>
+      );
+    }
     return null;
   }
 
@@ -54,6 +93,7 @@ export default function AdSenseHeaderBanner({ className = "" }: AdSenseHeaderBan
       <div className="bg-black/20 rounded-lg p-4 border border-amber-500/20">
         <div className="text-xs text-amber-400/60 text-center mb-2">Publicidad</div>
         <ins 
+          ref={adRef}
           className="adsbygoogle"
           style={{ display: 'block' }}
           data-ad-client="ca-pub-4987669803086382"
@@ -61,6 +101,24 @@ export default function AdSenseHeaderBanner({ className = "" }: AdSenseHeaderBan
           data-ad-format="auto"
           data-full-width-responsive="true"
         />
+        
+        {/* Placeholder for development or when ads don't load */}
+        {process.env.NODE_ENV === 'development' && !adPushed && (
+          <div className="bg-amber-900/20 h-24 flex items-center justify-center text-amber-400 text-sm border border-amber-500/30 rounded mt-2">
+            🎯 Espacio reservado para anuncio AdSense
+          </div>
+        )}
+        
+        {/* Debug info in development */}
+        {process.env.NODE_ENV === 'development' && (
+          <div className="text-xs text-amber-400/40 text-center mt-2 space-y-1">
+            <div>Status: {isLoaded ? '✅ Script loaded' : '⏳ Loading...'}</div>
+            <div>Ad pushed: {adPushed ? '✅ Yes' : '❌ No'}</div>
+            {hasError && <div className="text-red-400">❌ Error loading ads</div>}
+            <div>Retry count: {retryCount.current}</div>
+          </div>
+        )}
+        
         <div className="text-xs text-amber-400/40 text-center mt-2">
           Los anuncios nos ayudan a mantener Videntia gratuito
         </div>
