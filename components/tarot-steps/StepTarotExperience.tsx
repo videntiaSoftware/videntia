@@ -745,93 +745,38 @@ export default function StepTarotExperience({ readingType }: { readingType: stri
               animate={{ opacity: 1 }}
               exit={{ opacity: 0 }}
               transition={{ duration: 0.7, ease: 'easeInOut' }}
-              className="absolute left-0 top-0 w-full h-full flex flex-col items-center justify-start p-4 pt-8 pb-8"
+              className="absolute left-0 top-0 w-full h-full max-h-screen overflow-y-auto flex flex-col items-center justify-start p-4"
             >
-              <div className="w-full max-w-4xl h-full flex flex-col">
-                <div className="bg-slate-900/90 rounded-lg border border-purple-500/30 shadow-xl text-white flex-1 overflow-y-auto">
-                  <div className="p-6">
-                    <h2 className="text-2xl md:text-3xl font-bold text-amber-300 mb-6 font-cinzel text-center">Interpretación final</h2>
-                    
-                    <div className="mb-6">
-                      <p className="text-purple-200 mb-2 font-semibold font-cinzel">Pregunta:</p>
-                      <p className="mb-4 font-cormorant text-lg text-amber-100 leading-relaxed" style={{ fontFamily: 'Cormorant Garamond, Garamond, serif' }}>{question}</p>
-                      
-                      <p className="text-purple-200 mb-3 font-semibold font-cinzel">Cartas seleccionadas:</p>
-                      <ul className="mb-6 space-y-4">
-                        {selectedCards.map((c, i) => (
-                          <li key={c.card.id} className="bg-slate-800/50 rounded-lg p-4 border border-purple-500/20">
-                            <div className="flex items-start justify-between mb-2">
-                              <span className="font-bold text-amber-200 font-cinzel text-lg">{c.card.name}</span>
-                              <div className="flex items-center gap-2">
-                                {READING_TYPE_LAYOUTS[readingType]?.layout &&
-                                  <span className="text-xs text-purple-300 font-cormorant px-2 py-1 bg-purple-900/30 rounded" style={{ fontFamily: 'Cormorant Garamond, Garamond, serif' }}>{READING_TYPE_LAYOUTS[readingType].layout[i]}</span>
-                                }
-                                <span className="text-xs text-purple-300 font-cormorant px-2 py-1 bg-amber-900/30 rounded italic" style={{ fontFamily: 'Cormorant Garamond, Garamond, serif' }}>
-                                  {c.orientation === 'reversed' ? 'Invertida' : 'Al derecho'}
-                                </span>
-                              </div>
-                            </div>
-                            <div className="text-sm text-white/90 leading-relaxed font-cormorant" style={{ fontFamily: 'Cormorant Garamond, Garamond, serif' }}>
-                              {c.orientation === 'reversed' ? c.card.interpretation_reversed || 'Sin interpretación.' : c.card.interpretation_upright || 'Sin interpretación.'}
-                            </div>
-                          </li>
-                        ))}
-                      </ul>
-                    </div>
-
-                    {/* Conclusión integrada */}
-                    <div className="mb-6 p-4 bg-gradient-to-r from-amber-900/20 to-purple-900/20 rounded-lg border border-amber-500/30">
-                      <h3 className="text-lg md:text-xl font-semibold text-amber-300 mb-3 font-cinzel">Conclusión</h3>
-                      <div className="prose prose-invert max-w-none font-cormorant text-lg leading-relaxed" style={{ fontFamily: 'Cormorant Garamond, Garamond, serif' }}>
-                        {conclusionLoading ? (
-                          <div className="flex flex-col items-center justify-center py-6">
-                            <svg className="animate-spin h-8 w-8 text-amber-400 mb-4" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
-                              <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"></circle>
-                              <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8v8z"></path>
-                            </svg>
-                            <div className="text-amber-200 font-cinzel text-lg text-center">Generando tu conclusión, por favor espera...</div>
-                          </div>
-                        ) : conclusionError ? (
-                          <div className="text-red-400 font-cormorant bg-red-900/20 p-3 rounded border border-red-500/30">{conclusionError}</div>
-                                                 ) : (
-                           <div className="text-amber-100 leading-relaxed">
-                             <ReactMarkdown>
-                               {conclusionData?.interpretation || "Esta es la conclusión de la lectura según las cartas seleccionadas."}
-                             </ReactMarkdown>
-                           </div>
-                         )}
-                      </div>
-                    </div>
-
-                    {/* Botón de donación */}
-                    <div className="mb-6 flex justify-center">
-                      <DonationButton />
-                    </div>
-
-                    {/* Botón de nueva lectura */}
-                    <div className="mb-6 flex justify-center">
-                      <Button 
-                        onClick={resetReading}
-                        className="bg-gradient-to-r from-purple-600 to-amber-600 hover:from-purple-700 hover:to-amber-700 text-white font-cinzel px-8 py-3"
-                      >
-                        Hacer otra pregunta
-                      </Button>
-                    </div>
-
-                    {/* Promoción de cuenta */}
-                    <div className="p-4 bg-gradient-to-r from-amber-900/20 to-purple-900/20 border border-amber-500/30 rounded-lg text-center">
-                      <h4 className="font-semibold mb-2 font-cinzel text-amber-200">¿Quieres guardar esta lectura?</h4>
-                      <p className="text-sm mb-3 font-cormorant text-amber-100/90 leading-relaxed" style={{ fontFamily: 'Cormorant Garamond, Garamond, serif' }}>
-                        Inicia sesión o regístrate para guardar tu historial, acceder a tus tiradas favoritas y recibir recomendaciones personalizadas.
-                      </p>
-                      <Button 
-                        asChild
-                        className="bg-blue-600 hover:bg-blue-700 text-white font-cinzel"
-                      >
-                        <a href="/auth/sign-up">Crear cuenta gratuita</a>
-                      </Button>
-                    </div>
-                  </div>
+              <div className="mt-4 bg-slate-900/90 rounded-lg p-6 border border-purple-500/30 shadow-xl text-white max-w-4xl w-full max-h-[80vh] overflow-y-auto">
+                <h2 className="text-2xl md:text-3xl font-bold text-amber-300 mb-4 font-cinzel text-center">Interpretación final</h2>
+                <div className="mb-4">
+                  <p className="text-purple-200 mb-2 font-semibold font-cinzel">Pregunta:</p>
+                  <p className="mb-4 font-cormorant text-lg text-amber-100" style={{ fontFamily: 'Cormorant Garamond, Garamond, serif' }}>{question}</p>
+                  <p className="text-purple-200 mb-2 font-semibold font-cinzel">Cartas seleccionadas:</p>
+                  <ul className="mb-4">
+                    {selectedCards.map((c, i) => (
+                      <li key={c.card.id} className="mb-2">
+                        <span className="font-bold text-amber-200 font-cinzel">{c.card.name}</span>
+                        {READING_TYPE_LAYOUTS[readingType]?.layout &&
+                          <span className="ml-2 text-xs text-purple-300 font-cormorant" style={{ fontFamily: 'Cormorant Garamond, Garamond, serif' }}>({READING_TYPE_LAYOUTS[readingType].layout[i]})</span>
+                        }
+                        {" · "}
+                        <span className="italic text-purple-300 font-cormorant" style={{ fontFamily: 'Cormorant Garamond, Garamond, serif' }}>{c.orientation === 'reversed' ? 'Invertida' : 'Al derecho'}</span>
+                        <div className="text-sm text-white/90 mt-1 font-cormorant" style={{ fontFamily: 'Cormorant Garamond, Garamond, serif' }}>
+                          {c.orientation === 'reversed' ? c.card.interpretation_reversed || 'Sin interpretación.' : c.card.interpretation_upright || 'Sin interpretación.'}
+                        </div>
+                      </li>
+                    ))}
+                  </ul>
+                </div>
+                {/* Botón de donación al final de la lectura */}
+                <div className="mt-8 flex justify-center">
+                  <DonationButton />
+                </div>
+                <Button className="mt-6" onClick={resetReading}>Hacer otra pregunta</Button>
+                <div className="mt-8 p-4 bg-amber-50/80 dark:bg-slate-800/80 border border-amber-200 dark:border-slate-700 rounded-lg text-amber-900 dark:text-amber-100 text-center">
+                  <h4 className="font-semibold mb-1 font-cinzel">¿Quieres guardar esta lectura?</h4>
+                  <p className="text-sm mb-2 font-cormorant" style={{ fontFamily: 'Cormorant Garamond, Garamond, serif' }}>Inicia sesión o regístrate para guardar tu historial, acceder a tus tiradas favoritas y recibir recomendaciones personalizadas.</p>
                 </div>
               </div>
             </motion.div>
@@ -870,7 +815,27 @@ export default function StepTarotExperience({ readingType }: { readingType: stri
         }}
       />
 
-
+      {/* Loader y error en el bloque de conclusión */}
+      {currentStep === 'reading' || currentStep === 'limit' ? (
+        <div className="mt-4 p-4 bg-black/40 rounded">
+          <h3 className="text-lg md:text-xl font-semibold text-amber-300 mb-2 font-cinzel">Conclusión</h3>
+          <div className="prose prose-invert max-w-none font-cormorant text-lg" style={{ fontFamily: 'Cormorant Garamond, Garamond, serif' }}>
+            {conclusionLoading ? (
+              <div className="flex flex-col items-center justify-center py-8">
+                <svg className="animate-spin h-8 w-8 text-amber-400 mb-4" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
+                  <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"></circle>
+                  <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8v8z"></path>
+                </svg>
+                <div className="text-amber-200 font-cinzel text-lg text-center">Generando tu lectura, por favor espera...</div>
+              </div>
+            ) : conclusionError ? (
+              <div className="text-red-400 font-cormorant">{conclusionError}</div>
+            ) : (
+              <ReactMarkdown>{conclusionData?.interpretation || "Esta es la conclusión de la lectura según las cartas seleccionadas."}</ReactMarkdown>
+            )}
+          </div>
+        </div>
+      ) : null}
     </>
   );
 }

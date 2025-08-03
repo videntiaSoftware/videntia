@@ -74,8 +74,8 @@ const PROMPT_CONFIG: Record<string, { instructions: string; layout?: string[] }>
     layout: ["Primera carta", "Segunda carta", "Tercera carta"],
   },
   health: {
-    instructions: "Interpreta cada carta en relación al bienestar físico, mental o emocional. Relaciona cada posición con la pregunta y concluye con un consejo para mejorar la salud.",
-    layout: ["Salud Física", "Salud Mental/Emocional", "Consejo de Bienestar"],
+    instructions: "Interpreta cada carta en relación a la salud física, emocional y mental. Relaciona cada posición con la pregunta y concluye con una recomendación de bienestar.",
+    layout: ["Salud física", "Salud emocional", "Salud mental"],
   },
   spiritual_path: {
     instructions: "Interpreta cada carta como etapas o aprendizajes en el camino espiritual del consultante. Relaciona cada posición con la pregunta y concluye con una guía espiritual.",
