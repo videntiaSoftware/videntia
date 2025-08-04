@@ -28,6 +28,6 @@ export default function manifest(): MetadataRoute.Manifest {
     ],
     categories: ['entertainment', 'lifestyle', 'games'],
     lang: 'es',
-    orientation: 'portrait',
+    orientation: 'portrait'
   }
 }

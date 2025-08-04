@@ -28,10 +28,15 @@ export default function AdSenseHeaderBanner({ className = "" }: AdSenseHeaderBan
         console.log('✅ AdSense ad pushed successfully');
       } catch (error) {
         console.error('❌ Error pushing AdSense ad:', error);
-        // Retry up to 3 times
+        // Retry up to 3 times with exponential backoff
         if (retryCount.current < 3) {
           retryCount.current++;
-          setTimeout(pushAd, 2000);
+          const delay = Math.pow(2, retryCount.current) * 1000; // 2s, 4s, 8s
+          console.log(`⏳ Retrying in ${delay/1000}s (attempt ${retryCount.current}/3)`);
+          setTimeout(pushAd, delay);
+        } else {
+          console.error('❌ Max retries reached for AdSense');
+          setHasError(true);
         }
       }
     }
@@ -81,10 +86,8 @@ export default function AdSenseHeaderBanner({ className = "" }: AdSenseHeaderBan
     <div className={`w-full max-w-4xl mx-auto mb-6 ${className}`}>
       {/* Load AdSense Script */}
       <Script
-        async
         src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-4987669803086382"
-        crossOrigin="anonymous"
-        strategy="lazyOnload"
+        strategy="afterInteractive"
         onLoad={handleScriptLoad}
         onError={handleScriptError}
       />
