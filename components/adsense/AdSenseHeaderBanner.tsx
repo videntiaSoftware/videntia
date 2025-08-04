@@ -56,92 +56,82 @@ export default function AdSenseHeaderBanner({ className = "" }: AdSenseHeaderBan
   }, []);
 
   const pushAd = () => {
-    if (typeof window !== 'undefined' && adRef.current && !adPushed) {
-      try {
+    if (adPushed) {
+      if (process.env.NODE_ENV === 'development') console.log('🔵 Ad already pushed, skipping.');
+      return;
+    }
+
+    if (typeof window === 'undefined') {
+      if (process.env.NODE_ENV === 'development') console.log('🔵 window is not defined, skipping ad push (SSR).');
+      return;
+    }
+
+    if (!adRef.current) {
+      if (process.env.NODE_ENV === 'development') console.log('🟡 adRef is not available yet, will retry...');
+      setTimeout(pushAd, 200); // Reintentar pronto
+      return;
+    }
+
+    if (!window.adsbygoogle) {
+      if (process.env.NODE_ENV === 'development') console.warn('🟡 window.adsbygoogle not available yet, will retry...');
+      setTimeout(pushAd, 500); // Reintentar después de una pausa
+      return;
+    }
+
+    try {
+      if (process.env.NODE_ENV === 'development') {
+        console.log('🚀 Attempting to push AdSense ad...');
+      }
+      
+      const adElement = adRef.current;
+      const existingStatus = adElement.getAttribute('data-adsbygoogle-status');
+      
+      if (existingStatus) {
         if (process.env.NODE_ENV === 'development') {
-          console.log('🚀 Attempting to push AdSense ad...');
+          console.log(`⚠️ Ad already initialized with status: ${existingStatus}.`);
         }
-        
-        // Verificar que el elemento no esté ya inicializado
-        const adElement = adRef.current;
-        const existingStatus = adElement.getAttribute('data-adsbygoogle-status');
-        
-        if (existingStatus) {
-          if (process.env.NODE_ENV === 'development') {
-            console.log('⚠️ Ad already initialized with status:', existingStatus);
-          }
-          setAdPushed(true);
-          return;
-        }
-        
-        // Verificar si AdSense está disponible
-        if (!window.adsbygoogle) {
-          if (process.env.NODE_ENV === 'development') {
-            console.warn('⚠️ window.adsbygoogle not available yet - will retry');
-          }
-          // Retry in a moment
-          setTimeout(pushAd, 500);
-          return;
-        }
-        
-        // Push the ad
-        (window.adsbygoogle = window.adsbygoogle || []).push({});
         setAdPushed(true);
-        
+        return;
+      }
+      
+      console.log('🟢 Pushing ad to window.adsbygoogle');
+      (window.adsbygoogle = window.adsbygoogle || []).push({});
+      setAdPushed(true);
+      
+      if (process.env.NODE_ENV === 'development') {
+        console.log('✅ AdSense ad pushed successfully.');
+      }
+      
+      setTimeout(() => {
+        const status = adElement.getAttribute('data-adsbygoogle-status');
         if (process.env.NODE_ENV === 'development') {
-          console.log('✅ AdSense ad pushed successfully');
-        }
-        
-        // Check if ad loaded after a delay
-        setTimeout(() => {
-          const status = adElement.getAttribute('data-adsbygoogle-status');
-          if (process.env.NODE_ENV === 'development') {
-            console.log('📊 Ad status after 3s:', status);
-          }
-        }, 3000);
-        
-      } catch (error: any) {
-        if (process.env.NODE_ENV === 'development') {
-          console.error('❌ Error pushing AdSense ad:', error);
-          
-          // Verificar si es un error CSP específico
-          if (error.message && (
-            error.message.includes('Content Security Policy') ||
-            error.message.includes('adtrafficquality.google') ||
-            error.message.includes('Refused to frame')
-          )) {
-            console.error('🚨 CSP Error detected - check frame-src wildcard configuration');
-            console.log('💡 Solución: Usar https://*.adtrafficquality.google en CSP');
+          console.log(`📊 Ad status after 3s: ${status || 'unknown'}`);
+          if (!status) {
+            console.log('💡 Tip: If status is unknown, the ad might have been blocked or failed to fill.');
           }
         }
-        
-        // Retry up to 3 times with exponential backoff
-        if (retryCount.current < 3) {
-          retryCount.current++;
-          const delay = Math.pow(2, retryCount.current) * 1000; // 2s, 4s, 8s
-          if (process.env.NODE_ENV === 'development') {
-            console.log(`⏳ Retrying in ${delay/1000}s (attempt ${retryCount.current}/3)`);
-          }
-          setTimeout(pushAd, delay);
-        } else {
-          if (process.env.NODE_ENV === 'development') {
-            console.error('❌ Max retries reached for AdSense');
-          }
-          setHasError(true);
+      }, 3000);
+      
+    } catch (error: any) {
+      if (process.env.NODE_ENV === 'development') {
+        console.error('❌ Error pushing AdSense ad:', error);
+        if (error.message && error.message.includes('Content Security Policy')) {
+          console.error('🚨 CSP Error detected. Check your Content Security Policy configuration.');
         }
       }
-    } else {
-      // Log more detailed info about why ad can't be pushed (only in development)
-      if (process.env.NODE_ENV === 'development') {
-        if (typeof window === 'undefined') {
-          console.log('⚠️ Window not available (SSR)');
-        } else if (!window.adsbygoogle) {
-          console.log('⚠️ AdSense script not loaded yet');
-        } else if (!adRef.current) {
-          console.log('⚠️ Ad element ref not available');
-        } else if (adPushed) {
-          console.log('⚠️ Ad already pushed');
+      
+      if (retryCount.current < 3) {
+        retryCount.current++;
+        const delay = Math.pow(2, retryCount.current) * 1000;
+        if (process.env.NODE_ENV === 'development') {
+          console.log(`⏳ Retrying in ${delay/1000}s (attempt ${retryCount.current}/3)`);
         }
+        setTimeout(pushAd, delay);
+      } else {
+        if (process.env.NODE_ENV === 'development') {
+          console.error('❌ Max retries reached for AdSense.');
+        }
+        setHasError(true);
       }
     }
   };
@@ -149,24 +139,22 @@ export default function AdSenseHeaderBanner({ className = "" }: AdSenseHeaderBan
   useEffect(() => {
     if (isLoaded && !hasError && !adPushed && !adBlockerDetected) {
       if (process.env.NODE_ENV === 'development') {
-        console.log('📡 AdSense script loaded, initializing ad...');
+        console.log('📡 AdSense script loaded, initializing ad push logic...');
       }
-      // Delay to ensure DOM is ready and script is fully loaded
-      const timer = setTimeout(pushAd, 1500);
-      return () => clearTimeout(timer);
+      pushAd();
     }
   }, [isLoaded, hasError, adPushed, adBlockerDetected]);
 
   const handleScriptLoad = () => {
     if (process.env.NODE_ENV === 'development') {
-      console.log('AdSense script loaded successfully');
+      console.log('✅ AdSense script loaded successfully via Next/Script.');
     }
     setIsLoaded(true);
   };
 
   const handleScriptError = (e: any) => {
     if (process.env.NODE_ENV === 'development') {
-      console.error('AdSense script failed to load:', e);
+      console.error('❌ AdSense script failed to load via Next/Script:', e);
     }
     setHasError(true);
   };
