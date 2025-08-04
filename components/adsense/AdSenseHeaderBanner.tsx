@@ -16,8 +16,40 @@ export default function AdSenseHeaderBanner({ className = "" }: AdSenseHeaderBan
   const [isLoaded, setIsLoaded] = useState(false);
   const [hasError, setHasError] = useState(false);
   const [adPushed, setAdPushed] = useState(false);
+  const [adBlockerDetected, setAdBlockerDetected] = useState(false);
   const adRef = useRef<HTMLModElement>(null);
   const retryCount = useRef(0);
+
+  // Detectar bloqueador de anuncios
+  useEffect(() => {
+    const detectAdBlocker = () => {
+      // Crear elemento de prueba
+      const testAd = document.createElement('div');
+      testAd.innerHTML = '&nbsp;';
+      testAd.className = 'adsbox adsbygoogle';
+      testAd.style.position = 'absolute';
+      testAd.style.left = '-10000px';
+      testAd.style.width = '1px';
+      testAd.style.height = '1px';
+      document.body.appendChild(testAd);
+      
+      setTimeout(() => {
+        const isBlocked = testAd.offsetHeight === 0 || testAd.style.display === 'none';
+        document.body.removeChild(testAd);
+        
+        if (isBlocked) {
+          setAdBlockerDetected(true);
+          if (process.env.NODE_ENV === 'development') {
+            console.log('🚫 Ad blocker detected');
+          }
+        }
+      }, 100);
+    };
+    
+    if (typeof window !== 'undefined') {
+      detectAdBlocker();
+    }
+  }, []);
 
   const pushAd = () => {
     if (typeof window !== 'undefined' && window.adsbygoogle && adRef.current && !adPushed) {
@@ -125,19 +157,24 @@ export default function AdSenseHeaderBanner({ className = "" }: AdSenseHeaderBan
     setHasError(true);
   };
 
-  // Don't render anything if there's an error
-  if (hasError) {
+  // Don't render anything if there's an error or ad blocker
+  if (hasError || adBlockerDetected) {
     // Show placeholder in development
     if (process.env.NODE_ENV === 'development') {
       return (
         <div className={`w-full max-w-4xl mx-auto mb-6 ${className}`}>
           <div className="bg-red-900/20 rounded-lg p-4 border border-red-500/20">
-            <div className="text-xs text-red-400/60 text-center mb-2">AdSense Error - Modo Desarrollo</div>
+            <div className="text-xs text-red-400/60 text-center mb-2">
+              {adBlockerDetected ? 'Ad Blocker Detectado' : 'AdSense Error'} - Modo Desarrollo
+            </div>
             <div className="bg-red-800/20 h-24 flex items-center justify-center text-red-400 text-sm">
-              ❌ No se pudo cargar el anuncio (normal en desarrollo)
+              {adBlockerDetected ? '🚫 Bloqueador de anuncios activo' : '❌ No se pudo cargar el anuncio'}
             </div>
             <div className="text-xs text-red-400/40 text-center mt-2">
-              En producción se intentaría cargar un anuncio real aquí
+              {adBlockerDetected 
+                ? 'Desactiva el bloqueador para ver anuncios reales'
+                : 'En producción se intentaría cargar un anuncio real aquí'
+              }
             </div>
           </div>
         </div>
@@ -181,6 +218,7 @@ export default function AdSenseHeaderBanner({ className = "" }: AdSenseHeaderBan
           <div className="text-xs text-amber-400/40 text-center mt-2 space-y-1">
             <div>Status: {isLoaded ? '✅ Script loaded' : '⏳ Loading...'}</div>
             <div>Ad pushed: {adPushed ? '✅ Yes' : '❌ No'}</div>
+            <div>Ad blocker: {adBlockerDetected ? '🚫 Detected' : '✅ Not detected'}</div>
             {hasError && <div className="text-red-400">❌ Error loading ads</div>}
             <div>Retry count: {retryCount.current}</div>
           </div>
