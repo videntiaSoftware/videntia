@@ -22,94 +22,89 @@ export default function AdSenseHeaderBanner({ className = "" }: AdSenseHeaderBan
   const pushAd = () => {
     if (typeof window !== 'undefined' && window.adsbygoogle && adRef.current && !adPushed) {
       try {
-        console.log('🚀 Pushing AdSense ad...');
+        if (process.env.NODE_ENV === 'development') {
+          console.log('🚀 Pushing AdSense ad...');
+        }
         
         // Verificar que el elemento no esté ya inicializado
         const adElement = adRef.current;
         const existingStatus = adElement.getAttribute('data-adsbygoogle-status');
         
         if (existingStatus) {
-          console.log('⚠️ Ad already initialized with status:', existingStatus);
+          if (process.env.NODE_ENV === 'development') {
+            console.log('⚠️ Ad already initialized with status:', existingStatus);
+          }
           setAdPushed(true);
           return;
         }
         
         // Verificar CSP antes de pushear
         if (!window.adsbygoogle) {
-          console.error('❌ window.adsbygoogle not available - CSP might be blocking');
+          if (process.env.NODE_ENV === 'development') {
+            console.error('❌ window.adsbygoogle not available - CSP might be blocking');
+          }
           setHasError(true);
           return;
         }
         
-        // Añadir listener para errores CSP específicos
-        const originalError = console.error;
-        let cspErrorDetected = false;
-        
-        console.error = function(...args) {
-          const message = args.join(' ');
-          if (message.includes('Content Security Policy') || 
-              message.includes('adtrafficquality.google') ||
-              message.includes('Refused to frame')) {
-            cspErrorDetected = true;
-            console.log('🚨 CSP/Frame Error detected:', message);
-            console.log('💡 URLs dinámicas de AdSense pueden estar bloqueadas');
-          }
-          originalError.apply(console, args);
-        };
-        
         (window.adsbygoogle = window.adsbygoogle || []).push({});
         setAdPushed(true);
-        console.log('✅ AdSense ad pushed successfully');
         
-        // Verificar después de 3 segundos si hubo errores CSP
-        setTimeout(() => {
-          console.error = originalError; // Restaurar console.error
-          if (cspErrorDetected) {
-            console.warn('⚠️ CSP errors detected - using wildcard patterns should help');
-          }
-        }, 3000);
+        if (process.env.NODE_ENV === 'development') {
+          console.log('✅ AdSense ad pushed successfully');
+        }
         
       } catch (error: any) {
-        console.error('❌ Error pushing AdSense ad:', error);
-        
-        // Verificar si es un error CSP específico
-        if (error.message && (
-          error.message.includes('Content Security Policy') ||
-          error.message.includes('adtrafficquality.google') ||
-          error.message.includes('Refused to frame')
-        )) {
-          console.error('🚨 CSP Error detected - check frame-src wildcard configuration');
-          console.log('💡 Solución: Usar https://*.adtrafficquality.google en CSP');
+        if (process.env.NODE_ENV === 'development') {
+          console.error('❌ Error pushing AdSense ad:', error);
+          
+          // Verificar si es un error CSP específico
+          if (error.message && (
+            error.message.includes('Content Security Policy') ||
+            error.message.includes('adtrafficquality.google') ||
+            error.message.includes('Refused to frame')
+          )) {
+            console.error('🚨 CSP Error detected - check frame-src wildcard configuration');
+            console.log('💡 Solución: Usar https://*.adtrafficquality.google en CSP');
+          }
         }
         
         // Retry up to 3 times with exponential backoff
         if (retryCount.current < 3) {
           retryCount.current++;
           const delay = Math.pow(2, retryCount.current) * 1000; // 2s, 4s, 8s
-          console.log(`⏳ Retrying in ${delay/1000}s (attempt ${retryCount.current}/3)`);
+          if (process.env.NODE_ENV === 'development') {
+            console.log(`⏳ Retrying in ${delay/1000}s (attempt ${retryCount.current}/3)`);
+          }
           setTimeout(pushAd, delay);
         } else {
-          console.error('❌ Max retries reached for AdSense');
+          if (process.env.NODE_ENV === 'development') {
+            console.error('❌ Max retries reached for AdSense');
+          }
           setHasError(true);
         }
       }
     } else {
-      // Log more detailed info about why ad can't be pushed
-      if (typeof window === 'undefined') {
-        console.log('⚠️ Window not available (SSR)');
-      } else if (!window.adsbygoogle) {
-        console.log('⚠️ AdSense script not loaded yet');
-      } else if (!adRef.current) {
-        console.log('⚠️ Ad element ref not available');
-      } else if (adPushed) {
-        console.log('⚠️ Ad already pushed');
+      // Log more detailed info about why ad can't be pushed (only in development)
+      if (process.env.NODE_ENV === 'development') {
+        if (typeof window === 'undefined') {
+          console.log('⚠️ Window not available (SSR)');
+        } else if (!window.adsbygoogle) {
+          console.log('⚠️ AdSense script not loaded yet');
+        } else if (!adRef.current) {
+          console.log('⚠️ Ad element ref not available');
+        } else if (adPushed) {
+          console.log('⚠️ Ad already pushed');
+        }
       }
     }
   };
 
   useEffect(() => {
     if (isLoaded && !hasError && !adPushed) {
-      console.log('📡 AdSense script loaded, initializing ad...');
+      if (process.env.NODE_ENV === 'development') {
+        console.log('📡 AdSense script loaded, initializing ad...');
+      }
       // Small delay to ensure DOM is ready
       const timer = setTimeout(pushAd, 1000);
       return () => clearTimeout(timer);
@@ -117,12 +112,16 @@ export default function AdSenseHeaderBanner({ className = "" }: AdSenseHeaderBan
   }, [isLoaded, hasError, adPushed]);
 
   const handleScriptLoad = () => {
-    console.log('AdSense script loaded successfully');
+    if (process.env.NODE_ENV === 'development') {
+      console.log('AdSense script loaded successfully');
+    }
     setIsLoaded(true);
   };
 
   const handleScriptError = (e: any) => {
-    console.error('AdSense script failed to load:', e);
+    if (process.env.NODE_ENV === 'development') {
+      console.error('AdSense script failed to load:', e);
+    }
     setHasError(true);
   };
 
