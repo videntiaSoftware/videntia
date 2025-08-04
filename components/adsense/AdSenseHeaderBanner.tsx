@@ -24,7 +24,7 @@ export default function AdSenseHeaderBanner({ className = "" }: AdSenseHeaderBan
   const clientId = process.env.NEXT_PUBLIC_ADSENSE_CLIENT_ID || 'ca-pub-4987669803086382';
   const adSlot = process.env.NEXT_PUBLIC_ADSENSE_AD_UNIT_ID || '7298629760';
 
-  // Detectar bloqueador de anuncios
+  // Detectar bloqueador de anuncios y empujar el anuncio
   useEffect(() => {
     const detectAdBlocker = () => {
       // Crear elemento de prueba
@@ -51,7 +51,12 @@ export default function AdSenseHeaderBanner({ className = "" }: AdSenseHeaderBan
     };
     
     if (typeof window !== 'undefined') {
+      if (process.env.NODE_ENV === 'development') {
+        console.log('🔵 AdSense Component Mounted. Initializing...');
+      }
       detectAdBlocker();
+      // Directamente intentar empujar el anuncio. La función ya tiene reintentos.
+      pushAd();
     }
   }, []);
 
@@ -135,15 +140,6 @@ export default function AdSenseHeaderBanner({ className = "" }: AdSenseHeaderBan
       }
     }
   };
-
-  useEffect(() => {
-    if (isLoaded && !hasError && !adPushed && !adBlockerDetected) {
-      if (process.env.NODE_ENV === 'development') {
-        console.log('📡 AdSense script loaded, initializing ad push logic...');
-      }
-      pushAd();
-    }
-  }, [isLoaded, hasError, adPushed, adBlockerDetected]);
 
   const handleScriptLoad = () => {
     if (process.env.NODE_ENV === 'development') {
