@@ -17,7 +17,7 @@ export default function AdSenseHeaderBanner({ className = "" }: AdSenseHeaderBan
   const [hasError, setHasError] = useState(false);
   const [adPushed, setAdPushed] = useState(false);
   const [adBlockerDetected, setAdBlockerDetected] = useState(false);
-  const adRef = useRef<HTMLInsElement>(null);
+  const adRef = useRef<HTMLModElement>(null);
   const retryCount = useRef(0);
   
   // Get AdSense configuration from environment variables
