@@ -17,8 +17,12 @@ export default function AdSenseHeaderBanner({ className = "" }: AdSenseHeaderBan
   const [hasError, setHasError] = useState(false);
   const [adPushed, setAdPushed] = useState(false);
   const [adBlockerDetected, setAdBlockerDetected] = useState(false);
-  const adRef = useRef<HTMLModElement>(null);
+  const adRef = useRef<HTMLInsElement>(null);
   const retryCount = useRef(0);
+  
+  // Get AdSense configuration from environment variables
+  const clientId = process.env.NEXT_PUBLIC_ADSENSE_CLIENT_ID || 'ca-pub-4987669803086382';
+  const adSlot = process.env.NEXT_PUBLIC_ADSENSE_AD_UNIT_ID || '7298629760';
 
   // Detectar bloqueador de anuncios
   useEffect(() => {
@@ -52,10 +56,10 @@ export default function AdSenseHeaderBanner({ className = "" }: AdSenseHeaderBan
   }, []);
 
   const pushAd = () => {
-    if (typeof window !== 'undefined' && window.adsbygoogle && adRef.current && !adPushed) {
+    if (typeof window !== 'undefined' && adRef.current && !adPushed) {
       try {
         if (process.env.NODE_ENV === 'development') {
-          console.log('🚀 Pushing AdSense ad...');
+          console.log('🚀 Attempting to push AdSense ad...');
         }
         
         // Verificar que el elemento no esté ya inicializado
@@ -70,21 +74,31 @@ export default function AdSenseHeaderBanner({ className = "" }: AdSenseHeaderBan
           return;
         }
         
-        // Verificar CSP antes de pushear
+        // Verificar si AdSense está disponible
         if (!window.adsbygoogle) {
           if (process.env.NODE_ENV === 'development') {
-            console.error('❌ window.adsbygoogle not available - CSP might be blocking');
+            console.warn('⚠️ window.adsbygoogle not available yet - will retry');
           }
-          setHasError(true);
+          // Retry in a moment
+          setTimeout(pushAd, 500);
           return;
         }
         
+        // Push the ad
         (window.adsbygoogle = window.adsbygoogle || []).push({});
         setAdPushed(true);
         
         if (process.env.NODE_ENV === 'development') {
           console.log('✅ AdSense ad pushed successfully');
         }
+        
+        // Check if ad loaded after a delay
+        setTimeout(() => {
+          const status = adElement.getAttribute('data-adsbygoogle-status');
+          if (process.env.NODE_ENV === 'development') {
+            console.log('📊 Ad status after 3s:', status);
+          }
+        }, 3000);
         
       } catch (error: any) {
         if (process.env.NODE_ENV === 'development') {
@@ -133,15 +147,15 @@ export default function AdSenseHeaderBanner({ className = "" }: AdSenseHeaderBan
   };
 
   useEffect(() => {
-    if (isLoaded && !hasError && !adPushed) {
+    if (isLoaded && !hasError && !adPushed && !adBlockerDetected) {
       if (process.env.NODE_ENV === 'development') {
         console.log('📡 AdSense script loaded, initializing ad...');
       }
-      // Small delay to ensure DOM is ready
-      const timer = setTimeout(pushAd, 1000);
+      // Delay to ensure DOM is ready and script is fully loaded
+      const timer = setTimeout(pushAd, 1500);
       return () => clearTimeout(timer);
     }
-  }, [isLoaded, hasError, adPushed]);
+  }, [isLoaded, hasError, adPushed, adBlockerDetected]);
 
   const handleScriptLoad = () => {
     if (process.env.NODE_ENV === 'development') {
@@ -157,7 +171,7 @@ export default function AdSenseHeaderBanner({ className = "" }: AdSenseHeaderBan
     setHasError(true);
   };
 
-  // Don't render anything if there's an error or ad blocker
+  // Don't render anything if there's an error or ad blocker (except in development)
   if (hasError || adBlockerDetected) {
     // Show placeholder in development
     if (process.env.NODE_ENV === 'development') {
@@ -168,7 +182,7 @@ export default function AdSenseHeaderBanner({ className = "" }: AdSenseHeaderBan
               {adBlockerDetected ? 'Ad Blocker Detectado' : 'AdSense Error'} - Modo Desarrollo
             </div>
             <div className="bg-red-800/20 h-24 flex items-center justify-center text-red-400 text-sm">
-              {adBlockerDetected ? '🚫 Bloqueador de anuncios activo' : '❌ No se pudo cargar el anuncio'}
+              {adBlockerDetected ? '🚫 Bloqueador de anuncios activo' : '❌ Error al cargar AdSense'}
             </div>
             <div className="text-xs text-red-400/40 text-center mt-2">
               {adBlockerDetected 
@@ -180,6 +194,7 @@ export default function AdSenseHeaderBanner({ className = "" }: AdSenseHeaderBan
         </div>
       );
     }
+    // In production, silently fail
     return null;
   }
 
@@ -187,7 +202,7 @@ export default function AdSenseHeaderBanner({ className = "" }: AdSenseHeaderBan
     <div className={`w-full max-w-4xl mx-auto mb-6 ${className}`}>
       {/* Load AdSense Script */}
       <Script
-        src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-4987669803086382"
+        src={`https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=${clientId}`}
         strategy="afterInteractive"
         onLoad={handleScriptLoad}
         onError={handleScriptError}
@@ -200,27 +215,29 @@ export default function AdSenseHeaderBanner({ className = "" }: AdSenseHeaderBan
           ref={adRef}
           className="adsbygoogle"
           style={{ display: 'block' }}
-          data-ad-client="ca-pub-4987669803086382"
-          data-ad-slot="7298629760"
+          data-ad-client={clientId}
+          data-ad-slot={adSlot}
           data-ad-format="auto"
           data-full-width-responsive="true"
         />
         
-        {/* Placeholder for development or when ads don't load */}
-        {process.env.NODE_ENV === 'development' && !adPushed && (
-          <div className="bg-amber-900/20 h-24 flex items-center justify-center text-amber-400 text-sm border border-amber-500/30 rounded mt-2">
-            🎯 Espacio reservado para anuncio AdSense
-          </div>
-        )}
-        
-        {/* Debug info in development */}
+        {/* Placeholder and status for development */}
         {process.env.NODE_ENV === 'development' && (
-          <div className="text-xs text-amber-400/40 text-center mt-2 space-y-1">
-            <div>Status: {isLoaded ? '✅ Script loaded' : '⏳ Loading...'}</div>
-            <div>Ad pushed: {adPushed ? '✅ Yes' : '❌ No'}</div>
-            <div>Ad blocker: {adBlockerDetected ? '🚫 Detected' : '✅ Not detected'}</div>
-            {hasError && <div className="text-red-400">❌ Error loading ads</div>}
-            <div>Retry count: {retryCount.current}</div>
+          <div className="mt-2">
+            {!adPushed && (
+              <div className="bg-amber-900/20 h-24 flex items-center justify-center text-amber-400 text-sm border border-amber-500/30 rounded">
+                🎯 Espacio reservado para anuncio AdSense
+              </div>
+            )}
+            
+            <div className="text-xs text-amber-400/40 text-center mt-2 space-y-1">
+              <div>Script: {isLoaded ? '✅ Loaded' : '⏳ Loading...'}</div>
+              <div>Ad pushed: {adPushed ? '✅ Yes' : '❌ No'}</div>
+              <div>Ad blocker: {adBlockerDetected ? '🚫 Detected' : '✅ Not detected'}</div>
+              {hasError && <div className="text-red-400">❌ Error loading ads</div>}
+              <div>Client ID: {clientId}</div>
+              <div>Ad Slot: {adSlot}</div>
+            </div>
           </div>
         )}
         

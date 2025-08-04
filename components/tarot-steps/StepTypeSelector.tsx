@@ -72,9 +72,9 @@ export default function StepTypeSelector({ onSelectType, isPremiumUser = false }
 			</p>
 			
 			{/* AdSense Header Banner - Solo para usuarios no premium */}
-			{!isPremiumUser && (
+			
 				<AdSenseHeaderBanner className="mb-8" />
-			)}
+			
 			
 			{/* Desktop: Carousel clásico, Mobile: Scrollable con cards parcialmente visibles */}
 			<div className="relative w-full max-w-xl flex items-center justify-center">
