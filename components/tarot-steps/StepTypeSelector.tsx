@@ -71,12 +71,7 @@ export default function StepTypeSelector({ onSelectType, isPremiumUser = false }
 				Selecciona el método de tirada que mejor se adapte a tu pregunta o situación. Cada tipo de lectura te dará una perspectiva diferente.
 			</p>
 			
-			{/* AdSense Header Banner - Solo para usuarios no premium */}
-			
-				<AdSenseHeaderBanner className="mb-8" />
-			
-			
-			{/* Desktop: Carousel clásico, Mobile: Scrollable con cards parcialmente visibles */}
+				{/* Desktop: Carousel clásico, Mobile: Scrollable con cards parcialmente visibles */}
 			<div className="relative w-full max-w-xl flex items-center justify-center">
 				{/* Flechas solo en desktop */}
 				<button
@@ -211,6 +206,9 @@ export default function StepTypeSelector({ onSelectType, isPremiumUser = false }
 					&#8594;
 				</button>
 			</div>
+			
+			{/* AdSense Header Banner - Movido abajo para no interferir en móviles */}
+			{!isPremiumUser && <AdSenseHeaderBanner className="mt-8" />}
 		</div>
 	);
 }
