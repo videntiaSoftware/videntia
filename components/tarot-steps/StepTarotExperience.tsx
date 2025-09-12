@@ -491,40 +491,7 @@ export default function StepTarotExperience({ readingType }: { readingType: stri
     setConclusionRequested(true);
     setConclusionLoading(true);
     setConclusionError(null);
-    try {
-      const supabase = createClient();
-      const { data: userData } = await supabase.auth.getUser();
-      const isUserAuthenticated = !!userData?.user;
-      let guestId = null;
-      if (!isUserAuthenticated && typeof window !== 'undefined') {
-        guestId = localStorage.getItem('guest_id') || '';
-      }
-      const processedCards = selectedCards.map((c) => ({ id: c.card.id, orientation: c.orientation }));
-      // Eliminar toda lógica de reCAPTCHA en el fetch de la lectura
-      const payload = {
-        type: readingType,
-        question: question.trim(),
-        cards: processedCards,
-        guest_id: guestId,
-      };
-      const res = await fetch("/api/reading/generate", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify(payload),
-      });
-      if (!res.ok) {
-        const errorData = await res.json();
-        setConclusionError(errorData.error || 'Error generando la conclusión.');
-        setConclusionLoading(false);
-        return;
-      }
-      const data = await res.json();
-      setConclusionData(data);
-    } catch (e: any) {
-      setConclusionError(e?.message || 'Error generando la conclusión.');
-    } finally {
-      setConclusionLoading(false);
-    }
+    // Quitar el fetch duplicado, solo preparar para conclusión
   };
 
   const resetReading = () => {
@@ -573,9 +540,7 @@ export default function StepTarotExperience({ readingType }: { readingType: stri
   function handleRevealFinish() {
     setRevealIndex(null);
     setShowReading(true);
-    if (isSingleCardReading && !conclusionRequested) {
-      handleFirstNext();
-    }
+    fetchReading(selectedCards); // Llamar al fetch aquí para todas las lecturas
   }
 
   return (
