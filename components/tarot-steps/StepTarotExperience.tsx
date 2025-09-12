@@ -734,6 +734,15 @@ export default function StepTarotExperience({ readingType }: { readingType: stri
                     ))}
                   </ul>
                 </div>
+                {/* Mostrar la interpretación generada por IA */}
+                {readingData && readingData.interpretation && (
+                  <div className="mb-6">
+                    <p className="text-purple-200 mb-2 font-semibold font-cinzel">Interpretación de la lectura:</p>
+                    <div className="text-white/95 font-cormorant text-lg leading-relaxed" style={{ fontFamily: 'Cormorant Garamond, Garamond, serif' }}>
+                      {readingData.interpretation}
+                    </div>
+                  </div>
+                )}
                 {/* Botón de donación al final de la lectura */}
                 <div className="mt-8 flex justify-center">
                   <DonationButton />
