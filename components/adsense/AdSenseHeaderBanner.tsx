@@ -157,22 +157,13 @@ export default function AdSenseHeaderBanner({ className = "" }: AdSenseHeaderBan
 
   // Don't render anything if there's an error or ad blocker (except in development)
   if (hasError || adBlockerDetected) {
-    // Show placeholder in development
+    // Show compact placeholder in development
     if (process.env.NODE_ENV === 'development') {
       return (
-        <div className={`w-full max-w-4xl mx-auto mb-6 ${className}`}>
-          <div className="bg-red-900/20 rounded-lg p-4 border border-red-500/20">
-            <div className="text-xs text-red-400/60 text-center mb-2">
-              {adBlockerDetected ? 'Ad Blocker Detectado' : 'AdSense Error'} - Modo Desarrollo
-            </div>
-            <div className="bg-red-800/20 h-24 flex items-center justify-center text-red-400 text-sm">
-              {adBlockerDetected ? '🚫 Bloqueador de anuncios activo' : '❌ Error al cargar AdSense'}
-            </div>
-            <div className="text-xs text-red-400/40 text-center mt-2">
-              {adBlockerDetected 
-                ? 'Desactiva el bloqueador para ver anuncios reales'
-                : 'En producción se intentaría cargar un anuncio real aquí'
-              }
+        <div className={`w-full max-w-4xl mx-auto mb-2 ${className}`}>
+          <div className="bg-red-900/10 rounded p-2 border border-red-500/20">
+            <div className="text-xs text-red-400/60 text-center">
+              {adBlockerDetected ? '🚫 Ad Blocker' : '❌ AdSense Error'} (Dev)
             </div>
           </div>
         </div>
@@ -183,7 +174,7 @@ export default function AdSenseHeaderBanner({ className = "" }: AdSenseHeaderBan
   }
 
   return (
-    <div className={`w-full max-w-4xl mx-auto mb-6 ${className}`}>
+    <div className={`w-full max-w-4xl mx-auto mb-3 ${className}`}>
       {/* Load AdSense Script */}
       <Script
         src={`https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=${clientId}`}
@@ -192,40 +183,46 @@ export default function AdSenseHeaderBanner({ className = "" }: AdSenseHeaderBan
         onError={handleScriptError}
       />
       
-      {/* AdSense Header Banner */}
-      <div className="bg-black/20 rounded-lg p-4 border border-amber-500/20">
-        <div className="text-xs text-amber-400/60 text-center mb-2">Publicidad</div>
+      {/* AdSense Header Banner - Compact Design */}
+      <div className="bg-black/10 rounded-lg p-3 border border-amber-500/10">
+        <div className="text-xs text-amber-400/50 text-center mb-1">Publicidad</div>
         <ins 
           ref={adRef}
           className="adsbygoogle"
-          style={{ display: 'block' }}
+          style={{ display: 'block', minHeight: '50px', maxHeight: '90px' }}
           data-ad-client={clientId}
           data-ad-slot={adSlot}
           data-ad-format="auto"
           data-full-width-responsive="true"
         />
         
-        {/* Placeholder and status for development */}
+        {/* Placeholder and status for development - COMPACT VERSION */}
         {process.env.NODE_ENV === 'development' && (
-          <div className="mt-2">
-            {!adPushed && (
-              <div className="bg-amber-900/20 h-24 flex items-center justify-center text-amber-400 text-sm border border-amber-500/30 rounded">
-                🎯 Espacio reservado para anuncio AdSense
+          <div className="mt-1">
+            {!adPushed && !hasError && !adBlockerDetected && (
+              <div className="bg-amber-900/10 h-8 flex items-center justify-center text-amber-400 text-xs border border-amber-500/20 rounded">
+                🎯 Cargando AdSense...
               </div>
             )}
             
-            <div className="text-xs text-amber-400/40 text-center mt-2 space-y-1">
-              <div>Script: {isLoaded ? '✅ Loaded' : '⏳ Loading...'}</div>
-              <div>Ad pushed: {adPushed ? '✅ Yes' : '❌ No'}</div>
-              <div>Ad blocker: {adBlockerDetected ? '🚫 Detected' : '✅ Not detected'}</div>
-              {hasError && <div className="text-red-400">❌ Error loading ads</div>}
-              <div>Client ID: {clientId}</div>
-              <div>Ad Slot: {adSlot}</div>
+            {/* Compact status indicators in a single line */}
+            <div className="flex justify-center items-center space-x-3 text-xs text-amber-400/30 mt-1">
+              <span title="Script Status">{isLoaded ? '✅ Script' : '⏳ Script'}</span>
+              <span title="Ad Push Status">{adPushed ? '✅ Pushed' : '📭 Pending'}</span>
+              <span title="Ad Blocker">{adBlockerDetected ? '🚫 Blocked' : '✅ Clear'}</span>
+              {hasError && <span className="text-red-400" title="Error">❌ Error</span>}
             </div>
+            
+            {/* Only show IDs if there's an issue */}
+            {(hasError || !adPushed) && (
+              <div className="text-xs text-amber-400/20 text-center mt-1">
+                Client: {clientId.slice(-6)} | Slot: {adSlot}
+              </div>
+            )}
           </div>
         )}
         
-        <div className="text-xs text-amber-400/40 text-center mt-2">
+        <div className="text-xs text-amber-400/30 text-center mt-1">
           Los anuncios nos ayudan a mantener Videntia gratuito
         </div>
       </div>
