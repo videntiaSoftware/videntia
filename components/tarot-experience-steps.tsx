@@ -89,9 +89,19 @@ export default function TarotExperienceSteps({
 	// When step changes, update URL without reload and notify parent
 	useEffect(() => {
 		onStepChange?.(step);
-		const params = new URLSearchParams(window.location.search);
-		params.set("step", String(step));
-		const newUrl = `${window.location.pathname}?${params.toString()}`;
+		
+		 // Preservar todos los parámetros existentes y solo actualizar el step
+		const currentParams = new URLSearchParams(window.location.search);
+		const currentReadingType = currentParams.get("readingType");
+		
+		// Si tenemos readingType y step=2, no necesitamos actualizar la URL
+		if (currentReadingType && step === 2) {
+			return;
+		}
+		
+		// Actualizar solo el parámetro step, preservando otros
+		currentParams.set("step", String(step));
+		const newUrl = `${window.location.pathname}?${currentParams.toString()}`;
 		window.history.pushState(null, "", newUrl);
 	}, [step, onStepChange]);
 

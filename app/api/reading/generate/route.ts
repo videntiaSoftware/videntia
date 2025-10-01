@@ -3,6 +3,7 @@ import { createClient } from '@/lib/supabase/client';
 import { getUserTier, getTierLimits, canAccessReadingType, hasReachedDailyLimit, getTotalDailyReadings } from '@/lib/user-tiers';
 import { analyzeUserBehavior, checkRateLimit, validateDeviceFingerprint, analyzeQuestionContent, calculatePunishment } from '@/lib/anti-abuse';
 import { trackReadingUnified, prepareTrackingData } from '@/lib/supabase/unified-tracking';
+import { getGeminiApiUrl } from '@/lib/gemini-config';
 
 // export type ReadingType = 'single' | 'three_card' | 'love' | 'career' | 'celtic_cross';
 type ReadingType = 'single' | 'three_card' | 'love' | 'career' | 'celtic_cross';
@@ -10,11 +11,11 @@ type ReadingType = 'single' | 'three_card' | 'love' | 'career' | 'celtic_cross';
 // Comentado: variable no usada
 // const cardsInfo = (cards || []).slice(0, count).map((sel: any) => { /* ... */ });
 
-// Llamada real a Gemini Flash 1.5 Lite
+// Llamada real a Gemini Flash 1.5 8B (modelo gratuito optimizado)
 async function getGeminiInterpretation(cards: { name: string; orientation: string; keywords: string; interpretation: string }[], prompt: string) {
   const apiKey = process.env.GEMINI_API_KEY;
   if (!apiKey) throw new Error('Gemini API key not set');
-  const response = await fetch('https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-flash-latest:generateContent?key=' + apiKey, {
+  const response = await fetch(getGeminiApiUrl(apiKey), {
     method: 'POST',
     headers: { 'Content-Type': 'application/json' },
     body: JSON.stringify({

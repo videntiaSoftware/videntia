@@ -738,8 +738,23 @@ export default function StepTarotExperience({ readingType }: { readingType: stri
                 {readingData && readingData.interpretation && (
                   <div className="mb-6">
                     <p className="text-purple-200 mb-2 font-semibold font-cinzel">Interpretación de la lectura:</p>
-                    <div className="text-white/95 font-cormorant text-lg leading-relaxed" style={{ fontFamily: 'Cormorant Garamond, Garamond, serif' }}>
-                      {readingData.interpretation}
+                    <div className="text-white/95 font-cormorant text-lg leading-relaxed prose prose-invert prose-purple max-w-none" style={{ fontFamily: 'Cormorant Garamond, Garamond, serif' }}>
+                      <ReactMarkdown
+                        components={{
+                          h1: ({ node, ...props }) => <h1 className="text-2xl font-semibold text-purple-100 mt-4 mb-3" {...props} />,
+                          h2: ({ node, ...props }) => <h2 className="text-xl font-semibold text-purple-200 mt-3 mb-2" {...props} />,
+                          h3: ({ node, ...props }) => <h3 className="text-lg font-semibold text-purple-300 mt-2 mb-2" {...props} />,
+                          p: ({ node, ...props }) => <p className="mb-3 leading-relaxed" {...props} />,
+                          strong: ({ node, ...props }) => <strong className="font-bold text-purple-100" {...props} />,
+                          em: ({ node, ...props }) => <em className="italic text-purple-200" {...props} />,
+                          ul: ({ node, ...props }) => <ul className="list-disc list-inside space-y-1 mb-3" {...props} />,
+                          ol: ({ node, ...props }) => <ol className="list-decimal list-inside space-y-1 mb-3" {...props} />,
+                          li: ({ node, ...props }) => <li className="ml-4" {...props} />,
+                          blockquote: ({ node, ...props }) => <blockquote className="border-l-4 border-purple-400/50 pl-4 italic text-purple-200/90 my-3" {...props} />,
+                        }}
+                      >
+                        {readingData.interpretation}
+                      </ReactMarkdown>
                     </div>
                   </div>
                 )}

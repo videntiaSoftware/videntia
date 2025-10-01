@@ -1,5 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { createClient } from '@/lib/supabase/client';
+import { getGeminiApiUrl } from '@/lib/gemini-config';
 
 /**
  * API para análisis de preguntas con GEMINI AI y generación de tags comerciales
@@ -209,7 +210,10 @@ ANÁLISIS SIN LÍMITES:
 Analiza la pregunta y devuelve SOLO el JSON.
 `;
 
-    const response = await fetch(`https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-flash-latest:generateContent?key=${process.env.GEMINI_API_KEY}`, {
+    const apiKey = process.env.GEMINI_API_KEY;
+    if (!apiKey) throw new Error('Gemini API key not set');
+    
+    const response = await fetch(getGeminiApiUrl(apiKey), {
       method: 'POST',
       headers: {
         'Content-Type': 'application/json',
